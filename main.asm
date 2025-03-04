@@ -1,4 +1,3 @@
-
 ;map elements defines
 map_space=0
 map_earth=1
@@ -183,6 +182,22 @@ map_rockford_current_position_addr_high = $49
   sta 36869
 
 ; *************************************************************************************
+; For reading keyboard
+
+  lda #0
+  sta $9122
+  lda #$ff
+  sta $9123
+
+; *************************************************************************************
+
+  ;TODO: temp
+  lda #12  ;colour
+  sta $9400  ;colour map
+  sta $9401  ;colour map
+  sta $9418  ;colour map
+  sta $9419  ;colour map
+  jsr clear_status
 
   ;populate cave map
 	jsr populate_cave_from_file
@@ -201,9 +216,10 @@ map_rockford_current_position_addr_high = $49
 
   jsr draw_grid_of_sprites
 
-;thing1
-;  jmp thing1
-  rts
+thing1
+  jsr read_input
+  jmp thing1
+;  rts
 
 difficulty_level
   !byte 1
@@ -211,7 +227,7 @@ difficulty_level
 ; *************************************************************************************
 ; Draw a full grid of sprites, updating the current map position first
 ; Below is needed to point the program counter to the next page (multiple of 256)
-* = $1300
+* = $1400
 draw_grid_of_sprites
 
   ;jsr update_map_scroll_position
@@ -669,7 +685,65 @@ tile_below_store_row  ;special row for pseudo-random generated caves with extra-
   !fill 64
 
 ; *************************************************************************************
+;TODO: Temp function
+clear_status
+
+  ;Clear screen with zero values
+  lda #0
+  sta screen_addr2_low  ;target low
+  lda #$10
+  sta screen_addr2_high  ;target high
+
+  ;size is ...
+  lda #96
+  sta clear_size  
+  lda #0
+  sta clear_size+1
+
+  ;clear to 0
+  lda #0
+  sta clear_to
+
+  jsr clear_memory  ;clear target for given size and value
+  rts
+
+; *************************************************************************************
+; Clear a number of bytes in target memory locations, using clear_size and clear_to
+clear_memory
+
+  ldy #0
+  ldx clear_size+1
+  beq clear_remaining_bytes
+clear_a_page
+  lda clear_to
+  sta (screen_addr2_low),y
+  iny
+  bne clear_a_page
+  inc screen_addr2_high
+  dex
+  bne clear_a_page
+clear_remaining_bytes
+  ldx clear_size
+  beq clear_return
+clear_a_byte
+  lda clear_to
+  sta (screen_addr2_low),y
+  iny
+  dex
+  bne clear_a_byte
+
+clear_return
+  rts
+
+clear_size
+  !byte 0, 0
+clear_to
+  !byte 0
+
+; *************************************************************************************
 !source "vars.asm"
+
+!source "keyboard.asm"
 
 * = $2900  ;Needed to point to the correct memory location for loading caves
 !source "cavedata.asm"
