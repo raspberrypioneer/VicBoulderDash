@@ -3,6 +3,8 @@
 ; by raspberrypioneer Feb 2025
 ;
 
+_SCREEN_ADDR = $1000
+
 ;map elements defines
 map_space=0
 map_earth=1
@@ -254,7 +256,7 @@ play_ambient_sound = $71
   ;poke36869,peek(36869)and240or15
   lda 36869
   and #240
-  ora #15  ;custom characters at $1c00 (7168)
+  ora #14  ;custom characters at $1800 (6144)
   sta 36869
 
 ; *************************************************************************************
@@ -266,13 +268,13 @@ play_ambient_sound = $71
   sta $9123
 
 ; *************************************************************************************
-  ;TODO: Clear the zero page addresses
 
   ;Setup keyboard
   jsr setup_IRQ
 
 ;TODO: temp
   jsr clear_status
+
   lda #3
   sta player_lives
   lda #0
@@ -339,10 +341,10 @@ play_one_life
 
   jsr draw_borders
   jsr initialise_stage
-;  jsr update_cave_time
-;  jsr update_status_bar
-;  ldy #message_clear
-;  jsr update_status_message
+  jsr update_cave_time
+  jsr update_status_bar
+  ldy #message_clear
+  jsr update_status_message
 
   ;dissolve screen when starting
 ;  jsr prepare_reveal_hide_code
@@ -458,20 +460,19 @@ dont_allow_rock_push_up
   sta bomb_counter
 
   ;cave letter and difficulty level on status bar
-;TODO: AWR
   lda cave_number
   clc
   adc #"A"  ; Add letter "A" to get the cave letter for the cave number (which starts from zero)
-;  sta status_bar_line1+37
+  sta status_bar_line1+37
   lda difficulty_level
   clc
   adc #"0"
-;  sta status_bar_line1+38
+  sta status_bar_line1+38
 
   ;update diamonds required, bombs available, player lives on status bar
-;  jsr update_diamonds_required
-;  jsr update_bombs_available
-;  jsr update_player_lives
+  jsr update_diamonds_required
+  jsr update_bombs_available
+  jsr update_player_lives
 
   rts
 
@@ -494,6 +495,144 @@ set_rockford_start
   rts
 
 ; *************************************************************************************
+; Determine next cave to play, which depends on cave sequence, bonus caves and difficulty level
+calculate_next_cave_number_and_level
+
+    ldx cave_number
+    ldy difficulty_level
+    lda cave_play_order,x
+    sta cave_number
+    bne store_cave_number_and_difficulty_level
+    iny
+    cpy #6
+    bne store_cave_number_and_difficulty_level
+    ldy #1
+store_cave_number_and_difficulty_level
+    sty difficulty_level
+    sta cave_number
+    rts
+
+; *************************************************************************************
+; Set the status bar display with values applied during the games (cave time, diamonds required, etc)
+update_status_bar
+;TODO: AWR
+  rts
+
+    ldy #41
+status_bar_loop
+    dey
+    lda status_bar_line1,y
+    sta _SCREEN_ADDR,y
+    lda status_bar_line2,y
+    sta _SCREEN_ADDR+24,y
+    cpy #0
+    bne status_bar_loop
+    rts
+
+; *************************************************************************************
+; Set the status message display with the required status message in Y register
+update_status_message
+;TODO: AWR
+  rts
+
+  ldx #0
+status_message_loop
+  lda #" "
+  cpy #message_clear
+  beq plot_char
+	lda status_messages,y
+	iny
+plot_char
+  sta _SCREEN_ADDR+72,x
+  inx
+  cpx #19
+  bne status_message_loop
+	rts
+
+; *************************************************************************************
+update_diamonds_required
+    ldx #5  ;diamonds required start position
+    ldy diamonds_required
+    lda #0
+    jmp add_to_status_bar
+
+; *************************************************************************************
+update_bombs_available
+    ldx #14  ;bombs available start position
+    ldy bomb_counter
+    lda #0
+    jmp add_to_status_bar
+
+; *************************************************************************************
+update_cave_time
+    ldx #19  ;cave time start position
+    ldy time_remaining
+    lda #0
+    jmp add_to_status_bar
+
+; *************************************************************************************
+update_player_lives
+    ldx #30  ;lives available start position
+    ldy player_lives
+    lda #0
+    jmp add_to_status_bar
+
+; *************************************************************************************
+update_player_score
+    ldx #34  ;score start position
+    ldy score_low
+    lda score_high
+
+; *************************************************************************************
+; Converts a given value in bytes into readable ASCII and displays it on the status bar
+; Parameters are X register for the position of the status bar value to update, 
+;   Y for the value (low byte), and A for the value (high byte)
+add_to_status_bar
+
+    stx temp1  ;start position of value to update
+    sta temp2  ;high byte of value to add
+;TODO: What options for Vic here?
+;    jsr _CONVERT_TO_INT  ;convert integer in Y(low) and A(high) to accumulator by calling $d499 ($d3ed)
+;    jsr _INT_TO_ASCII_STRING  ;output accumulator into an ASCII string, stored at $100 upwards, ending with $00 by calling $e0d5 ($e0d1)
+
+    lda temp2
+    beq not_high_byte_value
+    lda #6  ;control digits to display (applies to score)
+    jmp convert_integer
+not_high_byte_value
+    lda #4  ;control digits to display (applies to diamonds required, bombs, cave time, lives)
+convert_integer
+    sta dont_want_space+2
+    sta add_spaces_after+1
+
+    ldy temp1  ;start position on status bar
+    ldx #0
+copy_digits_to_status_bar
+    lda $101,x  ;string of ASCII characters after leading space
+    bne digit_or_space
+    inx
+    jmp add_spaces_after
+digit_or_space
+    cmp #32
+    beq dont_want_space
+    sta status_bar_line2,y
+    iny
+dont_want_space
+    inx
+    cpx #4  ;Max will use
+    bne copy_digits_to_status_bar
+add_spaces_after
+    cpx #4  ;Max will use
+    bcs add_status_return
+    lda #32
+    sta status_bar_line2,y
+    iny
+    inx
+    jmp add_spaces_after
+add_status_return
+    rts
+
+; *************************************************************************************
 ; Plays the cave, each iteration of the loop is a game play tick
 ; The loop ends when Rockford's completes the cave or loses a life
 gameplay_loop
@@ -512,28 +651,27 @@ skip_clearing_amoeba_replacement
   stx current_amoeba_cell_type
 
   jsr update_map
-;TODO: AWR
-;  jsr update_cave_time
-;  jsr update_status_bar  ;time will always need updating, and sometimes the other values (updated for those events)
+  jsr update_cave_time
+  jsr update_status_bar  ;time will always need updating, and sometimes the other values (updated for those events)
 
   ;update status message
-;  lda message_timer  ;check if a message should be displayed
-;  beq skip_message_update
-;  dec message_timer
-;  ldy saved_message
-;  lda message_timer
-;  and #4  ;every 4 ticks, clear message then switch back to saved message
-;  bne show_message_update
-;  cpy #message_hurry_up
-;  bne skip_hurry_sound
-;  lda #hurry_sound
-;  sta play_sound_fx
-;skip_hurry_sound
+  lda message_timer  ;check if a message should be displayed
+  beq skip_message_update
+  dec message_timer
+  ldy saved_message
+  lda message_timer
+  and #4  ;every 4 ticks, clear message then switch back to saved message
+  bne show_message_update
+  cpy #message_hurry_up
+  bne skip_hurry_sound
+  lda #hurry_sound
+  sta play_sound_fx
+skip_hurry_sound
 
-;  ldy #message_clear
-;show_message_update
-;  jsr update_status_message
-;skip_message_update
+  ldy #message_clear
+show_message_update
+  jsr update_status_message
+skip_message_update
 
   ; get the contents of the cell that rockford is influencing. This can be the cell
   ; underneath rockford, or by holding the RETURN key down and pressing a direction
@@ -548,8 +686,7 @@ skip_clearing_amoeba_replacement
 
 rockford_is_not_at_end_position
   jsr draw_grid_of_sprites
-;TODO: AWR
-;  jsr update_amoeba_timing
+  jsr update_amoeba_timing
 
   ; check if the player is still alive by reading the current rockford sprite (branch if not)
   lda current_rockford_sprite
@@ -565,9 +702,8 @@ rockford_is_not_at_end_position
   ; branch if there's still time left
   bne check_for_earth
   ; out of time
-;TODO: AWR
-;  ldy #message_out_of_time
-;  jsr update_status_message
+  ldy #message_out_of_time
+  jsr update_status_message
   jsr update_with_gameplay_not_active
   jmp lose_a_life
 
@@ -602,10 +738,9 @@ skip_earth
   ldx #got_diamond_sound
   stx play_sound_fx
 
-;TODO: AWR
-;  jsr got_diamond_so_update_status_bar
-;  jsr update_diamonds_required
-;  jsr update_player_score
+  jsr got_diamond_so_update_status_bar
+  jsr update_diamonds_required
+  jsr update_player_score
 
 skip_got_diamond
 ;TODO: AWR
@@ -677,13 +812,11 @@ lose_a_life
   cmp #16  ;don't lose a life on a bonus cave, just move to next cave instead
   bcs unsuccessful_bonus_cave
   dec player_lives
-;TODO: AWR
-;  jsr update_player_lives
-;  jsr update_status_bar
+  jsr update_player_lives
+  jsr update_status_bar
   rts
 unsuccessful_bonus_cave
-;TODO: AWR
-;  jsr calculate_next_cave_number_and_level
+  jsr calculate_next_cave_number_and_level
   rts
 
 ; *************************************************************************************
@@ -757,8 +890,7 @@ rockford_reached_end_position
   cmp #15  ; award a life if the end was reached on a bonus cave
   bcc not_a_bonus_end
   inc player_lives
-;TODO: AWR
-;  jsr update_player_lives
+  jsr update_player_lives
 
   ;update message bar
   lda #message_bonus_life
@@ -778,15 +910,14 @@ count_up_bonus_at_end_of_stage_loop
 
   ;countdown the remaining time and add to score
   dec time_remaining
-;TODO: AWR
-;  jsr update_cave_time
+  jsr update_cave_time
 
   ;add 1 to score for each time unit left
   lda #1
 ;TODO: AWR
 ;  jsr update_score
-;  jsr update_player_score
-;  jsr update_status_bar
+  jsr update_player_score
+  jsr update_status_bar
 
   jsr draw_grid_of_sprites
 
@@ -795,14 +926,12 @@ count_up_bonus_at_end_of_stage_loop
 skip_bonus
 
   ;Determine next cave and level to play
-;TODO: AWR
-;  jsr calculate_next_cave_number_and_level
+  jsr calculate_next_cave_number_and_level
   ldy #message_clear
 
 update_during_pause_or_out_of_time
   sty save_message_number
-;TODO: AWR
-;  jsr update_status_message
+  jsr update_status_message
   jsr draw_grid_of_sprites
   ldy save_message_number
   jsr check_for_pause_key
@@ -821,9 +950,81 @@ check_for_pause_key
   rts
 
 ; *************************************************************************************
+; Apply updates to diamonds required, score, sound etc when a diamond is gathered
+; Includes check if all diamonds have been gathered and opens the exit
+got_diamond_so_update_status_bar
+
+    lda diamonds_required
+    bne update_diamonds_required_and_check_got_all
+
+    ;already got all the diamonds, so just update score with their extra value
+    lda param_diamond_extra_value
+;TODO: AWR
+;    jsr update_score
+    jmp got_diamond_return
+
+update_diamonds_required_and_check_got_all
+
+    lda param_diamond_value  ;update score with diamond value
+;TODO: AWR
+;    jsr update_score
+
+    dec diamonds_required  ;subtract 1 from diamonds needed
+    bne got_diamond_return
+
+    ; got all the diamonds
+    lda #message_got_all_diamonds
+    sta saved_message
+    lda #$27
+    sta message_timer
+    
+    ; open the exit
+    ldy #0
+    lda #map_active_exit
+    sta (map_rockford_end_position_addr_low),y
+
+    ; flash path (spaces)
+    lda #sprite_box
+    sta cell_type_to_sprite
+    jsr draw_grid_of_sprites
+    lda #sprite_space
+    sta cell_type_to_sprite
+
+    lda #got_all_diamonds_sound
+    sta play_sound_fx
+got_diamond_return
+    rts
+
+; *************************************************************************************
+;Custom character set. Must reside at this address
+* = $1800
+!source "spr.asm"
+
+;TODO: Extend sprites to use 256 characters available
+
+; *************************************************************************************
+;Cave tile map
+;
+;Below is needed to point the program counter to the next page (multiple of 256)
+;IMPORTANT: Address must be $1000, $2000 etc, not $1100 for example!
+;Each row has 40 bytes used for the tiles in the game, 24 unused
+* = $2000
+
+tile_map_row_0  ;top border
+  !fill 64
+tile_map_row_1  ;1-20 rows between the borders
+  !fill (64*19)
+tile_map_row_20
+  !fill 64
+tile_map_row_21  ;bottom border
+  !fill 64
+tile_below_store_row  ;special row for pseudo-random generated caves with extra-tile below the random one
+  !fill 64
+
+; *************************************************************************************
 ; Draw a full grid of sprites, updating the current map position first
 ; Below is needed to point the program counter to the next page (multiple of 256)
-* = $1600
+* = $2600
 draw_grid_of_sprites
 
   jsr update_map_scroll_position
@@ -1360,30 +1561,6 @@ seeded_rand_temp2
   !byte 0
 
 ; *************************************************************************************
-;Custom character set
-* = $1c00
-!source "spr.asm"
-
-; *************************************************************************************
-;Cave tile map
-;
-;Below is needed to point the program counter to the next page (multiple of 256)
-;IMPORTANT: Address must be $1000, $2000 etc, not $1100 for example!
-;Each row has 40 bytes used for the tiles in the game, 24 unused
-* = $2000
-
-tile_map_row_0  ;top border
-  !fill 64
-tile_map_row_1  ;1-20 rows between the borders
-  !fill (64*19)
-tile_map_row_20
-  !fill 64
-tile_map_row_21  ;bottom border
-  !fill 64
-tile_below_store_row  ;special row for pseudo-random generated caves with extra-tile below the random one
-  !fill 64
-
-; *************************************************************************************
 ; Update the gameplay map with action handlers for each of the game actors
 ; Includes logic for falling rocks, diamonds, bombs
 update_map
@@ -1772,8 +1949,7 @@ create_a_bomb
     sta message_timer
 skip_no_bombs_message
     ;update bombs available on status bar
-;TODO: Add when ready
-;    jsr update_bombs_available
+    jsr update_bombs_available
     lda #map_bomb
     rts
 

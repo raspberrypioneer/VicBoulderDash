@@ -17,7 +17,7 @@ param_cave_time
 ;    !byte $96, $6e, $46, $28, $1e      ; Cave time for each difficulty level x5
 param_amoeba_magic_wall_time
 ;TODO: Testing
-  !byte 50
+  !byte 60
 ;    !byte $00                          ; Amoeba or Magic Wall time
 param_initial_fill_tile
     !byte $01                          ; Initial fill tile - usually dirt, sometimes space
@@ -62,7 +62,7 @@ cave_map_data  ; 20 x 40 empty cave, each byte represents 2 tiles (each nibble)
   !byte $3f, $ff, $ff, $ff, $fd, $9f, $ff, $e0, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $f3
   !byte $3f, $fb, $ff, $fe, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $fc, $ff, $ff, $ff, $ff, $ff, $f3
   !byte $3f, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $f3
-  !byte $3f, $f4, $f7, $ff, $ff, $60, $00, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $f3
+  !byte $3f, $f4, $ff, $ff, $ff, $60, $00, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $f3
   !byte $32, $22, $22, $22, $22, $22, $22, $22, $22, $22, $22, $22, $22, $22, $22, $2f, $ff, $ff, $ff, $f3
   !byte $3f, $ff, $ff, $1f, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $f3
   !byte $3f, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $f3
