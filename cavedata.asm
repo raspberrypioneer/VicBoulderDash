@@ -13,7 +13,7 @@ param_diamonds_required
   !byte 2,3,4,5,6
 ;    !byte $0c, $0c, $0c, $0c, $0c      ; Diamonds required for each difficulty level x5
 param_cave_time
-  !byte 20,70,80,90,95
+  !byte 60,70,80,90,95
 ;    !byte $96, $6e, $46, $28, $1e      ; Cave time for each difficulty level x5
 param_amoeba_magic_wall_time
 ;TODO: Testing

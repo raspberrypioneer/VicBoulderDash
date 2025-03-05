@@ -261,16 +261,16 @@ handler_table_low
 	!byte <handler_basics
 	!byte 0
 	!byte 0
-	!byte 0;    !byte <handler_firefly_or_butterfly
-	!byte 0;    !byte <handler_amoeba
+	!byte <handler_firefly_or_butterfly
+	!byte <handler_amoeba
     !byte <handler_rockford_intro_or_exit
-	!byte 0;    !byte <handler_slime
+	!byte <handler_slime
     !byte <handler_rockford_intro_or_exit
     !byte 0
 growing_wall_handler_low
-	!byte 0;    !byte <handler_growing_wall
-	!byte 0;    !byte <handler_magic_wall
-	!byte 0;    !byte <handler_firefly_or_butterfly
+	!byte <handler_growing_wall
+	!byte <handler_magic_wall
+	!byte <handler_firefly_or_butterfly
 rockford_handler_low
     !byte <handler_rockford
 
@@ -281,16 +281,16 @@ handler_table_high
 	!byte >handler_basics
 	!byte 0
 	!byte 0
-    !byte 0;!byte >handler_firefly_or_butterfly
-	!byte 0;!byte >handler_amoeba
+    !byte >handler_firefly_or_butterfly
+	!byte >handler_amoeba
     !byte >handler_rockford_intro_or_exit
-	!byte 0;!byte >handler_slime
+	!byte >handler_slime
     !byte >handler_rockford_intro_or_exit
     !byte 0
 growing_wall_handler_high
-	!byte 0;!byte >handler_growing_wall
-	!byte 0;!byte >handler_magic_wall
-	!byte 0;!byte >handler_firefly_or_butterfly
+	!byte >handler_growing_wall
+	!byte >handler_magic_wall
+	!byte >handler_firefly_or_butterfly
 rockford_handler_high
 	!byte >handler_rockford
 
@@ -308,17 +308,17 @@ cell_type_to_sprite
     !byte sprite_diamond1                                                               ; cell type $04 = map_diamond
     !byte sprite_boulder1                                                               ; cell type $05 = map_rock
     !byte sprite_firefly4                                                               ; cell type $06 = map_firefly
-;amoeba_animated_sprite0
+amoeba_animated_sprite0
     !byte sprite_amoeba1                                                                ; cell type $07 = map_amoeba
     !byte sprite_titanium_wall2                                                         ; cell type $03 = map_titanium_wall
-;slime_animated_sprite0
+slime_animated_sprite0
     !byte sprite_amoeba1                                                                ; cell type $09 = map_slime
     !byte $4c                                                                           ; cell type $0A = map_explosion
     !byte sprite_bomb1                                                                  ; cell type $0B = map_bomb
     !byte sprite_magic_wall1                                                            ; cell type $0C = map_growing_wall
     !byte sprite_wall2                                                                  ; cell type $0D = map_magic_wall
     !byte sprite_butterfly1                                                             ; cell type $0E = map_butterfly
-;rockford_sprite
+rockford_sprite
     !byte sprite_rockford_tapping_foot1                                                 ; cell type $0F = map_rockford
     !byte sprite_explosion4                                                             ; cell type $10 = map_space | map_anim_state1
     !byte sprite_explosion4                                                             ; cell type $11 = map_earth | map_anim_state1
@@ -375,10 +375,10 @@ cell_type_to_sprite
     !byte sprite_diamond1                                                               ; cell type $44 = map_diamond | map_anim_state4
     !byte sprite_boulder1                                                               ; cell type $45 = map_rock | map_anim_state4
     !byte sprite_explosion1                                                             ; cell type $46 = map_start_large_explosion
-;amoeba_animated_sprite4
+amoeba_animated_sprite4
     !byte sprite_amoeba2                                                                ; cell type $47 = map_amoeba | map_anim_state4
     !byte sprite_rockford_moving_right4                                                 ; cell type $48 = map_rockford_appearing_or_end_position | map_anim_state4
-;slime_animated_sprite1
+slime_animated_sprite1
     !byte sprite_amoeba2                                                                ; cell type $49 = map_slime | map_anim_state4
     !byte sprite_firefly4                                                               ; cell type $4A = map_explosion | map_anim_state4
     !byte sprite_bomb1                                                                  ; cell type $4B = map_bomb | map_anim_state4
