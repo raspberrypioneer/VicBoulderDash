@@ -1,3 +1,8 @@
+; *************************************************************************************
+; Boulder Dash for the Vic20
+; by raspberrypioneer Feb 2025
+;
+
 ;map elements defines
 map_space=0
 map_earth=1
@@ -92,8 +97,59 @@ sprite_bomb3=52
 sprite_bomb4=53
 sprite_bubble=54
 
-map_address_low = $21
-map_address_high = $22
+;keys
+KEY_MASK_FIRE=1
+KEY_MASK_RIGHT=2
+KEY_MASK_LEFT=4
+KEY_MASK_UP=8
+KEY_MASK_DOWN=16
+
+;status_messages
+message_clear=255
+message_paused=0
+message_got_all_diamonds=18
+message_no_bombs_left=36
+message_hurry_up=54
+message_out_of_time=72
+message_bonus_life=90
+message_game_over=108
+message_std_keymap=126
+message_alt_keymap=144
+
+;sounds
+no_sound=0
+rockford_move_sound=1
+got_earth_sound=2
+got_diamond_sound=3
+got_all_diamonds_sound=4
+bonus_life_sound=4  ;same as got_all_diamonds_sound
+enter_cave_sound=5
+exit_cave_sound=6
+rock_move_sound=7
+diamond_move_sound=8
+hurry_sound=8  ;same as diamond_move_sound
+explosion_sound=9
+magic_wall_sound=10
+growing_wall_sound=10  ;same as magic_wall_sound
+amoeba_sound=11
+
+; *************************************************************************************
+zero_page_start
+
+neighbour_cell_directions = $00  ;used as a table for the cell variables below
+cell_above_left = $00
+cell_above = $01
+cell_above_right = $02
+cell_left = $03
+cell_current = $04
+cell_right = $05
+cell_below_left = $06
+cell_below = $07
+cell_below_right = $08
+
+neighbour_cell_pointer = $09
+
+key_press = $0a
 
 sprite_address_low = $23
 sprite_address_high = $24
@@ -108,8 +164,58 @@ colour_addr1_high = $45
 colour_addr2_low = $46
 colour_addr2_high = $47
 
+map_address_low = $21
+map_address_high = $22
+
+map_rows = $0b
+map_cols = $0c
+
 map_rockford_current_position_addr_low = $48
 map_rockford_current_position_addr_high = $49
+
+map_rockford_end_position_addr_low = $50
+map_rockford_end_position_addr_high = $51
+
+visible_top_left_map_x = $54
+visible_top_left_map_y = $55
+
+score_low = $0d
+score_high = $0e
+
+temp1 = $0f
+temp2 = $10
+
+player_lives = $56
+cave_number = $57
+difficulty_level = $58
+diamonds_required = $59
+time_remaining = $5a
+bomb_counter = $5b
+bomb_delay = $5c
+gravity_timer = $5d
+magic_wall_state = $5e
+magic_wall_timer = $5f
+amoeba_growth_interval = $60
+amoeba_counter = $61
+amoeba_replacement = $62
+number_of_amoeba_cells_found = $63
+bonus_timer = $64
+rockford_cell_value = $65
+current_rockford_sprite = $66
+rockford_explosion_cell_type = $67
+current_amoeba_cell_type = $68
+neighbour_cell_contents = $69
+delay_trying_to_push_rock = $6a
+saved_message = $6b
+message_timer = $6c
+
+tick_counter = $6d
+sub_second_ticks = $6e
+ticks_since_last_direction_key_pressed = $6f
+play_sound_fx = $70
+
+zero_page_end  ;last zero page byte
+play_ambient_sound = $71
 
 ;* = $1001
 ; !byte $0b,$10,$01,$00,$9e,$34,$31,$31,$30,$00,$00,$00,$00  ;sys4110 i.e. $100E
@@ -191,7 +297,12 @@ map_rockford_current_position_addr_high = $49
 
 ; *************************************************************************************
 
-  ;TODO: temp
+;TODO: Clear zero page
+
+  ;Setup keyboard
+  jsr setup_IRQ
+
+;TODO: temp
   lda #12  ;colour
   sta $9400  ;colour map
   sta $9401  ;colour map
@@ -199,38 +310,313 @@ map_rockford_current_position_addr_high = $49
   sta $9419  ;colour map
   jsr clear_status
 
+;TODO: temp
+lda #1
+sta player_lives
+sta difficulty_level
+
+;game loop for each of the player lives
+play_next_life
+  jsr play_one_life
+  lda player_lives
+  bne play_next_life
+
+;TODO: replace
+  rts
+
+; *************************************************************************************
+; Game action starts here, playing one of Rockford's lives
+play_one_life
+
+  ; Load cave parameters and map from file
+;  jsr load_cave_data
+
+  ;initialise variables
+;  lda #$9f
+;  sta rockford_cell_value
+;  lda #240
+;  sta ticks_since_last_direction_key_pressed
+;  lda #31
+;  sta tick_counter
+;  lda #12
+;  sta sub_second_ticks
+;  lda #4
+;  sta delay_trying_to_push_rock
+;  lda #$0d
+;  sta magic_wall_state
+;  sta amoeba_growth_interval
+;  lda #message_clear
+;  sta saved_message
+;  lda #1
+;  sta amoeba_counter
+;  sta message_timer
+;  lda #0
+;  sta amoeba_replacement
+;  sta number_of_amoeba_cells_found
+;  sta current_rockford_sprite
+;  sta rockford_explosion_cell_type
+;  sta bonus_timer
+;  sta cell_type_to_sprite  ;ensure space is the first sprite in table
+;  sta play_sound_fx
+;  sta play_ambient_sound
+;  sta random_seed
+
   ;populate cave map
-	jsr populate_cave_from_file
+  jsr populate_cave_from_file
   jsr populate_cave_tiles_pseudo_random
 
+  ;set start of map
+  lda #<tile_map_row_1
+  sta map_address_low
+  lda #>tile_map_row_1
+  sta map_address_high
+
   jsr draw_borders
+  jsr initialise_stage
+;  jsr update_cave_time
+;  jsr update_status_bar
+;  ldy #message_clear
+;  jsr update_status_message
+
+  ;dissolve screen when starting
+;  jsr prepare_reveal_hide_code
+;  lda #map_space
+;  jsr screen_dissolve_effect
+
+  ;for normal game play, nop out the logic applied above in draw grid (self-mod code)
+;  ldx #12
+;  jsr self_mod_code
+
+  jsr gameplay_loop
+
+  ;check for game over
+;  lda player_lives
+;  bne not_game_over
+
+;  ldy #message_game_over
+;  jsr update_status_message
+
+;not_game_over
+
+  ;un-dissolve screen when ending
+;  jsr prepare_reveal_hide_code
+;  lda #map_unprocessed
+;  jsr screen_dissolve_effect
+
+  rts
+
+; *************************************************************************************
+; Loop over all rows, plotting side borders from the cave file
+draw_borders
+
+;  ldx #21
+;write_left_and_right_borders_loop
+;  ldy #38
+;cells_to_processed_loop
+;  lda (map_address_low),y
+;  ora #map_unprocessed
+;  sta (map_address_low),y
+;  dey
+;  bne cells_to_processed_loop
+;  lda #$40
+;  jsr add_a_to_ptr
+;  dex
+;  bne write_left_and_right_borders_loop
+  ; write the top and bottom borders using param_border_tile (steelwall if zero)
+  lda param_border_tile
+  ldx #39
+write_top_and_bottom_borders_loop
+  sta tile_map_row_0,x
+  sta tile_map_row_21,x
+  dex
+  bpl write_top_and_bottom_borders_loop
+  rts
+
+; *************************************************************************************
+; Apply the parameters for the cave being played
+initialise_stage
+
+  lda #20
+  sta visible_top_left_map_x
+  lsr
+  sta visible_top_left_map_y
+
+  ; set the delay between amoeba growth
+;  lda param_amoeba_magic_wall_time
+;  sta amoeba_growth_interval
+;  sta magic_wall_timer
+
+  ; set the gravity timer
+;  ldy #0
+;  lda param_zero_gravity_time
+;  beq dont_allow_rock_push_up
+;  ldy #$ee  ;Special value used to detect rock has been pushed up, only applies when gravity is off
+;dont_allow_rock_push_up
+;  sta gravity_timer
+;  sty rock_push_directions+2
+
+  ; initialise random seed for possible use with slime permeability
+;  lda #0
+;  sta random_seed2
+
+  ; put the end tile on the map
+  lda param_rockford_end
+  sta screen_addr1_high
+  lda param_rockford_end+1
+  sta screen_addr1_low
+  jsr map_xy_position_to_map_address
+  ldy #0
+  lda #map_titanium_wall
+  sta (map_address_low),y
+  lda map_address_low
+  sta map_rockford_end_position_addr_low
+  lda map_address_high
+  sta map_rockford_end_position_addr_high
 
   ; put the start tile on the map
   jsr set_rockford_start
 
-  ;set start of map
-  lda #<tile_map_row_0
-  sta map_address_low
-  lda #>tile_map_row_0
-  sta map_address_high
+  ;set cave parameters
+;  ldx difficulty_level
+;  dex
+;  lda param_diamonds_required,x
+;  sta diamonds_required
+;  lda param_cave_time,x
+;  sta time_remaining
+;  lda param_bombs
+;  sta bomb_counter
 
+  ;cave letter and difficulty level on status bar
+;  lda cave_number
+;  clc
+;  adc #"A"  ; Add letter "A" to get the cave letter for the cave number (which starts from zero)
+;  sta status_bar_line1+37
+;  lda difficulty_level
+;  clc
+;  adc #"0"
+;  sta status_bar_line1+38
+
+  ;update diamonds required, bombs available, player lives on status bar
+;  jsr update_diamonds_required
+;  jsr update_bombs_available
+;  jsr update_player_lives
+
+  rts
+
+; *************************************************************************************
+; Set Rockford start position (row/column) on map
+set_rockford_start
+
+  lda param_rockford_start
+  sta screen_addr1_high
+  lda param_rockford_start+1
+  sta screen_addr1_low
+  jsr map_xy_position_to_map_address
+  ldy #0
+;TODO: Undo when ready
+  lda #map_rockford
+;    lda #map_rockford_appearing_or_end_position
+  sta (map_address_low),y
+  lda map_address_low
+  sta map_rockford_current_position_addr_low
+  lda map_address_high
+  sta map_rockford_current_position_addr_high
+  rts
+
+; *************************************************************************************
+gameplay_loop
+;TODO: Add all the missing code
+
+  jsr update_map
   jsr draw_grid_of_sprites
 
+;TODO: Temp
 thing1
-  jsr read_input
-  jmp thing1
-;  rts
+  lda key_press
+  cmp #KEY_MASK_FIRE
+  beq do_fire_things
 
-difficulty_level
-  !byte 1
+  cmp #KEY_MASK_RIGHT
+  beq do_right_things
+
+  cmp #KEY_MASK_LEFT
+  beq do_left_things
+
+  cmp #KEY_MASK_UP
+  beq do_up_things
+
+  cmp #KEY_MASK_DOWN
+  beq do_down_things
+
+  jmp gameplay_loop
+
+;do fire things (show diamond)
+do_fire_things
+  lda #10
+  sta $1000
+  lda #11
+  sta $1001
+  lda #12
+  sta $1018
+  lda #13
+  sta $1019
+  jmp gameplay_loop
+
+;do right things (show firefly)
+do_right_things
+  lda #18
+  sta $1000
+  lda #19
+  sta $1001
+  lda #20
+  sta $1018
+  lda #21
+  sta $1019
+  jmp gameplay_loop
+
+;do left things (show butterfly)
+do_left_things
+  lda #46
+  sta $1000
+  lda #47
+  sta $1001
+  lda #48
+  sta $1018
+  lda #49
+  sta $1019
+  jmp gameplay_loop
+
+;do up things (show bubble)
+do_up_things
+  lda #58
+  sta $1000
+  lda #59
+  sta $1001
+  lda #60
+  sta $1018
+  lda #61
+  sta $1019
+  jmp gameplay_loop
+
+;do down things (show Rockford)
+do_down_things
+  lda #62
+  sta $1000
+  lda #63
+  sta $1001
+  lda #64
+  sta $1018
+  lda #65
+  sta $1019
+  jmp gameplay_loop
 
 ; *************************************************************************************
 ; Draw a full grid of sprites, updating the current map position first
 ; Below is needed to point the program counter to the next page (multiple of 256)
-* = $1400
+* = $1600
 draw_grid_of_sprites
 
-  ;jsr update_map_scroll_position
+  jsr update_map_scroll_position
   ;jsr update_grid_animations
 
   lda #0  ;skip status bar
@@ -358,11 +744,97 @@ end_draw
 ;
   rts
 
-temp1
-  !byte 0
+; *************************************************************************************
+; Scrolls the map by setting the tile_map_ptr and visible_top_left_map_x and y
+; Note: each time Rockford moves and pushes the boundaries, visible_top_left_map_x and y are incremented / decremented
+;       this means the visible position is not set based on Rockford's absolute position at the start
+update_map_scroll_position
 
-temp2
-  !byte 0
+    lda map_rockford_current_position_addr_low
+    sta map_address_low
+    lda map_rockford_current_position_addr_high
+    sta map_address_high
+    jsr map_address_to_map_xy_position
+    sec
+    sbc visible_top_left_map_x
+    ldx visible_top_left_map_x
+    cmp #9
+    bmi check_for_need_to_scroll_left
+    cpx #28
+    bpl check_for_need_to_scroll_down
+    inx
+check_for_need_to_scroll_left
+    cmp #3
+    bpl check_for_need_to_scroll_down
+    cpx #1
+    bmi check_for_need_to_scroll_down
+    dex
+check_for_need_to_scroll_down
+    ldy visible_top_left_map_y
+    lda screen_addr1_high
+    sec
+    sbc visible_top_left_map_y
+    cmp #9
+    bmi check_for_need_to_scroll_up
+    cpy #$0a
+    bpl check_for_bonus_stages
+    iny
+check_for_need_to_scroll_up
+    cmp #3
+    bpl check_for_bonus_stages
+    cpy #1
+    bmi check_for_bonus_stages
+    dey
+check_for_bonus_stages
+    lda param_intermission
+    beq skip_bonus_stage
+    ; bonus stage is always situated in top left corner
+    lda #0
+    tax
+    tay
+skip_bonus_stage
+    stx visible_top_left_map_x
+    stx screen_addr1_low
+    sty visible_top_left_map_y
+    sty screen_addr1_high
+    jsr map_xy_position_to_map_address
+    rts
+
+; *************************************************************************************
+; Map address (which start at $1000) becomes row/column in screen_addr1_high and low
+; e.g. $1000 is 0,0   $1098 is 2,18   $1140 is 5,0   $110f is 5,15
+map_address_to_map_xy_position
+
+    lda map_address_high
+    and #7
+    sta screen_addr1_high
+    lda map_address_low
+    asl
+    rol screen_addr1_high
+    asl
+    rol screen_addr1_high
+    lda map_address_low
+    and #$3f
+    sta screen_addr1_low
+    rts
+
+; *************************************************************************************
+; Convert a grid position (row/column) to a map address
+map_xy_position_to_map_address
+
+    lda #0
+    sta map_address_low
+    lda screen_addr1_high
+    lsr
+    ror map_address_low
+    lsr
+    ror map_address_low
+    ora #>tile_map_row_0
+    sta map_address_high
+    lda screen_addr1_low
+    ora map_address_low
+    sta map_address_low
+    rts
 
 ; *************************************************************************************
 ; screen addresses
@@ -390,33 +862,6 @@ colour_screen_below_high
 
 colour_screen_below_low
   !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
-
-; *************************************************************************************
-; Loop over all rows, plotting side borders from the cave file
-draw_borders
-
-;    ldx #21
-;write_left_and_right_borders_loop
-;    ldy #38
-;cells_to_processed_loop
-;    lda (map_address_low),y
-;    ora #map_unprocessed
-;    sta (map_address_low),y
-;    dey
-;    bne cells_to_processed_loop
-;    lda #$40
-;    jsr add_a_to_ptr
-;    dex
-;    bne write_left_and_right_borders_loop
-  ; write the top and bottom borders using param_border_tile (steelwall if zero)
-  lda param_border_tile
-  ldx #39
-write_top_and_bottom_borders_loop
-  sta tile_map_row_0,x
-  sta tile_map_row_21,x
-  dex
-  bpl write_top_and_bottom_borders_loop
-  rts
 
 ; *************************************************************************************
 ; Populate game tile map from cave_map_data loaded from file
@@ -478,42 +923,6 @@ add_a_to_ptr
   bcc add_ptr_return
   inc map_address_high
 add_ptr_return
-  rts
-
-; *************************************************************************************
-map_xy_position_to_map_address
-
-  lda #0
-  sta map_address_low
-  lda screen_addr1_high
-  lsr
-  ror map_address_low
-  lsr
-  ror map_address_low
-  ora #>tile_map_row_0
-  sta map_address_high
-  lda screen_addr1_low
-  ora map_address_low
-  sta map_address_low
-  rts
-
-; *************************************************************************************
-set_rockford_start
-
-  lda param_rockford_start
-  sta screen_addr1_high
-  lda param_rockford_start+1
-  sta screen_addr1_low
-  jsr map_xy_position_to_map_address
-  ldy #0
-;TODO: Undo when ready
-  lda #map_rockford
-;    lda #map_rockford_appearing_or_end_position
-  sta (map_address_low),y
-  lda map_address_low
-  sta map_rockford_current_position_addr_low
-  lda map_address_high
-  sta map_rockford_current_position_addr_high
   rts
 
 ; ****************************************************************************************************
@@ -685,6 +1094,454 @@ tile_below_store_row  ;special row for pseudo-random generated caves with extra-
   !fill 64
 
 ; *************************************************************************************
+; Update the gameplay map with action handlers for each of the game actors
+; Includes logic for falling rocks, diamonds, bombs
+update_map
+
+    lda #20  ; twenty rows
+    sta map_rows
+    lda #>tile_map_row_0
+    sta map_address_high
+    lda #<tile_map_row_0
+    sta map_address_low
+    ; Each row is stored in the first 40 bytes of every 64 bytes. Here we set Y to
+    ; start on the second row, after the titanium wall border
+    ldy #$40
+    ; loop through the twenty rows of map
+tile_map_y_loop
+    lda #38  ; 38 columns (cells per row)
+    sta map_cols
+    lda (map_address_low),y
+    sta cell_left
+    ; move to the next cell
+    iny
+    ; read current cell contents into X
+    lda (map_address_low),y
+    tax
+    ; loop through the 38 cells in a row of map
+    ; read next cell contents into cell_right
+tile_map_x_loop
+    ldy #$42
+    lda (map_address_low),y
+    sta cell_right
+    ;Below checks if space, earth, wall, steel wall and just marks as processed, no handlers needed
+    cpx #map_diamond
+    bmi mark_cell_above_as_processed_and_move_to_next_cell
+
+    ; read cells into cell_above and cell_below variables
+    ldy #1
+    lda (map_address_low),y
+    sta cell_above
+    ldy #$81
+    lda (map_address_low),y
+    sta cell_below
+
+    ; if current cell is already processed (top bit set), then skip to next cell
+    txa
+    bmi mark_cell_above_as_processed_and_move_to_next_cell
+    ; mark current cell as processed (set top bit)
+    ora #$80
+    tax
+    ; the lower four bits are the type, each of which has a handler to process it
+    and #$0f
+    tay
+    lda handler_table_high,y
+    ; if we have no handler for this cell type then branch (destination was set
+    ; depending on where we entered this routine)
+    beq update_rock_or_diamond_that_can_fall
+    sta handler_high
+    lda handler_table_low,y
+    sta handler_low
+    ; call the handler for the cell based on the type (0-15)
+jsr_handler_instruction
+handler_low = jsr_handler_instruction+1
+handler_high = jsr_handler_instruction+2
+    jsr handler_rockford
+
+    ; the handler may have changed the surrounding cells, store the new cell below
+    lda cell_below
+    ldy #$81
+    sta (map_address_low),y
+    ; store the new cell above
+    lda cell_above
+    and #$7f
+    ldy #1
+    bpl move_to_next_cell  ; ALWAYS branch
+
+; *************************************************************************************
+mark_cell_above_as_processed_and_move_to_next_cell
+
+    ldy #1
+    lda (map_address_low),y
+    and #$7f
+move_to_next_cell
+    sta (map_address_low),y
+    ; store the new cell left back into the map
+    lda cell_left
+    ldy #$40
+    sta (map_address_low),y
+    ; update cell_left with the current cell value (in X)
+    stx cell_left
+    ; update the current cell value x from the cell_right variable
+    ldx cell_right
+    ; move ptr to next position
+    inc map_address_low
+    ; loop back for the rest of the cells in the row
+    dec map_cols
+    bne tile_map_x_loop
+    ; store the final previous_cell for the row
+    lda cell_left
+    sta (map_address_low),y
+    ; move ptr to the start of the next row. Stride is 64, 38 entries done, so
+    ; remainder to add is 64-38=26
+    lda #26
+    jsr add_a_to_ptr
+    ; loop back for the rest of the rows
+    dec map_rows
+    bne tile_map_y_loop
+    ; clear top bit in final row
+    ldy #38
+clear_top_bit_on_final_row_loop
+    lda tile_map_row_20,y
+    and #$7f
+    sta tile_map_row_20,y
+    dey
+    bne clear_top_bit_on_final_row_loop
+    ; clear top bit on end position
+    lda (map_rockford_end_position_addr_low),y
+    and #$7f
+    sta (map_rockford_end_position_addr_low),y
+    rts
+
+; *************************************************************************************
+; Update for rock/diamond/bomb elements
+update_rock_or_diamond_that_can_fall
+
+    cpy #map_bomb
+    bne not_a_bomb
+;TODO: Add when ready
+;    jsr handler_bomb  ;handle the bomb timer before continuing so it behaves like a rock/diamond
+not_a_bomb
+    lda gravity_timer
+    beq gravity_on_as_normal
+    ;gravity is off, so a rock/diamond/bomb can float
+    cpy #map_rock
+    bne mark_cell_above_as_processed_and_move_to_next_cell  ;only want to transition the rock
+    ldx #map_rock | map_unprocessed | map_anim_state1  ;switch to a bubble sprite
+    lda gravity_timer
+    cmp #4
+    bcs mark_cell_above_as_processed_and_move_to_next_cell
+    ldx #map_rock | map_unprocessed | map_anim_state2  ;switch to a bubble-transition-to-rock sprite instead
+    jmp mark_cell_above_as_processed_and_move_to_next_cell  ;bypass rock/diamond/bomb falling when gravity is off
+gravity_on_as_normal
+    cpx #map_rock | map_unprocessed | map_anim_state2
+    bne not_a_rock
+    ldx #map_rock | map_unprocessed  ;switch back to rock
+not_a_rock
+    ldy #$81
+    lda (map_address_low),y
+    beq cell_below_is_a_space
+    ; check current cell
+    cpx #map_deadly
+    bmi not_c0_or_above
+    jsr process_c0_or_above
+not_c0_or_above
+    and #$4f
+    tay
+    asl
+    bmi process_next_cell
+    lda cell_types_that_rocks_or_diamonds_will_fall_off,y
+    beq process_next_cell
+    lda cell_left
+    bne check_if_cell_right_is_empty
+    ; cell left is empty, now check below left cell
+    ldy #$80
+    lda (map_address_low),y
+    beq rock_or_diamond_can_fall_left_or_right
+check_if_cell_right_is_empty
+    lda cell_right
+    bne process_next_cell
+    ; cell right is empty, now check below right cell
+    ldy #$82
+    lda (map_address_low),y
+    bne process_next_cell
+    ; take the rock or diamond, and set bit 6 to indicate it has been moved this scan
+    ; (so it won't be moved again). Then store it in the below left or below right cell
+rock_or_diamond_can_fall_left_or_right
+    txa
+    ora #$40
+    sta (map_address_low),y
+set_to_unprocessed_space
+    ldx #$80
+    bne process_next_cell  ; ALWAYS branch
+
+    ; take the rock or diamond, and set bit 6 to indicate it has been moved this scan
+    ; (so it won't be moved again). Then store it in the cell below.
+cell_below_is_a_space
+    txa
+    ora #$40
+    sta (map_address_low),y
+    bne set_to_unprocessed_space  ; ALWAYS branch
+
+process_c0_or_above
+    pha
+    ; look up table based on type
+    and #$0f
+    tay
+    lda update_cell_type_when_below_a_falling_rock_or_diamond,y
+    beq play_rock_or_diamond_fall_sound
+    ; store in cell below
+    ldy #$81
+    sta (map_address_low),y
+play_rock_or_diamond_fall_sound
+
+    ldy #rock_move_sound
+    txa
+    and #$0f
+    cmp #map_diamond
+    bne save_rock_or_diamond_fall_sound
+    ldy #diamond_move_sound
+save_rock_or_diamond_fall_sound
+    sty play_sound_fx
+
+    ; mask off bit 6 for the current cell value
+    txa
+    and #$bf
+    tax
+    pla
+    rts
+
+;Needed because subroutine is out of range to branch to
+process_next_cell
+    jmp mark_cell_above_as_processed_and_move_to_next_cell
+
+; *************************************************************************************
+; Handler for Rockford's actions - moving, pushing rocks, etc
+handler_rockford
+
+    stx current_rockford_sprite
+    lda rockford_explosion_cell_type
+    bne start_large_explosion
+    inx
+    bne check_for_direction_key_pressed
+start_large_explosion
+    ldx #map_start_large_explosion
+    stx rockford_explosion_cell_type
+    rts
+
+check_for_direction_key_pressed
+    lda key_press
+    sta temp1
+    and #(KEY_MASK_UP | KEY_MASK_DOWN | KEY_MASK_LEFT | KEY_MASK_RIGHT)
+    bne direction_key_pressed
+    ; player is not moving in any direction
+    ldx #map_rockford
+update_player_at_current_location
+    lda #$41
+play_movement_sound_and_update_current_position_address
+    clc
+    adc map_address_low
+    sta map_rockford_current_position_addr_low
+    lda map_address_high
+    adc #0
+    sta map_rockford_current_position_addr_high
+    rts
+
+direction_key_pressed
+    ldx #0
+    stx ticks_since_last_direction_key_pressed
+    dex
+get_direction_index_loop
+    inx
+    lda temp1
+    and direction_key_table,x
+    beq get_direction_index_loop
+    lda rockford_cell_value_for_direction,x
+    beq skip_storing_rockford_cell_type
+    sta rockford_cell_value
+skip_storing_rockford_cell_type
+    ldy neighbour_cell_pointer_from_direction_index,x
+    sty neighbour_cell_pointer
+    lda neighbour_cell_directions,y
+    sta neighbour_cell_contents
+    and #$0f
+    tay
+    ; branch if movement is not possible
+    lda obstacle_control,y
+    beq check_if_value_is_empty
+    ; branch if movement is freely possible
+    bmi check_for_return_pressed
+    ; trying to move into something difficult to move (e.g. a rock)
+    ldy rock_push_directions,x
+    beq check_if_value_is_empty
+    cpy #$ee  ;Special value used to detect rock has been pushed up
+    beq check_push_up
+    lda (map_address_low),y
+    bne check_if_value_is_empty
+    lda neighbour_cell_contents
+    ; don't try pushing a rock that's just fallen this tick (bit 6 set at $24c7)
+    cmp #$45
+    beq check_if_value_is_empty
+    dec delay_trying_to_push_rock
+    bne check_if_value_is_empty
+    ora #$80
+    sta (map_address_low),y
+    lda #4
+    sta delay_trying_to_push_rock
+    lda #rock_move_sound
+    sta play_sound_fx
+check_for_return_pressed
+    lda key_press
+    and #KEY_MASK_FIRE
+    beq store_rockford_cell_value_without_return_pressed
+    ; return and direction is pressed. clear the appropriate cell
+    jsr check_if_bombs_used  ;Returns accumulator used below
+    ldy neighbour_cell_pointer
+    sta neighbour_cell_directions,y
+
+check_if_value_is_empty
+    ldx rockford_cell_value
+    bne update_player_at_current_location
+store_rockford_cell_value_without_return_pressed
+    lda play_sound_fx
+    bne keep_current_sound2  ;don't override a sound effect with Rockford default movement sound
+    lda #rockford_move_sound
+    sta play_sound_fx
+keep_current_sound2
+
+    lda rockford_cell_value
+    ldy neighbour_cell_pointer
+    sta neighbour_cell_directions,y
+    lda map_offset_for_direction,x
+    ldx #$80
+;TODO: Tidy
+    ;bne play_movement_sound_and_update_current_position_address                         ; ALWAYS branch
+    jmp play_movement_sound_and_update_current_position_address
+
+;Subroutine to allow Rockford to push a rock upwards
+;Needs to check there is a free space above the rock being pushed, allow for the push delay, then continue like other direction pushes
+check_push_up
+    lda map_address_high  ;store current line pointer high/low on stack
+    pha
+    lda map_address_low
+    pha
+    sec
+	lda map_address_low
+	sbc #$80  ;Need to point upwards 2 lines, so subtract (64 x 2 = 128) from pointer high/low
+	sta map_address_low
+    bcs no_up_ptr_high_change
+    dec map_address_high
+no_up_ptr_high_change
+    ldy #$41  ;offset the line pointer with Rockford's position
+    lda (map_address_low),y  ;this is the cell value 2 rows above Rockford
+    bne end_check_up
+    dec delay_trying_to_push_rock  ;ok to push up but delay
+    bne end_check_up
+    lda #map_rock | map_anim_state1  ;delay over, store a rock in the cell 2 rows above Rockford
+    sta (map_address_low),y
+    lda #4  ;reset the delay for next time
+    sta delay_trying_to_push_rock
+;    inc sound4_active_flag
+    pla  ;restore current line pointer high/low from stack
+    sta map_address_low
+    pla
+    sta map_address_high
+    jmp store_rockford_cell_value_without_return_pressed  ;continue like side/bottom pushes
+end_check_up
+    pla  ;restore current line pointer high/low from stack
+    sta map_address_low
+    pla
+    sta map_address_high
+    jmp check_if_value_is_empty  ;continue like side/bottom non-pushes
+
+;Subroutine called when pressing return + key direction
+;if bombs are allowed, place a bomb in the space of the direction, otherwise just clear the space given by the direction
+check_if_bombs_used
+    lda bomb_counter
+    bne bombs_allowed
+    lda #0
+    rts
+
+bombs_allowed
+    lda neighbour_cell_contents
+    beq check_bomb_delay
+    lda #0
+    rts
+
+check_bomb_delay
+    lda bomb_delay
+    beq create_a_bomb
+    lda #0
+    rts
+
+create_a_bomb
+    lda #3  ;delay creation of next bomb
+    sta bomb_delay
+    dec bomb_counter  ;one less bomb to use
+    bne skip_no_bombs_message
+    lda #message_no_bombs_left
+    sta saved_message
+    lda #$27
+    sta message_timer
+skip_no_bombs_message
+    ;update bombs available on status bar
+;TODO: Add when ready
+;    jsr update_bombs_available
+    lda #map_bomb
+    rts
+
+direction_key_table
+    !byte KEY_MASK_RIGHT
+    !byte KEY_MASK_LEFT
+    !byte KEY_MASK_UP
+    !byte KEY_MASK_DOWN
+
+; *************************************************************************************
+; Handler for Rockford entry, converstion of amoeba into diamonds
+; Called once handler_rockford_intro_or_exit sets the last transition to $21 (x is an explosion sprite)
+; $21 becomes unprocessed (ora #$80) and subtracted from #$90 = $11 so not processed initially but X is set to $11, set in update_map
+; $11 becomes unprocessed (ora #$80) and subtracted from #$90 = $1 and using explosion_replacements table, becomes unprocessed Rockford
+handler_basics
+
+    txa
+    sec
+    sbc #$90
+    cmp #$10
+    bpl not_in_range_so_change_nothing
+    ; cell is in the range $90-$9f (corresponding to $10 to $1f with the top bit set),
+    ; so we look up the replacement in a table. This is used to replace the final step
+    ; of an explosion, either with rockford during the introduction (offset $01), or a
+    ; space for the outro (death) explosion (offset $03)
+    tax
+    lda explosion_replacements,x
+not_in_range_so_change_nothing
+    tax
+    rts
+
+; *************************************************************************************
+; Handler for Rockford's intro/exit
+handler_rockford_intro_or_exit
+
+    txa
+    and #$7f
+    tax
+    ; branch if on exit
+    cpx #map_active_exit
+    beq intro_or_exit_return
+    ; we have found the intro square
+    ; wait for flashing rockford animation to finish
+    lda tick_counter
+    cmp #$f0
+    bpl intro_or_exit_return
+    ; start the explosion just before gameplay starts (x is an explosion sprite)
+    ldx #$21
+    lda #enter_cave_sound
+    sta play_sound_fx
+
+intro_or_exit_return
+    rts
+
+; *************************************************************************************
 ;TODO: Temp function
 clear_status
 
@@ -745,5 +1602,5 @@ clear_to
 
 !source "keyboard.asm"
 
-* = $2900  ;Needed to point to the correct memory location for loading caves
+* = $3200  ;Needed to point to the correct memory location for loading caves
 !source "cavedata.asm"

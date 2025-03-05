@@ -252,6 +252,49 @@ sprite_addr_pathway
     !byte 95,95,95,95
 
 ; *************************************************************************************
+; Sprite handler routine addresses
+;
+handler_table_low
+	!byte <handler_basics
+	!byte <handler_basics
+	!byte <handler_basics
+	!byte <handler_basics
+	!byte 0
+	!byte 0
+	!byte 0;    !byte <handler_firefly_or_butterfly
+	!byte 0;    !byte <handler_amoeba
+    !byte <handler_rockford_intro_or_exit
+	!byte 0;    !byte <handler_slime
+    !byte <handler_rockford_intro_or_exit
+    !byte 0
+growing_wall_handler_low
+	!byte 0;    !byte <handler_growing_wall
+	!byte 0;    !byte <handler_magic_wall
+	!byte 0;    !byte <handler_firefly_or_butterfly
+rockford_handler_low
+    !byte <handler_rockford
+
+handler_table_high
+	!byte >handler_basics
+	!byte >handler_basics
+	!byte >handler_basics
+	!byte >handler_basics
+	!byte 0
+	!byte 0
+    !byte 0;!byte >handler_firefly_or_butterfly
+	!byte 0;!byte >handler_amoeba
+    !byte >handler_rockford_intro_or_exit
+	!byte 0;!byte >handler_slime
+    !byte >handler_rockford_intro_or_exit
+    !byte 0
+growing_wall_handler_high
+	!byte 0;!byte >handler_growing_wall
+	!byte 0;!byte >handler_magic_wall
+	!byte 0;!byte >handler_firefly_or_butterfly
+rockford_handler_high
+	!byte >handler_rockford
+
+; *************************************************************************************
 ; Mapping table to convert a cell type 0-$7f into a sprite number
 ; The sprite number points to the sprite address to use (see above)
 ; By changing the entries of this table on the fly, this table allows the sprite to
@@ -391,3 +434,346 @@ cell_type_to_sprite
     !byte sprite_explosion1                                                             ; cell type $7D = map_magic_wall | map_anim_state7
     !byte sprite_butterfly2                                                             ; cell type $7E = map_butterfly | map_anim_state7
     !byte sprite_explosion1                                                             ; cell type $7F = map_rockford | map_anim_state7
+
+; *************************************************************************************
+; Cell types that animate every tick
+; These values are pointers into the cell_type_to_sprite table
+;
+cell_types_that_always_animate
+    !byte                   map_diamond
+    !byte map_anim_state4 | map_diamond
+    !byte                   map_firefly
+    !byte map_anim_state1 | map_firefly
+    !byte map_anim_state2 | map_firefly
+    !byte map_anim_state3 | map_firefly
+exit_cell_type
+    !byte                  map_active_exit
+    !byte map_anim_state1 | map_magic_wall
+    !byte                    map_butterfly
+    !byte  map_anim_state1 | map_butterfly
+    !byte  map_anim_state2 | map_butterfly
+    !byte  map_anim_state3 | map_butterfly
+    !byte  map_anim_state2 | map_rockford
+    !byte  map_anim_state1 | map_rockford
+    !byte  map_slime
+
+; *************************************************************************************
+; For animation, points to next sprite to use
+;
+sprite_to_next_sprite
+    !byte 0,0,0
+    !byte sprite_diamond2, sprite_diamond3, sprite_diamond4, sprite_diamond1
+    !byte 0
+    !byte sprite_box, sprite_titanium_wall2
+    !byte 0,0
+    !byte sprite_explosion1, sprite_explosion2, sprite_explosion3
+    !byte 0
+    !byte sprite_magic_wall2, sprite_magic_wall3, sprite_magic_wall4, sprite_magic_wall1
+    !byte sprite_amoeba1, sprite_amoeba2 
+    !byte sprite_butterfly2, sprite_butterfly3, sprite_butterfly1
+    !byte sprite_firefly2, sprite_firefly3, sprite_firefly4, sprite_firefly1
+    !byte 0,0,0,0,0,0,0,0,0,0,0,0,0
+    !byte sprite_rockford_moving_left2, sprite_rockford_moving_left3, sprite_rockford_moving_left4, sprite_rockford_moving_left1
+    !byte sprite_rockford_moving_right2, sprite_rockford_moving_right3, sprite_rockford_moving_right4, sprite_rockford_moving_right1
+    !byte $32, $32, sprite_diamond1, $32, $32, $0a, $3a, $34, $34, sprite_space, $32, $32, $32, sprite_space, $39, $39
+    !byte $38, $36, $39, $38, 0, 0, 0, 0, 0, 0, sprite_space, $33, $3f, sprite_space, $35, sprite_space
+    !byte 0, 0, 0, sprite_space, 0, $3e, $33, sprite_space, $5a, $5b, $5c, $5d, $5e, $5f, 7, $0a
+    !byte $16, $64, $2a, $66, $2e, 9, $1e, $69, $6a, $6b, $6c, $6d, $6e, $6f, $70, $71
+    !byte $72, $73, $74, $75, $76, $77, $78, $79, $7a, $7b, $7c, $7d, $7e, $7f
+
+; *************************************************************************************
+; Butterfly/firefly animation table
+;
+firefly_and_butterfly_cell_values
+    !byte (map_unprocessed | map_anim_state3) | map_firefly
+    !byte (map_unprocessed | map_anim_state3) | map_butterfly
+    !byte (map_unprocessed | map_anim_state0) | map_firefly
+    !byte (map_unprocessed | map_anim_state0) | map_butterfly
+    !byte (map_unprocessed | map_anim_state1) | map_firefly
+    !byte (map_unprocessed | map_anim_state1) | map_butterfly
+    !byte (map_unprocessed | map_anim_state2) | map_firefly
+    !byte (map_unprocessed | map_anim_state2) | map_butterfly
+
+; *************************************************************************************
+; Sprites to use for idle animation of rockford. They are encoded into the nybbles of
+; each byte. First it cycles through the bottom nybbles until near the end of the idle
+; animation, then cycles through through the top nybbles
+;
+idle_animation_data
+    !byte 16*(sprite_rockford_tapping_foot4-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_tapping_foot3-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_tapping_foot2-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_tapping_foot3-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_tapping_foot4-32) + sprite_rockford_blinking2-32
+    !byte 16*(sprite_rockford_tapping_foot1-32) + sprite_rockford_blinking3-32
+    !byte 16*(sprite_rockford_tapping_foot2-32) + sprite_rockford_blinking2-32
+    !byte 16*(sprite_rockford_tapping_foot1-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_tapping_foot3-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_tapping_foot5-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_tapping_foot5-32) + sprite_rockford_blinking3-32
+    !byte 16*(sprite_rockford_tapping_foot3-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_tapping_foot1-32) + sprite_rockford_blinking3-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_blinking2-32) + sprite_rockford_blinking2-32
+    !byte 16*(sprite_rockford_blinking3-32) + sprite_rockford_blinking3-32
+    !byte 16*(sprite_rockford_blinking2-32) + sprite_rockford_blinking2-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_blinking2-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot5-32
+    !byte 16*(sprite_rockford_blinking3-32) + sprite_rockford_tapping_foot3-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_blinking3-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_tapping_foot1-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_tapping_foot3-32) + sprite_rockford_tapping_foot5-32
+    !byte 16*(sprite_rockford_tapping_foot5-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_tapping_foot3-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_tapping_foot1-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_blinking3-32) + sprite_rockford_tapping_foot4-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot2-32
+    !byte 16*(sprite_rockford_blinking3-32) + sprite_rockford_tapping_foot3-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_blinking3-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_tapping_foot1-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_tapping_foot1-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_tapping_foot1-32) + sprite_rockford_tapping_foot5-32
+    !byte 16*(sprite_rockford_tapping_foot1-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_tapping_foot2-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_tapping_foot5-32) + sprite_rockford_blinking2-32
+    !byte 16*(sprite_rockford_tapping_foot2-32) + sprite_rockford_blinking3-32
+    !byte 16*(sprite_rockford_tapping_foot5-32) + sprite_rockford_blinking2-32
+    !byte 16*(sprite_rockford_tapping_foot2-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_tapping_foot3-32) + sprite_rockford_blinking1-32
+    !byte 16*(sprite_rockford_blinking3-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_blinking2-32) + sprite_rockford_tapping_foot2-32
+    !byte 16*(sprite_rockford_blinking2-32) + sprite_rockford_tapping_foot5-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot4-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot5-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot2-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot2-32
+    !byte 16*(sprite_rockford_blinking1-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_winking1-32) + sprite_rockford_tapping_foot2-32
+    !byte 16*(sprite_rockford_winking2-32) + sprite_rockford_tapping_foot1-32
+    !byte 16*(sprite_rockford_winking2-32) + sprite_rockford_tapping_foot4-32
+    !byte 16*(sprite_rockford_winking2-32) + sprite_rockford_tapping_foot3-32
+    !byte 16*(sprite_rockford_winking1-32) + sprite_rockford_tapping_foot2-32
+    !byte 16*(sprite_rockford_winking1-32) + sprite_rockford_tapping_foot1-32
+
+; *************************************************************************************
+; Determines what the end of an explosion turns into 
+; Also see handler_basics
+;
+explosion_replacements
+    !byte map_rockford | map_unprocessed
+    !byte map_rockford | map_unprocessed
+    !byte map_diamond | map_unprocessed
+    !byte map_space
+
+; *************************************************************************************
+; Given a cell type, decide what Rockford is allowed to do
+;   $ff means Rockford can move onto the cell freely (e.g. space, earth),
+;   $0 means no movement possible (e.g. wall), and
+;   $1 means move with a push (e.g rock)
+;
+obstacle_control
+    !byte $ff                                                                           ; map_space
+    !byte $ff                                                                           ; map_earth
+    !byte 0                                                                             ; map_wall
+    !byte 0                                                                             ; map_titanium_wall
+    !byte $ff                                                                           ; map_diamond
+    !byte 1                                                                             ; map_rock
+    !byte 0                                                                             ; map_firefly
+    !byte 0                                                                             ; map_amoeba
+    !byte 0                                                                             ; map_rockford_appearing_or_end_position
+    !byte 0                                                                             ; map_slime
+    !byte $ff                                                                           ; map_explosion
+    !byte 0                                                                             ; map_bomb
+    !byte 0                                                                             ; map_growing_wall
+    !byte 0                                                                             ; map_magic_wall
+    !byte 0                                                                             ; map_butterfly
+    !byte 1                                                                             ; map_rockford
+
+; *************************************************************************************
+; Given a cell type, decide if a rock/diamond will fall off them
+;   0 = rock/diamond won't fall
+;   1 = rock/diamond will slip off the cell (where this is space to do so)
+;
+cell_types_that_rocks_or_diamonds_will_fall_off
+    !byte 0                                                                             ; map_space
+    !byte 0                                                                             ; map_earth
+    !byte 1                                                                             ; map_wall
+    !byte 0                                                                             ; map_titanium_wall
+    !byte 1                                                                             ; map_diamond
+    !byte 1                                                                             ; map_rock
+    !byte 0                                                                             ; map_firefly
+    !byte 1                                                                             ; map_amoeba
+    !byte 0                                                                             ; map_rockford_appearing_or_end_position
+    !byte 0                                                                             ; map_slime
+    !byte 0                                                                             ; map_explosion
+    !byte 0                                                                             ; map_bomb
+    !byte 1                                                                             ; map_growing_wall
+    !byte 0                                                                             ; map_magic_wall
+    !byte 0                                                                             ; map_butterfly
+    !byte 0                                                                             ; map_rockford
+
+; *************************************************************************************
+; Given a cell type, decide what it turns into when a rock/diamond falls onto it
+; 
+update_cell_type_when_below_a_falling_rock_or_diamond
+    !byte 0                                                                             ; map_space
+    !byte 0                                                                             ; map_earth
+    !byte 0                                                                             ; map_wall
+    !byte 0                                                                             ; map_titanium_wall
+    !byte 0                                                                             ; map_diamond
+    !byte 0                                                                             ; map_rock
+    !byte map_start_large_explosion                                                     ; map_firefly
+    !byte 0                                                                             ; map_amoeba
+    !byte 0                                                                             ; map_rockford_appearing_or_end_position
+    !byte 0                                                                             ; map_slime
+    !byte 0                                                                             ; map_explosion
+    !byte map_start_large_explosion                                                     ; map_bomb
+    !byte 0                                                                             ; map_growing_wall
+    !byte map_anim_state3 | map_magic_wall                                              ; map_magic_wall
+    !byte map_anim_state4 | map_butterfly                                               ; map_butterfly
+    !byte map_anim_state7 | map_rockford                                                ; map_rockford
+
+; *************************************************************************************
+; Given a cell type, decide what it turns into when affected by an explosion
+;   0 = not affected
+;   $ff = Rockford dies
+; The self-mod code using lookup_table_address_low needs this (see show_large_explosion)
+
+;TODO: fix this
+;.dsb 256-(*&255)  ;Add another page of bytes
+
+cell_types_that_will_turn_into_large_explosion
+    !byte map_unprocessed | map_large_explosion_state3                                  ; map_space
+    !byte map_unprocessed | map_large_explosion_state3                                  ; map_earth
+    !byte map_unprocessed | map_large_explosion_state3                                  ; map_wall
+    !byte 0                                                                             ; map_titanium_wall
+    !byte map_unprocessed | map_large_explosion_state3                                  ; map_diamond
+    !byte map_unprocessed | map_large_explosion_state3                                  ; map_rock
+    !byte map_unprocessed | map_large_explosion_state3                                  ; map_firefly
+    !byte map_unprocessed | map_large_explosion_state3                                  ; map_amoeba
+    !byte 0                                                                             ; map_rockford_appearing_or_end_position
+    !byte map_unprocessed | map_large_explosion_state3                                  ; map_slime
+    !byte 0                                                                             ; map_explosion
+    !byte map_unprocessed | map_large_explosion_state3                                  ; map_bomb
+    !byte map_unprocessed | map_large_explosion_state3                                  ; map_growing_wall
+    !byte map_unprocessed | map_large_explosion_state3                                  ; map_magic_wall
+    !byte map_unprocessed | map_large_explosion_state3                                  ; map_butterfly
+    !byte $ff                                                                           ; map_rockford
+
+; *************************************************************************************
+; Given a cell type, decide what it turns into when affected by an explosion into diamonds
+;   0 = not affected
+;   $ff = Rockford dies
+;
+cell_types_that_will_turn_into_diamonds
+    !byte map_unprocessed | map_diamond                                                 ; map_space
+    !byte map_unprocessed | map_diamond                                                 ; map_earth
+    !byte map_unprocessed | map_diamond                                                 ; map_wall
+    !byte 0                                                                             ; map_titanium_wall
+    !byte map_unprocessed | map_diamond                                                 ; map_diamond
+    !byte map_unprocessed | map_diamond                                                 ; map_rock
+    !byte map_unprocessed | map_diamond                                                 ; map_firefly
+    !byte map_unprocessed | map_diamond                                                 ; map_amoeba
+    !byte 0                                                                             ; map_rockford_appearing_or_end_position
+    !byte map_unprocessed | map_diamond                                                 ; map_slime
+    !byte 0                                                                             ; map_explosion
+    !byte 0                                                                             ; map_bomb
+    !byte map_unprocessed | map_diamond                                                 ; map_growing_wall
+    !byte map_unprocessed | map_diamond                                                 ; map_magic_wall
+    !byte map_unprocessed | map_diamond                                                 ; map_butterfly
+    !byte $ff                                                                           ; map_rockford
+
+; *************************************************************************************
+; Given a cell type, decide what it turns into when processed by the magic wall
+; This just affects rocks/diamonds (rocks become diamonds and visa versa)
+;
+items_produced_by_the_magic_wall
+    !byte 0                                                                             ; map_space
+    !byte 0                                                                             ; map_earth
+    !byte 0                                                                             ; map_wall
+    !byte 0                                                                             ; map_titanium_wall
+    !byte map_unprocessed | map_rock                                                    ; map_diamond
+    !byte map_unprocessed | map_diamond                                                 ; map_rock
+    !byte 0                                                                             ; map_firefly
+    !byte 0                                                                             ; map_amoeba
+    !byte 0                                                                             ; map_rockford_appearing_or_end_position
+    !byte 0                                                                             ; map_slime
+    !byte 0                                                                             ; map_explosion
+    !byte 0                                                                             ; map_bomb
+    !byte 0                                                                             ; map_growing_wall
+    !byte 0                                                                             ; map_magic_wall
+    !byte 0                                                                             ; map_butterfly
+    !byte 0                                                                             ; map_rockford
+
+; *************************************************************************************
+; Given a cell type, decide what happens when landing on slime
+; Only rocks/diamonds/bombs are allowed through, they don't change
+;
+items_allowed_through_slime
+    !byte 0                                                                             ; map_space
+    !byte 0                                                                             ; map_earth
+    !byte 0                                                                             ; map_wall
+    !byte 0                                                                             ; map_titanium_wall
+    !byte map_unprocessed | map_diamond                                                 ; map_diamond
+    !byte map_unprocessed | map_rock                                                    ; map_rock
+    !byte 0                                                                             ; map_firefly
+    !byte 0                                                                             ; map_amoeba
+    !byte 0                                                                             ; map_rockford_appearing_or_end_position
+    !byte 0                                                                             ; map_slime
+    !byte 0                                                                             ; map_explosion
+    !byte map_unprocessed | map_bomb                                                    ; map_bomb
+    !byte 0                                                                             ; map_growing_wall
+    !byte 0                                                                             ; map_magic_wall
+    !byte 0                                                                             ; map_butterfly
+    !byte 0                                                                             ; map_rockford
+
+; *************************************************************************************
+; Direction handling
+;
+rock_push_directions  ;direction pointer to cell beyond the rock being pushed
+    !byte $43, $3f, 0, $c1  ;right, left, up, down. Up can change in game when gravity is on/off
+
+rockford_cell_value_for_direction
+    !byte map_unprocessed | map_anim_state2 | map_rockford  ;animation for left
+    !byte map_unprocessed | map_anim_state1 | map_rockford  ;animation for right
+    !byte 0, 0  ;no animation for up/down - remain as normal Rockford
+
+map_offset_for_direction  ;direction pointer to cells next to Rockford (in $41)
+    !byte $40, $42, 1, $81  ;left, right, up, down
+
+neighbour_cell_pointer_from_direction_index  ;direction pointer to surrounding cell reference table (Rockford)
+    !byte 5 ;points to cell_right
+    !byte 3 ;points to cell_left
+    !byte 1 ;points to cell_above
+    !byte 7 ;points to cell_below
+
+firefly_neighbour_pointers  ;direction pointer to surrounding cell reference table (butterfly/firefly)
+    !byte 3 ;points to cell_left
+    !byte 5 ;points to cell_right
+    !byte 1 ;points to cell_above
+    !byte 1 ;points to cell_above
+    !byte 5 ;points to cell_right
+    !byte 3 ;points to cell_left
+    !byte 7 ;points to cell_below
+    !byte 7 ;points to cell_below
+
+firefly_and_butterfly_next_direction_table  ;next direction to consider (butterfly/firefly)
+    !byte 2, 3, 4, 5, 6, 7, 0, 1
+
+; *************************************************************************************
+cave_play_order
+    !byte 1, 2, 3, 16
+    !byte 5, 6, 7, 17
+    !byte 9, 10, 11, 18
+    !byte 13, 14, 15, 19
+    !byte 4, 8, 12, 0
