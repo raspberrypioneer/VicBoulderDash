@@ -57,6 +57,7 @@ sprite_addresses_low
     !byte <sprite_addr_bomb2
     !byte <sprite_addr_bomb1
     !byte <sprite_addr_boulder2
+    !byte <sprite_addr_anti_space
 
 sprite_addresses_high
     !byte >sprite_addr_space
@@ -114,126 +115,137 @@ sprite_addresses_high
     !byte >sprite_addr_bomb2
     !byte >sprite_addr_bomb1
     !byte >sprite_addr_boulder2
+    !byte >sprite_addr_anti_space
 
 ; *************************************************************************************
 ; Remapped characters for each sprite
 ;
 
 sprite_addr_space
-    !byte 0,0,0,0
+    !byte 32,32,32,32
 
 sprite_addr_earth1
 sprite_addr_earth2
-    !byte 1,2,3,4
+    !byte 64,65,66,67
 
 sprite_addr_wall1
 sprite_addr_wall2
-sprite_addr_magic_wall2
-sprite_addr_magic_wall4
-    !byte 5,6,7,8
+    !byte 68,69,68,69
 
 sprite_addr_magic_wall1
+    !byte 70,71,70,71
+sprite_addr_magic_wall2
+    !byte 72,73,72,73
 sprite_addr_magic_wall3
-    !byte 5,6,7,8
+    !byte 74,75,74,75
+sprite_addr_magic_wall4
+    !byte 76,77,76,77
 
 sprite_addr_titanium_wall1  ;reuse characters
 sprite_addr_titanium_wall2
-    !byte 9,9,9,9
+    !byte 78,78,78,78
 
 sprite_addr_diamond1
-sprite_addr_diamond3
-    !byte 10,11,12,13
+    !byte 79,80,81,82
 sprite_addr_diamond2
+    !byte 83,84,85,86
+sprite_addr_diamond3
+    !byte 87,88,89,90
 sprite_addr_diamond4
-    !byte 10,11,12,13
+    !byte 91,92,93,94
 
 sprite_addr_boulder1
-    !byte 14,15,16,17
+    !byte 95,96,97,98
 sprite_addr_boulder2
-    !byte 14,15,16,17
+    !byte 99,100,101,102
 
 sprite_addr_firefly1
+    !byte 103,104,105,106
 sprite_addr_firefly2
-    !byte 18,19,20,21
+    !byte 107,108,109,110
 sprite_addr_firefly3
+    !byte 111,112,113,114
 sprite_addr_firefly4
-    !byte 18,19,20,21
+    !byte 115,116,117,118
 
 sprite_addr_amoeba1
-    !byte 22,23,24,25
+    !byte 119,120,121,122
 sprite_addr_amoeba2
-    !byte 26,27,28,29
+    !byte 123,124,125,126
 
 sprite_addr_box
-    !byte 0,0,0,0
+    !byte 127,128,129,130
 
 sprite_addr_explosion1
-    !byte 30,31,32,33
+    !byte 131,132,133,134
 sprite_addr_explosion2
-    !byte 34,35,36,37
+    !byte 135,136,137,138
 sprite_addr_explosion3
-    !byte 38,39,40,41
+    !byte 139,140,141,142
 sprite_addr_explosion4
-    !byte 42,43,44,45
+    !byte 143,144,145,146
 
 sprite_addr_butterfly1
-    !byte 46,47,48,49
+    !byte 147,148,149,150
 sprite_addr_butterfly2
-    !byte 50,51,52,53
+    !byte 151,152,153,154
 sprite_addr_butterfly3
-    !byte 54,55,56,57
+    !byte 155,156,157,158
 
 sprite_addr_bubble
-    !byte 58,59,60,61
+    !byte 159,160,161,162
 
 sprite_addr_rockford_blinking1  ;aka 'normal' Rockford
-    !byte 62,63,64,65
+    !byte 163,164,165,166
 sprite_addr_rockford_blinking2  ;eyes blink
-    !byte 66,67,64,65
+    !byte 167,168,165,166
 sprite_addr_rockford_blinking3  ;eyes close
-    !byte 68,69,64,65
+    !byte 169,170,165,166
 sprite_addr_rockford_winking1   ;right eye blink
-    !byte 62,67,64,65
+    !byte 163,168,165,166
 sprite_addr_rockford_winking2   ;right eye close
-    !byte 62,69,64,65
+    !byte 163,170,165,166
 sprite_addr_rockford_moving_down1  ;aka wait 1 - fold arms
-    !byte 62,63,70,71
+    !byte 163,164,171,172
 sprite_addr_rockford_moving_down2  ;aka wait 2 - fold arms, tap foot
-    !byte 62,63,72,71
+    !byte 163,164,173,172
 sprite_addr_rockford_moving_down3  ;aka wait 3 - eyes blink, fold arms
-    !byte 66,67,70,71
+    !byte 167,168,171,172
 sprite_addr_rockford_moving_up1  ;aka wait 4 - eyes close, tap foot
-    !byte 68,69,72,71
+    !byte 169,170,173,172
 sprite_addr_rockford_moving_up2  ;aka wait 5 - eyes close, fold arms
-    !byte 68,69,70,71
+    !byte 169,170,171,172
 sprite_addr_rockford_moving_left1  ;head left, legs full
-    !byte 73,74,75,76
+    !byte 174,175,176,177
 sprite_addr_rockford_moving_left2  ;head left, legs part
-    !byte 73,74,77,78
+    !byte 174,175,178,179
 sprite_addr_rockford_moving_left3  ;head left, legs part-stand
-    !byte 73,74,79,80
+    !byte 174,175,180,181
 sprite_addr_rockford_moving_left4  ;head left, legs stand
-    !byte 73,74,79,81
+    !byte 174,175,180,182
 sprite_addr_rockford_moving_right1  ;head right, legs stand
-    !byte 82,83,84,85
+    !byte 183,184,185,186
 sprite_addr_rockford_moving_right2  ;head right, legs part-stand
-    !byte 82,83,86,85
+    !byte 183,184,187,186
 sprite_addr_rockford_moving_right3  ;head right, legs part
-    !byte 82,83,87,88
+    !byte 183,184,188,189
 sprite_addr_rockford_moving_right4  ;head right, legs full
-    !byte 82,83,89,90
+    !byte 183,184,190,191
 
 sprite_addr_bomb
-sprite_addr_bomb2
-    !byte 91,92,93,94
+    !byte 192,193,194,195
 sprite_addr_bomb1
+    !byte 196,197,198,199
+sprite_addr_bomb2
+    !byte 200,201,202,203
 sprite_addr_bomb3
-    ;TODO: Need another sprite/s
-    ;!byte 123+128, 124+128, 125+128, 126+128  ;invert sprite_addr_bomb
-    !byte 91,92,93,94
+    !byte 204,205,206,207
 
 sprite_addr_pathway
-    !byte 95,95,95,95
+    !byte 208,209,210,211
+
+sprite_addr_anti_space
+    !byte 212,212,212,212
 
 ; *************************************************************************************
 ; Sprite handler routine addresses
@@ -766,38 +778,43 @@ cave_play_order
 ; status bar and messages
 ;
 status_bar_line1
-;    !byte 7, "+"+128, ","+128, "      ", 5, "{|", "             ", 2, "^_", 9, 6, "  CAVE A1 "
-    !fill 24,0
+    !byte 79,80,32,32,192,193
+    !fill 16,32
+    !byte 163,164
+
 status_bar_line2
-;    !byte 7, ")"+128, "-"+128, 9, "    ", 8, 5, "}~", 9, "     ", 3, "     ", 8, 2, "`a", 9, "    ", 6, "      "
-    !fill 24,0
+    !byte 81,82,32,32,194,195
+    !scr "  time  cave Z9 "
+    !byte 165,166
+
+status_bar_line3
+    !fill 24,32
 
 status_messages
 status_message_paused
-;    !byte 9, 6, "    PAUSED      "
-    !scr "      PAUSED      "
+    !byte 4  ;purple
+    !scr "     paused      "
 status_message_got_all_diamonds
-;    !byte 9, 2, "GOT ALL DIAMONDS"
-    !scr "  GOT ALL DIAMONDS"
-;    !scr "  got all diamonds"
+    !byte 5  ;green
+    !scr " got all diamonds"
 status_message_no_bombs_left
-;    !byte 9, 3, "NO BOMBS LEFT   "
-    !scr "  NO BOMBS LEFT   "
+    !byte 7  ;yellow
+    !scr "  no bombs left  "
 status_message_hurry
-;    !byte 9, 3, "    HURRY       "
-    !scr "      HURRY       "
+    !byte 7  ;yellow
+    !scr "      hurry      "
 status_message_out_of_time
-;    !byte 9, 1, " OUT OF TIME    "
-    !scr "   OUT OF TIME    "
+    !byte 2  ;red
+    !scr "   out of time   "
 status_message_bonus_life
-;    !byte 9, 6, "  BONUS LIFE    "
-    !scr "    BONUS LIFE    "
+    !byte 5  ;green
+    !scr "   bonus life    "
 status_message_game_over
-;    !byte 9, 1, "  GAME OVER     "
-    !scr "    GAME OVER     "
+    !byte 2  ;red
+    !scr "    game over    "
 status_message_std_keymap
-;    !byte 9, 2, " STANDARD KEYS  "
-    !scr "   STANDARD KEYS  "
+    !byte 5  ;green
+    !scr "  standard keys  "
 status_message_alt_keymap
-;    !byte 9, 2, " ALTERNATE KEYS "
-    !scr "   ALTERNATE KEYS "
+    !byte 5  ;green
+    !scr " alternate keys  "

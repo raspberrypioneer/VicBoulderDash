@@ -1,7 +1,7 @@
 redefined_characters
 
 ;Space
-!byte 0, 0, 0, 0, 0, 0, 0, 0
+!byte 0, 0, 0, 0, 0, 0, 0, 0  ;repeated for all 4 characters
 
 ;Dirt
 !byte $08, $a0, $2a, $a2, $aa, $88, $2a, $8a
@@ -10,31 +10,87 @@ redefined_characters
 !byte $aa, $a8, $a2, $2a, $88, $a2, $20, $88
 
 ;Wall
-!byte $3f, $1f, $15, $00, $fc, $fc, $54, $00
-!byte $fc, $fc, $54, $00, $3f, $1f, $15, $00
-!byte $3f, $1f, $15, $00, $fc, $fc, $54, $00
-!byte $fc, $fc, $54, $00, $3f, $1f, $15, $00
+!byte $3f, $1f, $15, $00, $fc, $fc, $54, $00  ;top left, repeated bottom left
+!byte $fc, $fc, $54, $00, $3f, $1f, $15, $00  ;top right, repeated bottom right
+
+;Magic Wall 1
+!byte $3f, $1f, $15, $70, $fc, $fc, $54, $00  ;top left, repeated bottom left
+!byte $fc, $fc, $54, $00, $3f, $1f, $15, $0d  ;top right, repeated bottom right
+
+;Magic Wall 2
+!byte $3f, $1f, $15, $07, $fc, $fc, $54, $00  ;top left, repeated bottom left
+!byte $fc, $fc, $54, $00, $3f, $1f, $15, $d0  ;top right, repeated bottom right
+
+;Magic Wall 3
+!byte $3f, $1f, $15, $00, $fc, $fc, $54, $0d  ;top left, repeated bottom left
+!byte $fc, $fc, $54, $70, $3f, $1f, $15, $00  ;top right, repeated bottom right
+
+;Magic Wall 4
+!byte $3f, $1f, $15, $00, $fc, $fc, $54, $d0  ;top left, repeated bottom left
+!byte $fc, $fc, $54, $07, $3f, $1f, $15, $00  ;top right, repeated bottom right
 
 ;Steelwall
-!byte $55, $55, $41, $41, $71, $71, $55, $55
+!byte $55, $55, $41, $41, $71, $71, $55, $55  ;repeated for all 4 characters
 
-;Diamond
+;Diamond 1
 !byte $03, $03, $07, $0d, $3f, $1f, $f7, $fd
 !byte $00, $00, $c0, $c0, $70, $d0, $f4, $fc
 !byte $7f, $df, $37, $3d, $0f, $0f, $03, $01
 !byte $7c, $dc, $f0, $f0, $40, $c0, $00, $00
 
-;Boulder
+;Diamond 2
+!byte $03, $03, $0d, $0f, $1f, $37, $fd, $7f
+!byte $00, $00, $c0, $40, $d0, $f0, $fc, $7c
+!byte $df, $f7, $3d, $3f, $0f, $07, $01, $03
+!byte $dc, $f4, $f0, $70, $c0, $c0, $00, $00
+
+;Diamond 3
+!byte $03, $01, $0f, $0f, $37, $3d, $7f, $df
+!byte $00, $00, $40, $c0, $f0, $f0, $7c, $dc
+!byte $f7, $fd, $3f, $1f, $07, $0d, $03, $03
+!byte $f4, $fc, $70, $d0, $c0, $c0, $00, $00
+
+;Diamond 4
+!byte $01, $03, $0f, $07, $3d, $3f, $df, $f7
+!byte $00, $00, $c0, $c0, $f0, $70, $dc, $f4
+!byte $fd, $7f, $1f, $37, $0d, $0f, $03, $03
+!byte $fc, $7c, $d0, $f0, $c0, $40, $00, $00
+
+;Boulder 1
 !byte $0f, $37, $df, $59, $69, $a5, $95, $55
 !byte $c0, $70, $dc, $7f, $7f, $9f, $5f, $6f
 !byte $45, $51, $45, $51, $58, $6a, $24, $05
 !byte $5b, $56, $55, $55, $54, $54, $50, $40
 
-;Firefly
+;Boulder 2
+!byte $03, $0e, $31, $32, $c0, $c0, $01, $c8
+!byte $c0, $70, $8c, $0c, $03, $03, $83, $60
+!byte $c1, $11, $c5, $d1, $d8, $1a, $34, $0f
+!byte $03, $17, $57, $57, $54, $5c, $70, $c0
+
+;Firefly 1
 !byte $ff, $ff, $ea, $ea, $e5, $e5, $e4, $e4
 !byte $ff, $ff, $ab, $ab, $5b, $5b, $1b, $1b
 !byte $e4, $e4, $e5, $e5, $ea, $ea, $ff, $ff
 !byte $1b, $1b, $5b, $5b, $ab, $ab, $ff, $ff
+
+;Firefly 2
+!byte $aa, $aa, $95, $95, $90, $90, $93, $93
+!byte $aa, $aa, $56, $56, $06, $06, $c6, $c6
+!byte $93, $93, $90, $90, $95, $95, $aa, $aa
+!byte $c6, $c6, $06, $06, $56, $56, $aa, $aa
+
+;Firefly 3
+!byte $55, $55, $40, $40, $4f, $4f, $4e, $4e
+!byte $55, $55, $01, $01, $f1, $f1, $b1, $b1
+!byte $4e, $4e, $4f, $4f, $40, $40, $55, $55
+!byte $b1, $b1, $f1, $f1, $01, $01, $55, $55
+
+;Firefly 4
+!byte $00, $00, $3f, $3f, $3a, $3a, $39, $39
+!byte $00, $00, $fc, $fc, $ac, $ac, $6c, $6c
+!byte $39, $39, $3a, $3a, $3f, $3f, $00, $00
+!byte $6c, $6c, $ac, $ac, $fc, $fc, $00, $00
 
 ;Amoeba 1
 !byte $5c, $57, $55, $d5, $35, $d5, $55, $55
@@ -47,6 +103,12 @@ redefined_characters
 !byte $d5, $55, $55, $57, $5c, $57, $f5, $0d
 !byte $57, $f5, $f5, $55, $55, $55, $57, $5c
 !byte $0d, $f5, $55, $55, $55, $55, $d5, $35
+
+;Box
+!byte $55, $55, $40, $40, $40, $40, $40, $40
+!byte $55, $55, $01, $01, $01, $01, $01, $01
+!byte $40, $40, $40, $40, $40, $40, $55, $55
+!byte $01, $01, $01, $01, $01, $01, $55, $55
 
 ;Explosion 1
 !byte $00, $00, $00, $00, $03, $30, $01, $0c
@@ -111,7 +173,6 @@ redefined_characters
 !byte $44, $d0, $40, $c0, $70, $30, $30, $14  ;fold arms
 !byte $11, $07, $01, $03, $0d, $0c, $14, $00  ;tap foot
 
-;TODO: Tweak Rockford arm movement up/down
 ;Rockford move left
 !byte $03, $0f, $33, $33, $0f, $03, $03, $07  ;head left
 !byte $c0, $f0, $f0, $f0, $f0, $c0, $c0, $c0  ;head left
@@ -123,7 +184,6 @@ redefined_characters
 !byte $40, $c0, $40, $c0, $40, $c0, $f0, $10  ;legs left part-stand
 !byte $40, $c0, $40, $c0, $40, $c0, $c0, $40  ;legs left stand
 
-;TODO: Tweak Rockford arm movement up/down
 ;Rockford move right
 !byte $03, $0f, $0f, $0f, $0f, $03, $03, $03  ;head right
 !byte $c0, $f0, $cc, $cc, $f0, $c0, $c0, $d0  ;head right
@@ -135,11 +195,35 @@ redefined_characters
 !byte $01, $03, $01, $03, $3d, $40, $40, $00  ;legs right full
 !byte $40, $c0, $40, $c0, $70, $0c, $0c, $05  ;legs right full
 
-;Bomb
+;Bomb 1
 !byte $00, $00, $02, $01, $01, $05, $15, $50
 !byte $00, $80, $00, $00, $00, $40, $50, $14
 !byte $48, $48, $40, $52, $58, $50, $15, $05
 !byte $84, $84, $04, $14, $94, $14, $50, $40
 
+;Bomb 2
+!byte $00, $00, $00, $00, $02, $06, $1f, $7c
+!byte $00, $00, $00, $00, $00, $40, $d0, $f4
+!byte $70, $7c, $7c, $7c, $7c, $70, $1f, $05
+!byte $f4, $f4, $f4, $f4, $f4, $34, $d0, $40
+
+;Bomb 3
+!byte $00, $00, $00, $00, $02, $07, $1f, $70
+!byte $00, $00, $00, $80, $00, $40, $d0, $34
+!byte $73, $7f, $70, $73, $73, $70, $1f, $05
+!byte $34, $34, $34, $f4, $f4, $34, $d0, $40
+
+;Bomb 4
+!byte $00, $00, $08, $02, $01, $07, $1f, $70
+!byte $00, $00, $00, $00, $00, $40, $d0, $34
+!byte $73, $7f, $7c, $7f, $73, $70, $1f, $05
+!byte $34, $34, $34, $34, $34, $34, $d0, $40
+
 ;Pathway
-!byte $00, $10, $2a, $10, $02, $15, $02, $00
+!byte $00, $3f, $00, $00, $00, $fc, $00, $00
+!byte $00, $3c, $00, $00, $00, $cc, $00, $00
+!byte $00, $33, $00, $00, $00, $fc, $00, $00
+!byte $00, $cf, $00, $00, $00, $c3, $00, $00
+
+;Anti-space
+!byte $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff  ;repeated for all 4 characters

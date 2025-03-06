@@ -4,6 +4,7 @@
 ;
 
 _SCREEN_ADDR = $1000
+_COLOUR_SCREEN_ADDR = $9400
 
 ;map elements defines
 map_space=0
@@ -98,6 +99,7 @@ sprite_bomb2=51
 sprite_bomb3=52
 sprite_bomb4=53
 sprite_bubble=54
+sprite_anti_space=55
 
 ;keys
 KEY_MASK_FIRE=1
@@ -134,6 +136,9 @@ explosion_sound=9
 magic_wall_sound=10
 growing_wall_sound=10  ;same as magic_wall_sound
 amoeba_sound=11
+
+;TODO: Make this selectable from the menu, possibly per cave using parameters
+colour_scheme=12
 
 ; *************************************************************************************
 zero_page_start
@@ -269,11 +274,20 @@ play_ambient_sound = $71
 
 ; *************************************************************************************
 
+;TODO: Using the first 64 alphanumeric etc characters in rom for now, see below
+;for i=6144 to 6144+64: poke i,peek(i+26624): next
+  ldx #0
+thing1
+  lda 32768,x
+  sta 6144,x
+  lda 32768+256,x
+  sta 6144+256,x
+  inx
+  bne thing1
+;
+
   ;Setup keyboard
   jsr setup_IRQ
-
-;TODO: temp
-  jsr clear_status
 
   lda #3
   sta player_lives
@@ -342,7 +356,7 @@ play_one_life
   jsr draw_borders
   jsr initialise_stage
   jsr update_cave_time
-  jsr update_status_bar
+  jsr setup_status_bar
   ldy #message_clear
   jsr update_status_message
 
@@ -460,14 +474,13 @@ dont_allow_rock_push_up
   sta bomb_counter
 
   ;cave letter and difficulty level on status bar
-  lda cave_number
-  clc
-  adc #"A"  ; Add letter "A" to get the cave letter for the cave number (which starts from zero)
-  sta status_bar_line1+37
+  ldy cave_number
+  iny
+  sty status_bar_line2+19
   lda difficulty_level
   clc
-  adc #"0"
-  sta status_bar_line1+38
+  adc #48
+  sta status_bar_line2+20
 
   ;update diamonds required, bombs available, player lives on status bar
   jsr update_diamonds_required
@@ -515,16 +528,12 @@ store_cave_number_and_difficulty_level
 ; *************************************************************************************
 ; Set the status bar display with values applied during the games (cave time, diamonds required, etc)
 update_status_bar
-;TODO: AWR
-  rts
 
-    ldy #41
+    ldy #24
 status_bar_loop
     dey
-    lda status_bar_line1,y
-    sta _SCREEN_ADDR,y
-    lda status_bar_line2,y
-    sta _SCREEN_ADDR+24,y
+    lda status_bar_line3,y
+    sta _SCREEN_ADDR+48,y
     cpy #0
     bne status_bar_loop
     rts
@@ -532,105 +541,227 @@ status_bar_loop
 ; *************************************************************************************
 ; Set the status message display with the required status message in Y register
 update_status_message
-;TODO: AWR
+
+  cpy #message_clear
+  bne start_message
+  lda #32
+  ldx #18
+status_clear_message_loop
+  dex
+  sta _SCREEN_ADDR+72,x
+  bne status_clear_message_loop
   rts
 
+start_message
+  lda status_messages,y  ;set message colour (self-mod)
+  sta message_colour+1
   ldx #0
 status_message_loop
-  lda #" "
-  cpy #message_clear
-  beq plot_char
-	lda status_messages,y
+	lda status_messages+1,y
 	iny
-plot_char
   sta _SCREEN_ADDR+72,x
+message_colour
+  lda #1
+  sta _COLOUR_SCREEN_ADDR+72,x
   inx
-  cpx #19
+  cpx #17
   bne status_message_loop
 	rts
 
 ; *************************************************************************************
 update_diamonds_required
-    ldx #5  ;diamonds required start position
-    ldy diamonds_required
-    lda #0
-    jmp add_to_status_bar
+  jsr clear_output8
+  lda diamonds_required
+  jsr single_byte_to_ASCII
+
+  lda output8
+  sta status_bar_line3
+  lda output8+1
+  sta status_bar_line3+1
+  lda output8+2
+  sta status_bar_line3+2
+  rts
 
 ; *************************************************************************************
 update_bombs_available
-    ldx #14  ;bombs available start position
-    ldy bomb_counter
-    lda #0
-    jmp add_to_status_bar
+  jsr clear_output8
+  lda bomb_counter
+  jsr single_byte_to_ASCII
+
+  lda output8
+  sta status_bar_line3+4
+  lda output8+1
+  sta status_bar_line3+5
+  lda output8+2
+  sta status_bar_line3+6
+  rts
 
 ; *************************************************************************************
 update_cave_time
-    ldx #19  ;cave time start position
-    ldy time_remaining
-    lda #0
-    jmp add_to_status_bar
+
+  jsr clear_output8
+  lda time_remaining
+  jsr single_byte_to_ASCII
+
+  lda output8
+  sta status_bar_line3+8
+  lda output8+1
+  sta status_bar_line3+9
+  lda output8+2
+  sta status_bar_line3+10
+  rts
 
 ; *************************************************************************************
 update_player_lives
-    ldx #30  ;lives available start position
-    ldy player_lives
-    lda #0
-    jmp add_to_status_bar
+
+  jsr clear_output8
+  lda player_lives
+  jsr single_byte_to_ASCII
+
+  lda output8
+  sta status_bar_line3+22
+  lda output8+1
+  sta status_bar_line3+23
+  ;output8+2 (100+ lives deliverately not set)
+  rts
+
+; *************************************************************************************
+; Convert byte value in A into readable ASCII returned in output8 
+single_byte_to_ASCII
+
+  ldx #1
+  stx wip8c
+  inx
+  ldy #$40
+b2A_1
+  sty wip8b
+  lsr
+b2A_2
+  rol
+  bcs b2A_3
+  cmp wip8a,X
+  bcc b2A_4
+b2A_3
+  sbc wip8a,X
+  sec
+b2A_4
+  rol wip8b
+  bcc b2A_2
+  tay
+  cpx wip8c
+  lda wip8b
+  bcc b2A_5
+  beq b2A_6
+  stx wip8c
+b2A_5
+  eor #$30
+  ;set output using counter in temp1
+  stx temp2  ;preserve X
+  ldx temp1
+  sta output8,X
+  inc temp1
+  ldx temp2  ;restore X
+b2A_6
+  tya
+  ldy #$10
+  dex
+  bpl b2A_1
+  rts
+
+clear_output8
+  lda #0
+  sta temp1
+  lda #32
+  sta output8
+  sta output8+1
+  sta output8+2
+  rts
+
+wip8a
+  !byte 128,160,200
+wip8b
+  !byte 1
+wip8c
+  !byte 1
+
+output8
+  !byte 32,32,32  ;spaces
 
 ; *************************************************************************************
 update_player_score
-    ldx #34  ;score start position
-    ldy score_low
-    lda score_high
+;TODO: tidy this
+  ldy score_low
+  lda score_high
+  sty MSIINT
+  sta MSIINT+1
+  jsr INT2STR
+  lda MSISTR
+  sta status_bar_line3+16
+  lda MSISTR+1
+  sta status_bar_line3+17
+  lda MSISTR+2
+  sta status_bar_line3+18
+  lda MSISTR+3
+  sta status_bar_line3+19
+  lda MSISTR+4
+  sta status_bar_line3+20
+  rts
 
-; *************************************************************************************
-; Converts a given value in bytes into readable ASCII and displays it on the status bar
-; Parameters are X register for the position of the status bar value to update, 
-;   Y for the value (low byte), and A for the value (high byte)
-add_to_status_bar
+; ------------------------------
+; Func: INT2STR
+; Desc: Integer to String
+; ------------------------------
+INT2STR
+    LDY #0
+    STY temp1
+ITSNEXT
+    LDX #0
+ITSSLP
+    LDA MSIINT
+    SEC 
+    SBC ITSTABLE,Y
+    STA MSIINT
+    LDA MSIINT+1
+    INY 
+    SBC ITSTABLE,Y
+    BCC ITSADD
+    STA MSIINT+1
+    INX 
+    DEY 
+    CLC 
+    BCC ITSSLP
+ITSADD
+    DEY
+    LDA MSIINT
+    ADC ITSTABLE,Y
+    STA MSIINT
+    TXA
+    ORA #$30
+    LDX temp1
+    STA MSISTR,X
+    INC temp1
+    INY
+    INY
+    CPY #8
+    BCC ITSNEXT
+    LDA MSIINT
+    ORA #$30
+    LDX temp1
+    STA MSISTR,X
+    INX
+    LDA #32
+    STA MSISTR,X
+    RTS
+ITSTABLE
+  !word 10000
+  !word 1000
+  !word 100
+  !word 10
 
-    stx temp1  ;start position of value to update
-    sta temp2  ;high byte of value to add
-;TODO: What options for Vic here?
-;    jsr _CONVERT_TO_INT  ;convert integer in Y(low) and A(high) to accumulator by calling $d499 ($d3ed)
-;    jsr _INT_TO_ASCII_STRING  ;output accumulator into an ASCII string, stored at $100 upwards, ending with $00 by calling $e0d5 ($e0d1)
-
-    lda temp2
-    beq not_high_byte_value
-    lda #6  ;control digits to display (applies to score)
-    jmp convert_integer
-not_high_byte_value
-    lda #4  ;control digits to display (applies to diamonds required, bombs, cave time, lives)
-convert_integer
-    sta dont_want_space+2
-    sta add_spaces_after+1
-
-    ldy temp1  ;start position on status bar
-    ldx #0
-copy_digits_to_status_bar
-    lda $101,x  ;string of ASCII characters after leading space
-    bne digit_or_space
-    inx
-    jmp add_spaces_after
-digit_or_space
-    cmp #32
-    beq dont_want_space
-    sta status_bar_line2,y
-    iny
-dont_want_space
-    inx
-    cpx #4  ;Max will use
-    bne copy_digits_to_status_bar
-add_spaces_after
-    cpx #4  ;Max will use
-    bcs add_status_return
-    lda #32
-    sta status_bar_line2,y
-    iny
-    inx
-    jmp add_spaces_after
-add_status_return
-    rts
+MSISTR
+  !byte 0,0,0,0,0,0
+MSIINT
+  !byte 0,0
 
 ; *************************************************************************************
 ; Plays the cave, each iteration of the loop is a game play tick
@@ -914,8 +1045,7 @@ count_up_bonus_at_end_of_stage_loop
 
   ;add 1 to score for each time unit left
   lda #1
-;TODO: AWR
-;  jsr update_score
+  jsr update_score
   jsr update_player_score
   jsr update_status_bar
 
@@ -959,15 +1089,13 @@ got_diamond_so_update_status_bar
 
     ;already got all the diamonds, so just update score with their extra value
     lda param_diamond_extra_value
-;TODO: AWR
-;    jsr update_score
+    jsr update_score
     jmp got_diamond_return
 
 update_diamonds_required_and_check_got_all
 
     lda param_diamond_value  ;update score with diamond value
-;TODO: AWR
-;    jsr update_score
+    jsr update_score
 
     dec diamonds_required  ;subtract 1 from diamonds needed
     bne got_diamond_return
@@ -984,7 +1112,7 @@ update_diamonds_required_and_check_got_all
     sta (map_rockford_end_position_addr_low),y
 
     ; flash path (spaces)
-    lda #sprite_box
+    lda #sprite_anti_space
     sta cell_type_to_sprite
     jsr draw_grid_of_sprites
     lda #sprite_space
@@ -997,7 +1125,12 @@ got_diamond_return
 
 ; *************************************************************************************
 ;Custom character set. Must reside at this address
+;TODO: Using the first 64 alphanumeric etc characters in rom for now, see above
+
 * = $1800
+  !fill (63*8),0
+
+* = $1800+(63*8)
 !source "spr.asm"
 
 ;TODO: Extend sprites to use 256 characters available
@@ -1106,11 +1239,9 @@ bottom_left_char
   lda #67
   sta (screen_addr2_low),y
 
-;TODO: Temp
-  lda #12
+  lda #colour_scheme
   sta (colour_addr1_low),y
   sta (colour_addr2_low),y
-;
 
   iny
 
@@ -1121,11 +1252,9 @@ bottom_right_char
   lda #68
   sta (screen_addr2_low),y
 
-;TODO: Temp
-  lda #12
+  lda #colour_scheme
   sta (colour_addr1_low),y
   sta (colour_addr2_low),y
-;
 
 ;skip_null_tile
   inc temp2  ;grid column counter
@@ -1332,25 +1461,19 @@ extract_lower_nybble
 ;
 char_screen_high
   !byte $10, $10, $10, $10, $11, $11, $11, $11, $11, $12, $12, $12
-
 char_screen_low
   !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
-
 char_screen_below_high
   !byte $10, $10, $10, $11, $11, $11, $11, $11, $11, $12, $12, $12
-
 char_screen_below_low
   !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
 
 colour_screen_high
   !byte $94, $94, $94, $94, $95, $95, $95, $95, $95, $96, $96, $96
-
 colour_screen_low
   !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
-
 colour_screen_below_high
   !byte $94, $94, $94, $95, $95, $95, $95, $95, $95, $96, $96, $96
-
 colour_screen_below_low
   !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
 
@@ -1558,6 +1681,69 @@ random_seed2
 seeded_rand_temp1
   !byte 0
 seeded_rand_temp2
+  !byte 0
+
+; *************************************************************************************
+; Updates the score and bonus with accumulator value and performs the bonus life actions
+update_score
+
+  clc
+  adc score_low
+  sta score_low
+  bcc score_skip_high
+  inc score_high
+score_skip_high
+
+  ;Check for bonus every 500 points
+  ;Subtract score from previous bonus (which start at zero)
+  sec
+  lda score_low
+  sbc bonus_low
+  sta result_low
+  lda score_high
+  sbc bonus_high
+  sta result_high
+
+  ;Check if the result is over 500 (high byte = 2 or 1 and low byte >= 244)
+  lda result_high
+  cmp #1
+  bcc score_return  ; less than
+  bne award_bonus_life  ;greater than
+  lda result_low
+  cmp #244
+  bcc score_return  ; less than
+
+  ;Set the bonus score to the current score for checking next time
+award_bonus_life
+  lda score_low
+  sta bonus_low
+  lda score_high
+  sta bonus_high
+  lda #$27  ;Set the bonus timer to animate the pathway/space sprites
+  sta bonus_timer
+  inc player_lives
+  jsr update_player_lives
+
+  ;play sound
+  lda #bonus_life_sound
+  sta play_sound_fx
+
+  ;update message bar
+  lda #message_bonus_life
+  sta saved_message
+  lda #$27
+  sta message_timer
+
+score_return
+  rts
+
+bonus_low
+  !byte 0
+bonus_high
+  !byte 0
+result_low
+  !byte 0
+result_high
   !byte 0
 
 ; *************************************************************************************
@@ -2374,26 +2560,55 @@ bomb_return
     rts
 
 ; *************************************************************************************
-;TODO: Temp function
-clear_status
+; Setup the status bar with labels, sprites and colours
+setup_status_bar
 
-  ;Clear screen with zero values
-  lda #0
+  ;Draw status bar
+  ldy #25
+status_bar_setup_loop
+  dey
+  lda status_bar_line1,y
+  sta _SCREEN_ADDR,y
+  lda status_bar_line2,y
+  sta _SCREEN_ADDR+24,y
+  lda #32
+  sta _SCREEN_ADDR+48,y
+  sta _SCREEN_ADDR+72,y
+  cpy #0
+  bne status_bar_setup_loop
+
+  ;Set base colour
+  lda #<_COLOUR_SCREEN_ADDR
   sta screen_addr2_low  ;target low
-  lda #$10
+  lda #>_COLOUR_SCREEN_ADDR
   sta screen_addr2_high  ;target high
 
-  ;size is ...
+  ;size is 4 lines x 24 characters
   lda #96
   sta clear_size  
   lda #0
   sta clear_size+1
 
-  ;clear to 0
-  lda #0
+  ;clear to colour 3 cyan
+  lda #3
   sta clear_to
 
   jsr clear_memory  ;clear target for given size and value
+
+  ;Set colour for sprites used in status bar
+  ldy #2
+colour_status_bar_loop
+  dey
+  lda #colour_scheme
+  sta _COLOUR_SCREEN_ADDR,y
+  sta _COLOUR_SCREEN_ADDR+24,y
+  sta _COLOUR_SCREEN_ADDR+4,y
+  sta _COLOUR_SCREEN_ADDR+28,y
+  sta _COLOUR_SCREEN_ADDR+22,y
+  sta _COLOUR_SCREEN_ADDR+46,y
+  cpy #0
+  bne colour_status_bar_loop
+
   rts
 
 ; *************************************************************************************
@@ -2434,5 +2649,5 @@ clear_to
 
 !source "keyboard.asm"
 
-* = $3200  ;Needed to point to the correct memory location for loading caves
+* = $3300  ;Needed to point to the correct memory location for loading caves
 !source "cavedata.asm"
