@@ -272,22 +272,10 @@ play_ambient_sound = $71
   lda #$ff
   sta $9123
 
-; *************************************************************************************
-
-;TODO: Using the first 64 alphanumeric etc characters in rom for now, see below
-;for i=6144 to 6144+64: poke i,peek(i+26624): next
-  ldx #0
-thing1
-  lda 32768,x
-  sta 6144,x
-  lda 32768+256,x
-  sta 6144+256,x
-  inx
-  bne thing1
-;
-
   ;Setup keyboard
   jsr setup_IRQ
+
+; *************************************************************************************
 
   lda #3
   sta player_lives
@@ -1124,16 +1112,10 @@ got_diamond_return
     rts
 
 ; *************************************************************************************
-;Custom character set. Must reside at this address
-;TODO: Using the first 64 alphanumeric etc characters in rom for now, see above
-
+;Custom character set for fonts and sprites. Must reside at this address
 * = $1800
-  !fill (63*8),0
-
-* = $1800+(63*8)
+!binary "font.bin"
 !source "spr.asm"
-
-;TODO: Extend sprites to use 256 characters available
 
 ; *************************************************************************************
 ;Cave tile map
