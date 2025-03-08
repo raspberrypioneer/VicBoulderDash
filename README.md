@@ -1,5 +1,7 @@
 5 rem test keyboard
 10 poke37154,0:poke37155,255
+15 rem poke37153,251 :rem isolate column with 6tfcxdr5
+16 poke37153,253 :rem isolate column with 4esz(left-shift)aw3
 20 printpeek(37152)
 30 goto20
 

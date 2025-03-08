@@ -5,6 +5,7 @@
 
 _SCREEN_ADDR = $1000
 _COLOUR_SCREEN_ADDR = $9400
+_BACKGROUND_BORDER_COLOUR = $900f
 
 ;map elements defines
 map_space=0
@@ -107,6 +108,8 @@ KEY_MASK_RIGHT=2
 KEY_MASK_LEFT=4
 KEY_MASK_UP=8
 KEY_MASK_DOWN=16
+KEY_MASK_ESCAPE=32
+KEY_MASK_PAUSE=64
 
 ;status_messages
 message_clear=255
@@ -137,8 +140,9 @@ magic_wall_sound=10
 growing_wall_sound=10  ;same as magic_wall_sound
 amoeba_sound=11
 
-;TODO: Make this selectable from the menu, possibly per cave using parameters
+;TODO: Make these selectable from the menu, possibly per cave using parameters
 colour_scheme=12
+background_border_colour=15
 
 ; *************************************************************************************
 zero_page_start
@@ -265,14 +269,11 @@ play_ambient_sound = $71
   sta 36869
 
 ; *************************************************************************************
-; For reading keyboard
+  lda #background_border_colour
+  sta _BACKGROUND_BORDER_COLOUR
 
-  lda #0
-  sta $9122
-  lda #$ff
-  sta $9123
-
-  ;Setup keyboard
+; *************************************************************************************
+; Setup keyboard
   jsr setup_IRQ
 
 ; *************************************************************************************
@@ -627,10 +628,10 @@ b2A_1
 b2A_2
   rol
   bcs b2A_3
-  cmp wip8a,X
+  cmp wip8a,x
   bcc b2A_4
 b2A_3
-  sbc wip8a,X
+  sbc wip8a,x
   sec
 b2A_4
   rol wip8b
@@ -646,7 +647,7 @@ b2A_5
   ;set output using counter in temp1
   stx temp2  ;preserve X
   ldx temp1
-  sta output8,X
+  sta output8,x
   inc temp1
   ldx temp2  ;restore X
 b2A_6
@@ -677,78 +678,72 @@ output8
 
 ; *************************************************************************************
 update_player_score
-;TODO: tidy this
+
   ldy score_low
   lda score_high
-  sty MSIINT
-  sta MSIINT+1
-  jsr INT2STR
-  lda MSISTR
-  sta status_bar_line3+16
-  lda MSISTR+1
-  sta status_bar_line3+17
-  lda MSISTR+2
-  sta status_bar_line3+18
-  lda MSISTR+3
-  sta status_bar_line3+19
-  lda MSISTR+4
-  sta status_bar_line3+20
+  sty wip_int
+  sta wip_int+1
+  jsr two_bytes_to_ASCII
+  ldx #0
+plot_score
+  lda output16,x
+  sta status_bar_line3+16,x
+  inx
+  cpx #5
+  bne plot_score
   rts
 
-; ------------------------------
-; Func: INT2STR
-; Desc: Integer to String
-; ------------------------------
-INT2STR
-    LDY #0
-    STY temp1
-ITSNEXT
-    LDX #0
-ITSSLP
-    LDA MSIINT
-    SEC 
-    SBC ITSTABLE,Y
-    STA MSIINT
-    LDA MSIINT+1
-    INY 
-    SBC ITSTABLE,Y
-    BCC ITSADD
-    STA MSIINT+1
-    INX 
-    DEY 
-    CLC 
-    BCC ITSSLP
-ITSADD
-    DEY
-    LDA MSIINT
-    ADC ITSTABLE,Y
-    STA MSIINT
-    TXA
-    ORA #$30
-    LDX temp1
-    STA MSISTR,X
-    INC temp1
-    INY
-    INY
-    CPY #8
-    BCC ITSNEXT
-    LDA MSIINT
-    ORA #$30
-    LDX temp1
-    STA MSISTR,X
-    INX
-    LDA #32
-    STA MSISTR,X
-    RTS
-ITSTABLE
+two_bytes_to_ASCII
+  ldy #0
+  sty temp1
+w2A_next
+  ldx #0
+w2A_slp
+  lda wip_int
+  sec 
+  sbc w2A_table,y
+  sta wip_int
+  lda wip_int+1
+  iny 
+  sbc w2A_table,y
+  bcc w2A_add
+  sta wip_int+1
+  inx 
+  dey 
+  clc 
+  bcc w2A_slp
+w2A_add
+  dey
+  lda wip_int
+  adc w2A_table,y
+  sta wip_int
+  txa
+  ora #$30
+  ldx temp1
+  sta output16,x
+  inc temp1
+  iny
+  iny
+  cpy #8
+  bcc w2A_next
+  lda wip_int
+  ora #$30
+  ldx temp1
+  sta output16,x
+  inx
+  lda #32
+  sta output16,x
+  rts
+
+w2A_table
   !word 10000
   !word 1000
   !word 100
   !word 10
 
-MSISTR
+output16
   !byte 0,0,0,0,0,0
-MSIINT
+wip_int
   !byte 0,0
 
 ; *************************************************************************************
@@ -903,9 +898,7 @@ update_death_explosion
   ; branch if escape not pressed
 check_for_escape_key_pressed_to_die
   lda key_press
-;TODO: add key
-  lda #0
-;  and #KEY_MASK_LEFT_SHIFT
+  and #KEY_MASK_ESCAPE
   beq check_if_pause_is_available
   ; branch if explosion already underway
   lda rockford_explosion_cell_type
@@ -915,15 +908,14 @@ check_for_escape_key_pressed_to_die
   sta rockford_explosion_cell_type
   ; branch if on a bonus stage (no pause available)
 check_if_pause_is_available
-;TODO: AWR
-;  lda cave_number
-;  cmp #16
-;  bpl gameplay_loop_local
-;  ; check if pause pressed
-;  jsr check_for_pause_key
-;  beq gameplay_loop_local
-;  jsr update_with_gameplay_not_active
-;gameplay_loop_local
+  lda cave_number
+  cmp #16
+  bpl gameplay_loop_local
+  ; check if pause pressed
+  jsr check_for_pause_key
+  beq gameplay_loop_local
+  jsr update_with_gameplay_not_active
+gameplay_loop_local
   jmp gameplay_loop
 
 lose_a_life
@@ -1063,8 +1055,7 @@ save_message_number
 check_for_pause_key
 
   lda key_press
-;TODO: add key
-;  and #KEY_MASK_GREATER_THAN
+  and #KEY_MASK_PAUSE
   rts
 
 ; *************************************************************************************
@@ -1260,10 +1251,6 @@ skip_high
   jmp loop_plot_row
 
 end_draw
-;TODO: Temp
-  lda #15
-  sta $900f
-;
   rts
 
 ; *************************************************************************************
