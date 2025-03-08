@@ -272,6 +272,10 @@ play_ambient_sound = $71
   lda #background_border_colour
   sta _BACKGROUND_BORDER_COLOUR
 
+;TODO: Add menu to choose version
+;  jsr select_caves_for_version  ;Let the user select the game version to play, returns cave to load in Y
+  jsr load_caves_for_version  ;Load all caves into memory
+
 ; *************************************************************************************
 ; Setup keyboard
   jsr setup_IRQ
@@ -298,9 +302,8 @@ play_next_life
 ; Game action starts here, playing one of Rockford's lives
 play_one_life
 
-;TODO: AWR
   ; Load cave parameters and map from file
-;  jsr load_cave_data
+  jsr load_cave_data
 
   ;initialise variables
   lda #$9f
@@ -1254,6 +1257,27 @@ end_draw
   rts
 
 ; *************************************************************************************
+; screen addresses
+;
+char_screen_high
+  !byte $10, $10, $10, $10, $11, $11, $11, $11, $11, $12, $12, $12
+char_screen_low
+  !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
+char_screen_below_high
+  !byte $10, $10, $10, $11, $11, $11, $11, $11, $11, $12, $12, $12
+char_screen_below_low
+  !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
+
+colour_screen_high
+  !byte $94, $94, $94, $94, $95, $95, $95, $95, $95, $96, $96, $96
+colour_screen_low
+  !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
+colour_screen_below_high
+  !byte $94, $94, $94, $95, $95, $95, $95, $95, $95, $96, $96, $96
+colour_screen_below_low
+  !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
+
+; *************************************************************************************
 ; Scrolls the map by setting the tile_map_ptr and visible_top_left_map_x and y
 ; Note: each time Rockford moves and pushes the boundaries, visible_top_left_map_x and y are incremented / decremented
 ;       this means the visible position is not set based on Rockford's absolute position at the start
@@ -1425,26 +1449,44 @@ extract_lower_nybble
   inc ticks_since_last_direction_key_pressed
   rts
 
-; *************************************************************************************
-; screen addresses
-;
-char_screen_high
-  !byte $10, $10, $10, $10, $11, $11, $11, $11, $11, $12, $12, $12
-char_screen_low
-  !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
-char_screen_below_high
-  !byte $10, $10, $10, $11, $11, $11, $11, $11, $11, $12, $12, $12
-char_screen_below_low
-  !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
+; ****************************************************************************************************
+; Load cave data
+; Using the cave number, copy the cave data already loaded from CAVES.TAP file into the 
+; cave_parameter_data location used in the program
+load_cave_data
 
-colour_screen_high
-  !byte $94, $94, $94, $94, $95, $95, $95, $95, $95, $96, $96, $96
-colour_screen_low
-  !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
-colour_screen_below_high
-  !byte $94, $94, $94, $95, $95, $95, $95, $95, $95, $96, $96, $96
-colour_screen_below_low
-  !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
+    lda cave_number
+    cmp load_cave_number_stored  ;Check if the cave is already stored
+    beq load_cave_data_return  ;Skip if already loaded
+
+    ;Copy cave from load area into area used in program
+    lda cave_number  ;cave number starts from zero
+    sta load_cave_number_stored
+
+    tay
+    lda cave_addr_low,y
+    sta screen_addr1_low  ;source low
+    lda cave_addr_high,y
+    sta screen_addr1_high  ;source high
+
+    lda #<cave_parameter_data
+    sta screen_addr2_low  ;target low
+    lda #>cave_parameter_data
+    sta screen_addr2_high  ;target high
+
+    ;size is always 448 bytes per cave
+    lda #$c0
+    sta copy_size  
+    lda #1
+    sta copy_size+1
+
+    jsr copy_memory  ;copy from source to target for given size
+
+load_cave_data_return
+    rts
+
+load_cave_number_stored
+    !byte $ff                          ; Initially cave $ff isn't a valid cave, so will always loads cave A
 
 ; *************************************************************************************
 ; Populate game tile map from cave_map_data loaded from file
@@ -2581,6 +2623,38 @@ colour_status_bar_loop
   rts
 
 ; *************************************************************************************
+; Copy a number of bytes (in copy size variable) from source to target memory locations
+copy_memory
+
+    ldy #0
+    ldx copy_size+1
+    beq copy_remaining_bytes
+copy_a_page
+    lda (screen_addr1_low),y
+    sta (screen_addr2_low),y
+    iny
+    bne copy_a_page
+    inc screen_addr1_high
+    inc screen_addr2_high
+    dex
+    bne copy_a_page
+copy_remaining_bytes
+    ldx copy_size
+    beq copy_return
+copy_a_byte
+    lda (screen_addr1_low),y
+    sta (screen_addr2_low),y
+    iny
+    dex
+    bne copy_a_byte
+
+copy_return
+    rts
+
+copy_size
+    !byte 0, 0
+
+; *************************************************************************************
 ; Clear a number of bytes in target memory locations, using clear_size and clear_to
 clear_memory
 
@@ -2614,9 +2688,43 @@ clear_to
   !byte 0
 
 ; *************************************************************************************
+load_caves_for_version
+
+  lda #$09  ;number of characters in filename (e.g. CAVES.PRG)
+  ldx #<caves_file_name  ;Load X and Y with address of filename
+  ldy #>caves_file_name  ;Load X and Y with address of filename
+  jsr $ffbd  ;Kernal: SETNAM, set filename
+  lda #$00  ;0 is device number
+  ldx #$08  ;8 is logical file number
+  ldy #$01  ;1 means use secondary address (load into memory location set in PRG first 2 bytes)
+  jsr $ffba  ;Kernal: SETLFS, set logical first and second addresses
+  lda #$00  ;0 set operation to be load (not verify)
+  jsr $ffd5  ;Kernal: LOAD, load into memory from device
+  rts
+
+caves_file_name
+  !scr "CAVES.PRG"
+
+; *************************************************************************************
 !source "vars.asm"
 
 !source "keyboard.asm"
 
-* = $3300  ;Needed to point to the correct memory location for loading caves
+; *************************************************************************************
+; cave parameters and map for one cave
+* = $3400  ;Needed to point to the correct memory location for loading caves
 !source "cavedata.asm"
+
+; *************************************************************************************
+; cave starting addresses
+cave_load_address
+cave_addr_low
+	!byte $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00
+cave_addr_high
+	!byte $36, $37, $39, $3b, $3d, $3e, $40, $42, $44, $45, $47, $49, $4b, $4c, $4e, $50, $52, $53, $55, $57, $59
+
+; *************************************************************************************
+; all caves A to T with the Z intro cave on the end are loaded into memory from this point onwards
+; each cave is 448 bytes (48 parameters, 400 map) x 21 caves = 9408 bytes
+* = $3600
+all_caves_load_area  ;This address needs to be cave_load_address (high-low)
