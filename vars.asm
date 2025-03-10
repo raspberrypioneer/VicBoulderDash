@@ -818,3 +818,27 @@ status_message_std_keymap
 status_message_alt_keymap
     !byte 5  ;green
     !scr " alternate keys  "
+
+cave_file_names
+    !fill 16,0
+    !scr "B1CAVES.PRG     "
+    !scr "B2CAVES.PRG     "
+    !scr "B3CAVES.PRG     "
+    !scr "P1CAVES.PRG     "
+    !scr "A1CAVES.PRG     "
+    !scr "BBCAVES.PRG     "
+
+version_option_text
+    !scr "select version  "
+    !byte 2  ;red
+    !scr "boulder dash 1 "
+    !byte 3  ;cyan
+    !scr "boulder dash 2 "
+    !byte 4  ;purple
+    !scr "boulder dash 3 "
+    !byte 5  ;green
+    !scr "boulder dash +1"
+    !byte 7  ;yellow
+    !scr "arno dash 1    "
+    !byte 6  ;blue
+    !scr "bonus caves    "

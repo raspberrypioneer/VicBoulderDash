@@ -269,11 +269,13 @@ play_ambient_sound = $71
   sta 36869
 
 ; *************************************************************************************
+  
+  jsr clear_screen
+  
   lda #background_border_colour
   sta _BACKGROUND_BORDER_COLOUR
 
-;TODO: Add menu to choose version
-;  jsr select_caves_for_version  ;Let the user select the game version to play, returns cave to load in Y
+  jsr select_caves_for_version  ;Let the user select the game version to play
   jsr load_caves_for_version  ;Load all caves into memory
 
 ; *************************************************************************************
@@ -2687,12 +2689,161 @@ clear_size
 clear_to
   !byte 0
 
+; ****************************************************************************************************
+; Clear screen memory with spaces, colour memory to white
+clear_screen
+
+    ;set screen memory as target
+    lda #<_SCREEN_ADDR
+    sta screen_addr2_low  ;target low
+    lda #>_SCREEN_ADDR
+    sta screen_addr2_high  ;target high
+
+    ;size is 672 bytes for display (28 lines of 24 columns)
+    lda #$a0
+    sta clear_size  
+    lda #$02
+    sta clear_size+1
+
+    ;clear to 32
+    lda #32
+    sta clear_to
+
+    jsr clear_memory  ;clear target for given size and value
+
+
+    ;set colour memory as target
+    lda #<_COLOUR_SCREEN_ADDR
+    sta screen_addr2_low  ;target low
+    lda #>_COLOUR_SCREEN_ADDR
+    sta screen_addr2_high  ;target high
+
+    ;size is 672 bytes for display (28 lines of 24 columns)
+    lda #$a0
+    sta clear_size  
+    lda #$02
+    sta clear_size+1
+
+    ;clear to 1 (white)
+    lda #1
+    sta clear_to
+
+    jsr clear_memory  ;clear target for given size and value
+
+    rts
+
+
+; ****************************************************************************************************
+delay_a_bit_longer
+
+delay_long
+  jsr delay_a_bit
+  dec temp1
+  bne delay_long
+  rts
+
+; ****************************************************************************************************
+delay_a_bit
+delay1
+    ldy $ff
+delay2
+    dey
+    bne delay2
+    dex
+    bne delay1
+    rts
+
+; ****************************************************************************************************
+; Let the user select which version of Boulder Dash to play and load the caves file for it
+select_caves_for_version
+
+    lda version_selected
+version_display
+    jsr show_version_text
+
+    lda #5
+    sta temp1
+    ldx #$ff
+    jsr delay_a_bit_longer
+
+version_loop
+    lda joystick_addr  ;Read joystick address
+    and #$20  ;Fire button
+    beq end_version_selection
+
+    lda joystick_addr  ;Read joystick address
+    and #$04  ;Up direction
+    beq version_up
+
+    lda joystick_addr  ;Read joystick address
+    and #$08  ;Down direction
+    beq version_down
+
+    jmp version_loop
+
+show_version_text
+    lda version_selected  ;multiply by 16 (4 x asl)
+    asl
+    asl
+    asl
+    asl
+    tay  ;version text table location in Y
+
+    lda version_option_text,y  ;set text colour (self-mod)
+    sta version_text_colour+1
+    ;set version text (all lines are the same length)
+    ldx #0
+version_text_loop
+    lda version_option_text,x
+    sta _SCREEN_ADDR+312+4,x
+    lda version_option_text+1,y
+    sta _SCREEN_ADDR+336+4,x
+version_text_colour
+    lda #1
+    sta _COLOUR_SCREEN_ADDR+336+4,x
+    iny
+    inx
+    cpx #15
+    bne version_text_loop
+    rts
+
+version_down
+    ldy version_selected
+    lda version_selection_cycle_down,y
+    sta version_selected
+    jmp version_display
+
+version_up
+    ldy version_selected
+    lda version_selection_cycle_up,y
+    sta version_selected
+    jmp version_display
+
+version_selected
+    !byte 1
+
+version_selection_cycle_up
+    !byte 0,2,3,4,5,6,1
+version_selection_cycle_down
+    !byte 0,6,1,2,3,4,5
+
+end_version_selection
+    rts
+
 ; *************************************************************************************
 load_caves_for_version
 
-  lda #$09  ;number of characters in filename (e.g. CAVES.PRG)
-  ldx #<caves_file_name  ;Load X and Y with address of filename
-  ldy #>caves_file_name  ;Load X and Y with address of filename
+  ;Get the start of the cave file name to load
+  lda version_selected  ;multiply by 16 (4 x asl)
+  asl
+  asl
+  asl
+  asl
+  clc
+  adc #<cave_file_names  ;Load X and Y with address of filename
+  tax
+  ldy #>cave_file_names  ;Load X and Y with address of filename
+  lda #$0b  ;number of characters in filename (e.g. B1CAVES.PRG)
   jsr $ffbd  ;Kernal: SETNAM, set filename
   lda #$00  ;0 is device number
   ldx #$08  ;8 is logical file number
@@ -2702,8 +2853,6 @@ load_caves_for_version
   jsr $ffd5  ;Kernal: LOAD, load into memory from device
   rts
 
-caves_file_name
-  !scr "CAVES.PRG"
 
 ; *************************************************************************************
 !source "vars.asm"
@@ -2712,7 +2861,7 @@ caves_file_name
 
 ; *************************************************************************************
 ; cave parameters and map for one cave
-* = $3400  ;Needed to point to the correct memory location for loading caves
+* = $3500  ;Needed to point to the correct memory location for loading caves
 !source "cavedata.asm"
 
 ; *************************************************************************************
@@ -2721,10 +2870,10 @@ cave_load_address
 cave_addr_low
 	!byte $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00
 cave_addr_high
-	!byte $36, $37, $39, $3b, $3d, $3e, $40, $42, $44, $45, $47, $49, $4b, $4c, $4e, $50, $52, $53, $55, $57, $59
+	!byte $37, $38, $3a, $3c, $3e, $3f, $41, $43, $45, $46, $48, $4a, $4c, $4d, $4f, $51, $53, $54, $56, $58, $5a
 
 ; *************************************************************************************
 ; all caves A to T with the Z intro cave on the end are loaded into memory from this point onwards
 ; each cave is 448 bytes (48 parameters, 400 map) x 21 caves = 9408 bytes
-* = $3600
+* = $3700
 all_caves_load_area  ;This address needs to be cave_load_address (high-low)
