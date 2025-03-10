@@ -645,6 +645,7 @@ update_cell_type_when_below_a_falling_rock_or_diamond
 ;   $ff = Rockford dies
 ; The self-mod code using lookup_table_address_low needs this (see show_large_explosion)
 ; IMPORTANT: this table must not go-over a page boundary
+!align 255, 0
 
 cell_types_that_will_turn_into_large_explosion
     !byte map_unprocessed | map_large_explosion_state3                                  ; map_space

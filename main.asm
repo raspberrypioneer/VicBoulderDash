@@ -3,9 +3,10 @@
 ; by raspberrypioneer Feb 2025
 ;
 
-_SCREEN_ADDR = $1000
-_COLOUR_SCREEN_ADDR = $9400
-_BACKGROUND_BORDER_COLOUR = $900f
+_SCREEN_ADDR = $1000  ;4096
+_COLOUR_SCREEN_ADDR = $9400  ;37888
+_AUXILIARY_COLOUR = $900e  ;36878
+_BACKGROUND_BORDER_COLOUR = $900f  ;36879
 
 ;map elements defines
 map_space=0
@@ -138,10 +139,6 @@ magic_wall_sound=10
 growing_wall_sound=10  ;same as magic_wall_sound
 amoeba_sound=11
 
-;TODO: Make colours selectable from the menu or set per cave using parameters
-colour_scheme=12
-background_border_colour=15
-
 ; *************************************************************************************
 zero_page_start
 
@@ -255,10 +252,10 @@ play_ambient_sound = $71
   sta 36865  ;vertical alignment
 
   ;poke36878,(peek(36878)and15or32
-  lda 36878
+  lda _AUXILIARY_COLOUR
   and #15
-  ora #32  ;auxillary colour
-  sta 36878
+  ora #32  ;red
+  sta _AUXILIARY_COLOUR
 
   ;poke36869,peek(36869)and240or15
   lda 36869
@@ -270,7 +267,7 @@ play_ambient_sound = $71
 ; Select version to play
 
   jsr clear_screen
-  lda #background_border_colour
+  lda #15  ;yellow
   sta _BACKGROUND_BORDER_COLOUR
 
   jsr select_caves_for_version  ;Let the user select the game version to play
@@ -379,7 +376,7 @@ show_options_loop
   lda #1  ;white
   sta _COLOUR_SCREEN_ADDR+10
   sta _COLOUR_SCREEN_ADDR+34
-  lda #colour_scheme
+  lda #14  ;blue
   sta _COLOUR_SCREEN_ADDR
   sta _COLOUR_SCREEN_ADDR+1
   sta _COLOUR_SCREEN_ADDR+24
@@ -411,12 +408,6 @@ wait_for_keypress
 
   cmp #KEY_MASK_RIGHT
   beq cave_up
-
-;  cmp #KEY_MASK_LESS_THAN
-;  beq colour_map_down
-
-;  cmp #KEY_MASK_GREATER_THAN
-;  beq colour_map_up
 
   jmp wait_for_keypress
 
@@ -473,20 +464,6 @@ level_display
   sta _SCREEN_ADDR+34
   jmp wait_for_keypress
 
-;colour_map_down
-;  ldy set_line_colour+1
-;  lda colour_selection_cycle_down,y
-;  sta set_line_colour+1
-;  jsr set_title_text  ;update the title text which need the colour setting
-;  jmp wait_for_keypress
-
-;colour_map_up
-;  ldy set_line_colour+1
-;  lda colour_selection_cycle_up,y
-;  sta set_line_colour+1
-;  jsr set_title_text  ;update the title text which need the colour setting
-;  jmp wait_for_keypress
-
 cave_selection_cycle_up
     !byte 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0
 cave_selection_cycle_down
@@ -497,11 +474,6 @@ level_selection_cycle_up
 level_selection_cycle_down
     !byte 0,5,1,2,3,4
 
-;colour_selection_cycle_up
-;    !byte 0,2,3,5,0,6,1
-;colour_selection_cycle_down
-;    !byte 0,6,1,2,0,3,5
-
 ;handler_null
 ;    rts
 
@@ -511,6 +483,7 @@ play_one_life
 
   ; Load cave parameters and map from file
   jsr load_cave_data
+  jsr set_cave_colours
 
   ;initialise variables
   lda #$9f
@@ -1167,8 +1140,9 @@ tile_below_store_row  ;special row for pseudo-random generated caves with extra-
 
 ; *************************************************************************************
 ; Draw a full grid of sprites, updating the current map position first
-; IMPORTANT: Below is needed to point the program counter to the next page (multiple of 256)
-* = $2600
+; IMPORTANT: this table must not go-over a page boundary
+!align 255, 0
+
 draw_grid_of_sprites
 
   jsr update_map_scroll_position
@@ -1250,7 +1224,8 @@ bottom_left_char
   lda #67
   sta (screen_addr2_low),y
 
-  lda #colour_scheme
+foreground_colourA
+  lda #14  ;blue
   sta (colour_addr1_low),y
   sta (colour_addr2_low),y
 
@@ -1263,7 +1238,8 @@ bottom_right_char
   lda #68
   sta (screen_addr2_low),y
 
-  lda #colour_scheme
+foreground_colourB
+  lda #14  ;blue
   sta (colour_addr1_low),y
   sta (colour_addr2_low),y
 
@@ -1695,6 +1671,33 @@ load_cave_data_return
 
 load_cave_number_stored
     !byte $ff                          ; Initially cave $ff isn't a valid cave, so will always loads cave A
+
+; *************************************************************************************
+; Apply the cave colours from the parameters, affects border, foreground colour and auxiliary colour
+set_cave_colours
+
+  lda param_colours  ;Group 1 for most of titanium walls, rocks, amoeba; part of rockford, diamonds
+  ora #8
+  sta _BACKGROUND_BORDER_COLOUR
+
+  lda param_colours+1  ;Group 2 earth
+  ora #8
+  sta foreground_colourA+1
+  sta foreground_colourB+1
+
+  lda param_colours+2  ;Group 3 most of walls, rockford; part of rocks, diamonds
+  asl  ;multiply by 16 (4 x asl)
+  asl
+  asl
+  asl
+  sta temp1
+
+  lda _AUXILIARY_COLOUR
+  and #15
+  ora temp1
+  sta _AUXILIARY_COLOUR
+
+  rts
 
 ; *************************************************************************************
 ; Populate game tile map from cave_map_data loaded from file
@@ -2808,8 +2811,8 @@ status_bar_setup_loop
   lda #0
   sta clear_size+1
 
-  ;clear to colour 3 cyan
-  lda #3
+  ;clear to colour
+  lda #3  ;cyan
   sta clear_to
 
   jsr clear_memory  ;clear target for given size and value
@@ -2818,7 +2821,7 @@ status_bar_setup_loop
   ldy #2
 colour_status_bar_loop
   dey
-  lda #colour_scheme
+  lda #14  ;blue
   sta _COLOUR_SCREEN_ADDR,y
   sta _COLOUR_SCREEN_ADDR+24,y
   sta _COLOUR_SCREEN_ADDR+4,y
@@ -2930,8 +2933,8 @@ clear_screen
     lda #$02
     sta clear_size+1
 
-    ;clear to 1 (white)
-    lda #1
+    ;clear to colour
+    lda #1  ;white
     sta clear_to
 
     jsr clear_memory  ;clear target for given size and value
