@@ -120,8 +120,6 @@ message_hurry_up=54
 message_out_of_time=72
 message_bonus_life=90
 message_game_over=108
-message_std_keymap=126
-message_alt_keymap=144
 
 ;sounds
 no_sound=0
@@ -269,9 +267,9 @@ play_ambient_sound = $71
   sta 36869
 
 ; *************************************************************************************
-  
+; Select version to play
+
   jsr clear_screen
-  
   lda #background_border_colour
   sta _BACKGROUND_BORDER_COLOUR
 
@@ -279,26 +277,233 @@ play_ambient_sound = $71
   jsr load_caves_for_version  ;Load all caves into memory
 
 ; *************************************************************************************
-; Setup keyboard
+; Setup joystick-keyboard actions interrupt
   jsr setup_IRQ
 
 ; *************************************************************************************
+; Menu to start with and return to after a game ends
+menu_loop
+  jsr intro_and_cave_select
 
   lda #3
   sta player_lives
-  lda #0
-  sta cave_number
-  lda #1
-  sta difficulty_level
 
-;game loop for each of the player lives
+  lda #0
+  sta score_low
+  sta score_high
+  sta bonus_low
+  sta bonus_high
+
+  ;game loop for each of the player lives
 play_next_life
   jsr play_one_life
   lda player_lives
   bne play_next_life
 
-;TODO: replace
+  jmp menu_loop
+
+; *************************************************************************************
+; Load and display the intro screen, accept the cave, level, keyset from the user and start the game
+intro_and_cave_select
+
+;TODO: setup and display intro cave
+  jsr clear_screen
+;  lda #20  ;Cave Z (intro cave)
+;  sta cave_number
+
+;	jsr load_cave_data
+;	jsr populate_cave_from_file
+
+  ;set visible map and Rockford position for drawing grid
+;  lda #0
+;  sta visible_top_left_map_x
+;  sta visible_top_left_map_y
+;  jsr set_rockford_start
+
+  ;set start of map
+;  lda #<tile_map_row_1
+;  sta map_address_low
+;  lda #>tile_map_row_1
+;  sta map_address_high
+;  jsr draw_borders
+
+  ;set the tile check logic in draw grid (self-mod code)
+;  ldx #0
+;  jsr self_mod_code
+;  lda #skip_null_tile-(skip_tile_check+4)  ;branch forward to skip_null_tile (+4 bytes for cmp,#,beq,#)
+;  sta skip_tile_check+3
+
+  ;knock-out Rockford and growing wall handlers for now
+  ;growing wall is ignored on the intro screen, so that the title text isn't removed when drawing the map
+;  lda #<handler_null
+;  sta rockford_handler_low
+;  sta growing_wall_handler_low
+;  lda #>handler_null
+;  sta rockford_handler_high
+;  sta growing_wall_handler_high
+
+  ;set title text
+;  jsr set_title_text
+
+  ;Tick counter needed for some animation
+;  lda #31
+;  sta tick_counter
+
+  ;cave number and levels to start selection from
+  lda #0
+  sta cave_number
+
+  lda #1
+  sta difficulty_level
+
+  ;set options text (all lines are the same length)
+  ldy #24
+show_options_loop
+  dey
+  lda #3  ;cyan
+  sta _COLOUR_SCREEN_ADDR,y
+  sta _COLOUR_SCREEN_ADDR+25,y
+  lda #5  ;green
+  sta _COLOUR_SCREEN_ADDR+72,y
+
+  lda options_cave_select,y
+  sta _SCREEN_ADDR,y
+  lda options_level_select,y
+  sta _SCREEN_ADDR+24,y
+  lda options_start,y
+  sta _SCREEN_ADDR+72,y
+  cpy #0
+  bne show_options_loop
+
+  ;exception colours
+  lda #1  ;white
+  sta _COLOUR_SCREEN_ADDR+10
+  sta _COLOUR_SCREEN_ADDR+34
+  lda #colour_scheme
+  sta _COLOUR_SCREEN_ADDR
+  sta _COLOUR_SCREEN_ADDR+1
+  sta _COLOUR_SCREEN_ADDR+24
+  sta _COLOUR_SCREEN_ADDR+25
+
+  ;draw map, waiting for keyboard input
+wait_for_keypress
+;    jsr update_map
+;    jsr draw_grid_of_sprites
+;    dec tick_counter
+
+  lda #2
+  sta temp1
+  ldx #$ff
+  jsr delay_a_bit_longer
+
+  lda key_press
+  cmp #KEY_MASK_FIRE
+  beq exit_intro_keypress
+
+  cmp #KEY_MASK_UP
+  beq level_up
+
+  cmp #KEY_MASK_LEFT
+  beq cave_down
+
+  cmp #KEY_MASK_DOWN
+  beq level_down
+
+  cmp #KEY_MASK_RIGHT
+  beq cave_up
+
+;  cmp #KEY_MASK_LESS_THAN
+;  beq colour_map_down
+
+;  cmp #KEY_MASK_GREATER_THAN
+;  beq colour_map_up
+
+  jmp wait_for_keypress
+
+exit_intro_keypress
+
+  ;nop out the tile check logic in draw grid (self-mod code)
+;  ldx #12
+;  jsr self_mod_code
+
+  ;add back Rockford and growing wall handlers
+;  lda #<handler_rockford
+;  sta rockford_handler_low
+;  lda #>handler_rockford
+;  sta rockford_handler_high
+;  lda #<handler_growing_wall
+;  sta growing_wall_handler_low
+;  lda #>handler_growing_wall
+;  sta growing_wall_handler_high
   rts
+
+cave_down
+  ldy cave_number
+  lda cave_selection_cycle_down,y
+  sta cave_number
+  jmp cave_display
+
+cave_up
+  ldy cave_number
+  lda cave_selection_cycle_up,y
+  sta cave_number
+  jmp cave_display
+
+cave_display
+  ldy cave_number
+  iny  ;start of screen codes for letters
+  sty _SCREEN_ADDR+10
+  jmp wait_for_keypress
+
+level_down
+  ldy difficulty_level
+  lda level_selection_cycle_down,y
+  sta difficulty_level
+  jmp level_display
+
+level_up
+  ldy difficulty_level
+  lda level_selection_cycle_up,y
+  sta difficulty_level
+  jmp level_display
+
+level_display
+  clc
+  adc #48  ;start of screen codes for numbers
+  sta _SCREEN_ADDR+34
+  jmp wait_for_keypress
+
+;colour_map_down
+;  ldy set_line_colour+1
+;  lda colour_selection_cycle_down,y
+;  sta set_line_colour+1
+;  jsr set_title_text  ;update the title text which need the colour setting
+;  jmp wait_for_keypress
+
+;colour_map_up
+;  ldy set_line_colour+1
+;  lda colour_selection_cycle_up,y
+;  sta set_line_colour+1
+;  jsr set_title_text  ;update the title text which need the colour setting
+;  jmp wait_for_keypress
+
+cave_selection_cycle_up
+    !byte 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0
+cave_selection_cycle_down
+    !byte 15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14
+
+level_selection_cycle_up
+    !byte 0,2,3,4,5,1
+level_selection_cycle_down
+    !byte 0,5,1,2,3,4
+
+;colour_selection_cycle_up
+;    !byte 0,2,3,5,0,6,1
+;colour_selection_cycle_down
+;    !byte 0,6,1,2,0,3,5
+
+;handler_null
+;    rts
 
 ; *************************************************************************************
 ; Game action starts here, playing one of Rockford's lives
@@ -936,6 +1141,178 @@ unsuccessful_bonus_cave
   rts
 
 ; *************************************************************************************
+; Custom character set for fonts and sprites
+; IMPORTANT: Address must be fixed to this location for custom characters to work
+* = $1800
+!binary "font.bin"
+!source "spr.asm"
+
+; *************************************************************************************
+; Cave tile map
+;
+; Each row has 40 bytes used for the tiles in the game, 24 unused
+; IMPORTANT: Address must be $1000, $2000 etc, not $1100 for example!
+* = $2000
+
+tile_map_row_0  ;top border
+  !fill 64
+tile_map_row_1  ;1-20 rows between the borders
+  !fill (64*19)
+tile_map_row_20
+  !fill 64
+tile_map_row_21  ;bottom border
+  !fill 64
+tile_below_store_row  ;special row for pseudo-random generated caves with extra-tile below the random one
+  !fill 64
+
+; *************************************************************************************
+; Draw a full grid of sprites, updating the current map position first
+; IMPORTANT: Below is needed to point the program counter to the next page (multiple of 256)
+* = $2600
+draw_grid_of_sprites
+
+  jsr update_map_scroll_position
+  jsr update_grid_animations
+
+  lda #0  ;skip status bar
+  sta temp1  ;grid row counter
+loop_plot_row
+  tay
+
+  lda char_screen_low,y
+  sta screen_addr1_low
+  lda char_screen_high,y
+  sta screen_addr1_high
+
+  lda char_screen_below_low,y
+  sta screen_addr2_low
+  lda char_screen_below_high,y
+  sta screen_addr2_high
+
+  lda colour_screen_low,y
+  sta colour_addr1_low
+  lda colour_screen_high,y
+  sta colour_addr1_high
+
+  lda colour_screen_below_low,y
+  sta colour_addr2_low
+  lda colour_screen_below_high,y
+  sta colour_addr2_high
+
+  lda #0
+  sta temp2  ;grid column counter
+loop_plot_column
+
+  ;Get sprite number from map
+  tay
+  lda (map_address_low),y
+
+  ;Next 6 bytes are changed with self-mod code
+  ;skip_tile_check
+  ;    cmp #map_growing_wall
+  ;    beq skip_null_tile
+  ;    nop
+  ;    nop
+  ;not_titanium
+
+  tay
+  lda cell_type_to_sprite,y
+  tay
+
+  ;Lookup sprite high/low address in the sprite list table
+  lda sprite_addresses_low,y
+  sta sprite_address_low
+  lda sprite_addresses_high,y
+  sta sprite_address_high
+
+  ;Transfer the 4 bytes which make up the sprite tile to the locations below (self-mod code)
+  ldy #0
+  lda (sprite_address_low),y
+  sta top_left_char+1
+  iny
+  lda (sprite_address_low),y
+  sta top_right_char+1
+  iny
+  lda (sprite_address_low),y
+  sta bottom_left_char+1
+  iny
+  lda (sprite_address_low),y
+  sta bottom_right_char+1
+
+  ;Plot the top 2 and bottom 2 characters for the tile
+  lda temp2  ;grid column counter
+  asl  ;Double the counter number to get the screen offset position
+  tay
+top_left_char
+  lda #65
+  sta (screen_addr1_low),y
+bottom_left_char
+  lda #67
+  sta (screen_addr2_low),y
+
+  lda #colour_scheme
+  sta (colour_addr1_low),y
+  sta (colour_addr2_low),y
+
+  iny
+
+top_right_char
+  lda #66
+  sta (screen_addr1_low),y
+bottom_right_char
+  lda #68
+  sta (screen_addr2_low),y
+
+  lda #colour_scheme
+  sta (colour_addr1_low),y
+  sta (colour_addr2_low),y
+
+;skip_null_tile
+  inc temp2  ;grid column counter
+  lda temp2  ;grid column counter
+  cmp #12  ;12 columns
+  bcc loop_plot_column
+
+  ; move tile pointer on to next row (64 bytes)
+  lda map_address_low
+  clc
+  adc #$40
+  sta map_address_low
+  bcc skip_high
+  inc map_address_high
+skip_high
+  inc temp1  ;grid row counter
+  lda temp1  ;grid row counter
+  cmp #12  ;12 rows (skip status bar in rows 0, 1)
+  ;bcc loop_plot_row
+  bcs end_draw
+  jmp loop_plot_row
+
+end_draw
+  rts
+
+; *************************************************************************************
+; screen addresses
+;
+char_screen_high
+  !byte $10, $10, $10, $10, $11, $11, $11, $11, $11, $12, $12, $12
+char_screen_low
+  !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
+char_screen_below_high
+  !byte $10, $10, $10, $11, $11, $11, $11, $11, $11, $12, $12, $12
+char_screen_below_low
+  !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
+
+colour_screen_high
+  !byte $94, $94, $94, $94, $95, $95, $95, $95, $95, $96, $96, $96
+colour_screen_low
+  !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
+colour_screen_below_high
+  !byte $94, $94, $94, $95, $95, $95, $95, $95, $95, $96, $96, $96
+colour_screen_below_low
+  !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
+
+; *************************************************************************************
 ; Update screen while paused, or out of time, or at end position
 ;   (i.e. when gameplay started but is not currently active)
 update_with_gameplay_not_active
@@ -1106,178 +1483,6 @@ update_diamonds_required_and_check_got_all
     sta play_sound_fx
 got_diamond_return
     rts
-
-; *************************************************************************************
-;Custom character set for fonts and sprites. Must reside at this address
-* = $1800
-!binary "font.bin"
-!source "spr.asm"
-
-; *************************************************************************************
-;Cave tile map
-;
-;Below is needed to point the program counter to the next page (multiple of 256)
-;IMPORTANT: Address must be $1000, $2000 etc, not $1100 for example!
-;Each row has 40 bytes used for the tiles in the game, 24 unused
-* = $2000
-
-tile_map_row_0  ;top border
-  !fill 64
-tile_map_row_1  ;1-20 rows between the borders
-  !fill (64*19)
-tile_map_row_20
-  !fill 64
-tile_map_row_21  ;bottom border
-  !fill 64
-tile_below_store_row  ;special row for pseudo-random generated caves with extra-tile below the random one
-  !fill 64
-
-; *************************************************************************************
-; Draw a full grid of sprites, updating the current map position first
-; Below is needed to point the program counter to the next page (multiple of 256)
-* = $2600
-draw_grid_of_sprites
-
-  jsr update_map_scroll_position
-  jsr update_grid_animations
-
-  lda #0  ;skip status bar
-  sta temp1  ;grid row counter
-loop_plot_row
-  tay
-
-  lda char_screen_low,y
-  sta screen_addr1_low
-  lda char_screen_high,y
-  sta screen_addr1_high
-
-  lda char_screen_below_low,y
-  sta screen_addr2_low
-  lda char_screen_below_high,y
-  sta screen_addr2_high
-
-  lda colour_screen_low,y
-  sta colour_addr1_low
-  lda colour_screen_high,y
-  sta colour_addr1_high
-
-  lda colour_screen_below_low,y
-  sta colour_addr2_low
-  lda colour_screen_below_high,y
-  sta colour_addr2_high
-
-  lda #0
-  sta temp2  ;grid column counter
-loop_plot_column
-
-  ;Get sprite number from map
-  tay
-  lda (map_address_low),y
-
-  ;Next 6 bytes are changed with self-mod code
-  ;skip_tile_check
-  ;    cmp #map_growing_wall
-  ;    beq skip_null_tile
-  ;    nop
-  ;    nop
-  ;not_titanium
-
-  tay
-  lda cell_type_to_sprite,y
-  tay
-
-  ;Lookup sprite high/low address in the sprite list table
-  lda sprite_addresses_low,y
-  sta sprite_address_low
-  lda sprite_addresses_high,y
-  sta sprite_address_high
-
-  ;Transfer the 4 bytes which make up the sprite tile to the locations below (self-mod code)
-  ldy #0
-  lda (sprite_address_low),y
-  sta top_left_char+1
-  iny
-  lda (sprite_address_low),y
-  sta top_right_char+1
-  iny
-  lda (sprite_address_low),y
-  sta bottom_left_char+1
-  iny
-  lda (sprite_address_low),y
-  sta bottom_right_char+1
-
-  ;Plot the top 2 and bottom 2 characters for the tile
-  lda temp2  ;grid column counter
-  asl  ;Double the counter number to get the screen offset position
-  tay
-top_left_char
-  lda #65
-  sta (screen_addr1_low),y
-bottom_left_char
-  lda #67
-  sta (screen_addr2_low),y
-
-  lda #colour_scheme
-  sta (colour_addr1_low),y
-  sta (colour_addr2_low),y
-
-  iny
-
-top_right_char
-  lda #66
-  sta (screen_addr1_low),y
-bottom_right_char
-  lda #68
-  sta (screen_addr2_low),y
-
-  lda #colour_scheme
-  sta (colour_addr1_low),y
-  sta (colour_addr2_low),y
-
-;skip_null_tile
-  inc temp2  ;grid column counter
-  lda temp2  ;grid column counter
-  cmp #12  ;12 columns
-  bcc loop_plot_column
-
-  ; move tile pointer on to next row (64 bytes)
-  lda map_address_low
-  clc
-  adc #$40
-  sta map_address_low
-  bcc skip_high
-  inc map_address_high
-skip_high
-  inc temp1  ;grid row counter
-  lda temp1  ;grid row counter
-  cmp #12  ;12 rows (skip status bar in rows 0, 1)
-  ;bcc loop_plot_row
-  bcs end_draw
-  jmp loop_plot_row
-
-end_draw
-  rts
-
-; *************************************************************************************
-; screen addresses
-;
-char_screen_high
-  !byte $10, $10, $10, $10, $11, $11, $11, $11, $11, $12, $12, $12
-char_screen_low
-  !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
-char_screen_below_high
-  !byte $10, $10, $10, $11, $11, $11, $11, $11, $11, $12, $12, $12
-char_screen_below_low
-  !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
-
-colour_screen_high
-  !byte $94, $94, $94, $94, $95, $95, $95, $95, $95, $96, $96, $96
-colour_screen_low
-  !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
-colour_screen_below_high
-  !byte $94, $94, $94, $95, $95, $95, $95, $95, $95, $96, $96, $96
-colour_screen_below_low
-  !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
 
 ; *************************************************************************************
 ; Scrolls the map by setting the tile_map_ptr and visible_top_left_map_x and y
@@ -2856,24 +3061,26 @@ load_caves_for_version
 
 ; *************************************************************************************
 !source "vars.asm"
-
 !source "keyboard.asm"
 
 ; *************************************************************************************
-; cave parameters and map for one cave
-* = $3500  ;Needed to point to the correct memory location for loading caves
+; Cave parameters and map for one cave
+; IMPORTANT: Below is needed to point to the correct memory location for loading caves
+* = $3600
 !source "cavedata.asm"
 
 ; *************************************************************************************
-; cave starting addresses
+; Cave starting addresses
+; each cave is 448 bytes, each high-low combination is 448 bytes apart
 cave_load_address
 cave_addr_low
 	!byte $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00
 cave_addr_high
-	!byte $37, $38, $3a, $3c, $3e, $3f, $41, $43, $45, $46, $48, $4a, $4c, $4d, $4f, $51, $53, $54, $56, $58, $5a
+	!byte $38, $39, $3b, $3d, $3f, $40, $42, $44, $46, $47, $49, $4b, $4d, $4e, $50, $52, $54, $55, $57, $59, $5b
 
 ; *************************************************************************************
-; all caves A to T with the Z intro cave on the end are loaded into memory from this point onwards
+; All caves A to T with the Z intro cave on the end are loaded into memory from this point onwards
 ; each cave is 448 bytes (48 parameters, 400 map) x 21 caves = 9408 bytes
-* = $3700
-all_caves_load_area  ;This address needs to be cave_load_address (high-low)
+; IMPORTANT: Address needs to be first cave_load_address (high-low)
+* = $3800
+all_caves_load_area

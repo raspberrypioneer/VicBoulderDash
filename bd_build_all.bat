@@ -5,7 +5,7 @@
 :: .e.g. when all_caves_load_area start address is $3700, set CAVE_LOW=00, CAVE_HIGH=37
 set MAKECAVES=N
 set CAVE_LOW=00
-set CAVE_HIGH=37
+set CAVE_HIGH=38
 
 :: Build main program
 echo Created game engine
@@ -56,14 +56,5 @@ move /y .\build\caves_prg.bin .\%BDPRG%.prg >nul
 echo Created cave file from %BDVER% called %BDPRG%
 exit /B
 
-:: For loading as one tap, combine the game, caves, sprite tap files (needed for real Oric)
-:: The order of the tap files is important, the program does not rewind the tape!
 :build_completed
 echo Done!
-
-
-
-
-
-
-

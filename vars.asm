@@ -644,9 +644,7 @@ update_cell_type_when_below_a_falling_rock_or_diamond
 ;   0 = not affected
 ;   $ff = Rockford dies
 ; The self-mod code using lookup_table_address_low needs this (see show_large_explosion)
-
-;TODO: fix this
-;.dsb 256-(*&255)  ;Add another page of bytes
+; IMPORTANT: this table must not go-over a page boundary
 
 cell_types_that_will_turn_into_large_explosion
     !byte map_unprocessed | map_large_explosion_state3                                  ; map_space
@@ -812,13 +810,8 @@ status_message_bonus_life
 status_message_game_over
     !byte 2  ;red
     !scr "    game over    "
-status_message_std_keymap
-    !byte 5  ;green
-    !scr "  standard keys  "
-status_message_alt_keymap
-    !byte 5  ;green
-    !scr " alternate keys  "
 
+; IMPORTANT: this table must not go-over a page boundary
 cave_file_names
     !fill 16,0
     !scr "B1CAVES.PRG     "
@@ -842,3 +835,13 @@ version_option_text
     !scr "arno dash 1    "
     !byte 6  ;blue
     !scr "bonus caves    "
+
+game_options
+options_cave_select
+    !byte 164,165
+    !scr "  cave  a  left right "
+options_level_select
+    !byte 166,167
+    !scr "  level 1  up down    "
+options_start
+    !scr "  press fire to start   "
