@@ -138,7 +138,7 @@ magic_wall_sound=10
 growing_wall_sound=10  ;same as magic_wall_sound
 amoeba_sound=11
 
-;TODO: Make these selectable from the menu, possibly per cave using parameters
+;TODO: Make colours selectable from the menu or set per cave using parameters
 colour_scheme=12
 background_border_colour=15
 
@@ -306,7 +306,7 @@ play_next_life
 ; Load and display the intro screen, accept the cave, level, keyset from the user and start the game
 intro_and_cave_select
 
-;TODO: setup and display intro cave
+;TODO: Setup and display intro cave
   jsr clear_screen
 ;  lda #20  ;Cave Z (intro cave)
 ;  sta cave_number
@@ -1067,7 +1067,7 @@ skip_earth
   jsr update_player_score
 
 skip_got_diamond
-;TODO: AWR
+;TODO: Add sounds
 ;  jsr update_sounds
   ; update game tick
   dec tick_counter
@@ -1398,7 +1398,7 @@ not_a_bonus_end
 count_up_bonus_at_end_of_stage_loop
   lda #exit_cave_sound
   sta play_sound_fx
-;TODO: AWR
+;TODO: Add sounds
 ;  jsr update_sounds
 
   ;countdown the remaining time and add to score
@@ -1529,6 +1529,7 @@ check_for_bonus_stages
     lda param_intermission
     beq skip_bonus_stage
     ; bonus stage is always situated in top left corner
+    ;TODO: Fix bonus cave scrolling
     lda #0
     tax
     tay

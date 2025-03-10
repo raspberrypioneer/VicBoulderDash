@@ -9,7 +9,7 @@ set CAVE_HIGH=38
 
 :: Build main program
 echo Created game engine
-.\bin\acme.exe -l .\build\symbols -o .\a.prg .\main.asm
+.\bin\acme.exe -l .\build\symbols -o .\prg\a.prg .\main.asm
 
 :: Create tap file containing the caves of each version
 if "%MAKECAVES%"=="Y" (
@@ -52,7 +52,7 @@ cd .\caves_bin\%BDVER%
 copy /b A+B+C+D+E+F+G+H+I+J+K+L+M+N+O+P+Q+R+S+T+Z ..\..\build\caves.bin >nul
 cd ..\..
 copy /b .\build\prgheader.bin+.\build\caves.bin .\build\caves_prg.bin >nul
-move /y .\build\caves_prg.bin .\%BDPRG%.prg >nul
+move /y .\build\caves_prg.bin .\prg\%BDPRG%.prg >nul
 echo Created cave file from %BDVER% called %BDPRG%
 exit /B
 
