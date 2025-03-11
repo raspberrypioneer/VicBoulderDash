@@ -1492,7 +1492,7 @@ check_for_need_to_scroll_down
     sbc visible_top_left_map_y
     cmp #9
     bmi check_for_need_to_scroll_up
-    cpy #$0a
+    cpy #10
     bpl check_for_bonus_stages
     iny
 check_for_need_to_scroll_up
@@ -1504,10 +1504,7 @@ check_for_need_to_scroll_up
 check_for_bonus_stages
     lda param_intermission
     beq skip_bonus_stage
-    ; bonus stage is always situated in top left corner
-    ;TODO: Fix bonus cave scrolling
-    lda #0
-    tax
+    lda #0  ; bonus stage y position is fixed (cannot scroll down, only left-right)
     tay
 skip_bonus_stage
     stx visible_top_left_map_x
@@ -1518,8 +1515,8 @@ skip_bonus_stage
     rts
 
 ; *************************************************************************************
-; Map address (which start at $1000) becomes row/column in screen_addr1_high and low
-; e.g. $1000 is 0,0   $1098 is 2,18   $1140 is 5,0   $110f is 5,15
+; Map address (which starts at $2000) becomes row/column in screen_addr1_high and low
+; e.g. $2000 is 0,0   $2098 is 2,18   $2140 is 5,0   $210f is 5,15
 map_address_to_map_xy_position
 
     lda map_address_high
