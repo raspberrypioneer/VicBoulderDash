@@ -303,48 +303,49 @@ play_next_life
 ; Load and display the intro screen, accept the cave, level, keyset from the user and start the game
 intro_and_cave_select
 
-;TODO: Setup and display intro cave
   jsr clear_screen
-;  lda #20  ;Cave Z (intro cave)
-;  sta cave_number
+  lda #20  ;Cave Z (intro cave)
+  sta cave_number
 
-;	jsr load_cave_data
-;	jsr populate_cave_from_file
+  ;set-up cave and variables
+  jsr load_cave_data
+  jsr initialise_variables
+	jsr populate_cave_from_file
 
   ;set visible map and Rockford position for drawing grid
-;  lda #0
-;  sta visible_top_left_map_x
-;  sta visible_top_left_map_y
-;  jsr set_rockford_start
+  lda #0
+  sta visible_top_left_map_x
+  sta visible_top_left_map_y
+  jsr set_rockford_start
 
   ;set start of map
-;  lda #<tile_map_row_1
-;  sta map_address_low
-;  lda #>tile_map_row_1
-;  sta map_address_high
-;  jsr draw_borders
+  lda #<tile_map_row_1
+  sta map_address_low
+  lda #>tile_map_row_1
+  sta map_address_high
+  jsr draw_borders
 
   ;set the tile check logic in draw grid (self-mod code)
-;  ldx #0
-;  jsr self_mod_code
-;  lda #skip_null_tile-(skip_tile_check+4)  ;branch forward to skip_null_tile (+4 bytes for cmp,#,beq,#)
-;  sta skip_tile_check+3
+  ldx #0
+  jsr self_mod_code
+  lda #skip_null_tile-(skip_tile_check+4)  ;branch forward to skip_null_tile (+4 bytes for cmp,#,beq,#)
+  sta skip_tile_check+3
 
   ;knock-out Rockford and growing wall handlers for now
   ;growing wall is ignored on the intro screen, so that the title text isn't removed when drawing the map
-;  lda #<handler_null
-;  sta rockford_handler_low
-;  sta growing_wall_handler_low
-;  lda #>handler_null
-;  sta rockford_handler_high
-;  sta growing_wall_handler_high
+  lda #<handler_null
+  sta rockford_handler_low
+  sta growing_wall_handler_low
+  lda #>handler_null
+  sta rockford_handler_high
+  sta growing_wall_handler_high
 
   ;set title text
-;  jsr set_title_text
+  jsr set_title_text
 
   ;Tick counter needed for some animation
-;  lda #31
-;  sta tick_counter
+  lda #31
+  sta tick_counter
 
   ;cave number and levels to start selection from
   lda #0
@@ -384,14 +385,9 @@ show_options_loop
 
   ;draw map, waiting for keyboard input
 wait_for_keypress
-;    jsr update_map
-;    jsr draw_grid_of_sprites
-;    dec tick_counter
-
-  lda #2
-  sta temp1
-  ldx #$ff
-  jsr delay_a_bit_longer
+  jsr update_map
+  jsr draw_grid_of_sprites
+  dec tick_counter
 
   lda key_press
   cmp #KEY_MASK_FIRE
@@ -414,18 +410,18 @@ wait_for_keypress
 exit_intro_keypress
 
   ;nop out the tile check logic in draw grid (self-mod code)
-;  ldx #12
-;  jsr self_mod_code
+  ldx #12
+  jsr self_mod_code
 
   ;add back Rockford and growing wall handlers
-;  lda #<handler_rockford
-;  sta rockford_handler_low
-;  lda #>handler_rockford
-;  sta rockford_handler_high
-;  lda #<handler_growing_wall
-;  sta growing_wall_handler_low
-;  lda #>handler_growing_wall
-;  sta growing_wall_handler_high
+  lda #<handler_rockford
+  sta rockford_handler_low
+  lda #>handler_rockford
+  sta rockford_handler_high
+  lda #<handler_growing_wall
+  sta growing_wall_handler_low
+  lda #>handler_growing_wall
+  sta growing_wall_handler_high
   rts
 
 cave_down
@@ -474,18 +470,63 @@ level_selection_cycle_up
 level_selection_cycle_down
     !byte 0,5,1,2,3,4
 
-;handler_null
-;    rts
+handler_null
+    rts
 
 ; *************************************************************************************
 ; Game action starts here, playing one of Rockford's lives
 play_one_life
 
-  ; Load cave parameters and map from file
+  ;set-up cave and variables
   jsr load_cave_data
-  jsr set_cave_colours
+  jsr initialise_variables
+  jsr populate_cave_from_file
+  jsr populate_cave_tiles_pseudo_random
 
-  ;initialise variables
+  ;set start of map
+  lda #<tile_map_row_1
+  sta map_address_low
+  lda #>tile_map_row_1
+  sta map_address_high
+
+  jsr draw_borders
+  jsr initialise_stage
+  jsr set_cave_colours
+  jsr update_cave_time
+  jsr setup_status_bar
+  ldy #message_clear
+  jsr update_status_message
+
+  ;dissolve screen when starting
+  jsr prepare_reveal_hide_code
+  lda #map_space
+  jsr screen_dissolve_effect
+
+  ;for normal game play, nop out the logic applied above in draw grid (self-mod code)
+  ldx #12
+  jsr self_mod_code
+
+  jsr gameplay_loop
+
+  ;check for game over
+  lda player_lives
+  bne not_game_over
+
+  ldy #message_game_over
+  jsr update_status_message
+
+not_game_over
+
+  ;un-dissolve screen when ending
+  jsr prepare_reveal_hide_code
+  lda #map_unprocessed
+  jsr screen_dissolve_effect
+
+  rts
+
+; *************************************************************************************
+initialise_variables
+  
   lda #$9f
   sta rockford_cell_value
   lda #240
@@ -514,55 +555,128 @@ play_one_life
   sta play_sound_fx
   sta play_ambient_sound
   sta random_seed
-
-  ;populate cave map
-  jsr populate_cave_from_file
-  jsr populate_cave_tiles_pseudo_random
-
-  ;set start of map
-  lda #<tile_map_row_1
-  sta map_address_low
-  lda #>tile_map_row_1
-  sta map_address_high
-
-  jsr draw_borders
-  jsr initialise_stage
-  jsr update_cave_time
-  jsr setup_status_bar
-  ldy #message_clear
-  jsr update_status_message
-
-  ;dissolve screen when starting
-;  jsr prepare_reveal_hide_code
-;  lda #map_space
-;  jsr screen_dissolve_effect
-
-  ;for normal game play, nop out the logic applied above in draw grid (self-mod code)
-;  ldx #12
-;  jsr self_mod_code
-
-  jsr gameplay_loop
-
-  ;check for game over
-;  lda player_lives
-;  bne not_game_over
-
-;  ldy #message_game_over
-;  jsr update_status_message
-
-;not_game_over
-
-  ;un-dissolve screen when ending
-;  jsr prepare_reveal_hide_code
-;  lda #map_unprocessed
-;  jsr screen_dissolve_effect
-
   rts
 
+; *************************************************************************************
+; Set menu screen title text
+set_title_text
+
+  ldy #12
+game_title_loop
+  dey
+  lda game_title,y
+  sta _SCREEN_ADDR+393,y
+  lda #4  ;purple
+  sta _COLOUR_SCREEN_ADDR+393,y
+  cpy #0
+  bne game_title_loop
+  rts
+
+; *************************************************************************************
+; Routine to self-mod a section of code, used to replace code in draw_grid_of_sprites
+; for displaying text in the map and to reveal-hide tiles
+self_mod_code
+
+  ldy #0
+self_mod_code_loop
+	lda self_mod_code_table,x
+	inx
+  sta skip_tile_check,y
+  iny
+  cpy #6
+  bne self_mod_code_loop
+	rts
+
+; *************************************************************************************
+; Self-mod code applied to draw_grid_of_sprites routine to reveal-hide tiles used in cave open/close
+prepare_reveal_hide_code
+    ;add a check for unprocessed cells and set to titanium tile in draw grid (self-mod code)
+    ldx #6
+    jsr self_mod_code
+    lda #not_titanium-(skip_tile_check+4)  ;branch forward to not_titanium (+4 bytes for cmp,#,bcc,#)
+    sta skip_tile_check+3
+    rts
+
+; *************************************************************************************
+; Apply the cave open/close tiles which show/hide the tiles on screen
+; Performed in a loop using the game tick counter
+screen_dissolve_effect
+    sta dissolve_to_solid_flag
+    lda #$21
+    sta tick_counter
+screen_dissolve_loop
+    jsr reveal_or_hide_more_cells
+    jsr draw_grid_of_sprites
+    dec tick_counter
+    bpl screen_dissolve_loop
+    rts
+
 dissolve_to_solid_flag
-  !byte 0
+    !byte 0
 random_seed
-  !byte 0
+    !byte 0
+
+; *************************************************************************************
+; Apply the tile show/hide routine for each game play tick
+reveal_or_hide_more_cells
+    ldy #<tile_map_row_1
+    sty map_address_low
+    lda #>tile_map_row_1
+    sta map_address_high
+
+    ldx #21
+reveal_rows_loop
+    ldy #38
+reveal_cells_loop
+    ; progress a counter in a non-obvious pattern
+    jsr get_next_random_byte
+    ; if it's early in the process (tick counter is low), then branch more often so we
+    ; reveal/hide the cells in a non-obvious pattern over time
+    lsr
+    lsr
+    lsr
+    cmp tick_counter
+    bcc skip_reveal_or_hide
+    lda (map_address_low),y
+    ; clear the top bit to reveal the cell...
+    and #$7f
+    ; ...or set the top bit to hide the cell
+    ora dissolve_to_solid_flag
+    sta (map_address_low),y
+skip_reveal_or_hide
+    dey
+    bne reveal_cells_loop
+    lda #$40
+    jsr add_a_to_ptr
+    dex
+    bne reveal_rows_loop
+
+;TODO: Add sounds
+    ; create some 'random' audio pitches to play while revealing/hiding the map
+;    jsr get_next_random_byte
+;    ora cave_number
+;    sta sound_random_base  ;set the pitch on the A channel (first byte)
+;    ldx #<sound_random_base
+;    ldy #>sound_random_base
+;    jsr _PLAY_SOUND_FX
+
+    rts
+
+;sound_random_base
+;    !byte 7,0,0,0,0,0,0,$7e,16,0,0,0,7,9
+
+; *************************************************************************************
+; A small 'pseudo-random' number routine. Generates a sequence of 256 numbers.
+get_next_random_byte
+    lda random_seed
+    asl
+    asl
+    asl
+    asl
+    sec
+    adc random_seed
+    sta random_seed
+    rts
 
 ; *************************************************************************************
 ; Loop over all rows, plotting side borders from the cave file
@@ -860,76 +974,6 @@ output8
   !byte 32,32,32  ;spaces
 
 ; *************************************************************************************
-update_player_score
-
-  ldy score_low
-  lda score_high
-  sty wip_int
-  sta wip_int+1
-  jsr two_bytes_to_ASCII
-  ldx #0
-plot_score
-  lda output16,x
-  sta status_bar_line3+16,x
-  inx
-  cpx #5
-  bne plot_score
-  rts
-
-two_bytes_to_ASCII
-  ldy #0
-  sty temp1
-w2A_next
-  ldx #0
-w2A_slp
-  lda wip_int
-  sec 
-  sbc w2A_table,y
-  sta wip_int
-  lda wip_int+1
-  iny 
-  sbc w2A_table,y
-  bcc w2A_add
-  sta wip_int+1
-  inx 
-  dey 
-  clc 
-  bcc w2A_slp
-w2A_add
-  dey
-  lda wip_int
-  adc w2A_table,y
-  sta wip_int
-  txa
-  ora #$30
-  ldx temp1
-  sta output16,x
-  inc temp1
-  iny
-  iny
-  cpy #8
-  bcc w2A_next
-  lda wip_int
-  ora #$30
-  ldx temp1
-  sta output16,x
-  inx
-  lda #32
-  sta output16,x
-  rts
-
-w2A_table
-  !word 10000
-  !word 1000
-  !word 100
-  !word 10
-
-output16
-  !byte 0,0,0,0,0,0
-wip_int
-  !byte 0,0
-
-; *************************************************************************************
 ; Plays the cave, each iteration of the loop is a game play tick
 ; The loop ends when Rockford's completes the cave or loses a life
 gameplay_loop
@@ -1182,12 +1226,12 @@ loop_plot_column
   lda (map_address_low),y
 
   ;Next 6 bytes are changed with self-mod code
-  ;skip_tile_check
-  ;    cmp #map_growing_wall
-  ;    beq skip_null_tile
-  ;    nop
-  ;    nop
-  ;not_titanium
+skip_tile_check
+  cmp #map_growing_wall
+  beq skip_null_tile
+  nop
+  nop
+not_titanium
 
   tay
   lda cell_type_to_sprite,y
@@ -1243,7 +1287,7 @@ foreground_colourB
   sta (colour_addr1_low),y
   sta (colour_addr2_low),y
 
-;skip_null_tile
+skip_null_tile
   inc temp2  ;grid column counter
   lda temp2  ;grid column counter
   cmp #12  ;12 columns
@@ -1287,6 +1331,76 @@ colour_screen_below_high
   !byte $94, $94, $94, $95, $95, $95, $95, $95, $95, $96, $96, $96
 colour_screen_below_low
   !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
+
+; *************************************************************************************
+update_player_score
+
+  ldy score_low
+  lda score_high
+  sty wip_int
+  sta wip_int+1
+  jsr two_bytes_to_ASCII
+  ldx #0
+plot_score
+  lda output16,x
+  sta status_bar_line3+16,x
+  inx
+  cpx #5
+  bne plot_score
+  rts
+
+two_bytes_to_ASCII
+  ldy #0
+  sty temp1
+w2A_next
+  ldx #0
+w2A_slp
+  lda wip_int
+  sec 
+  sbc w2A_table,y
+  sta wip_int
+  lda wip_int+1
+  iny 
+  sbc w2A_table,y
+  bcc w2A_add
+  sta wip_int+1
+  inx 
+  dey 
+  clc 
+  bcc w2A_slp
+w2A_add
+  dey
+  lda wip_int
+  adc w2A_table,y
+  sta wip_int
+  txa
+  ora #$30
+  ldx temp1
+  sta output16,x
+  inc temp1
+  iny
+  iny
+  cpy #8
+  bcc w2A_next
+  lda wip_int
+  ora #$30
+  ldx temp1
+  sta output16,x
+  inx
+  lda #32
+  sta output16,x
+  rts
+
+w2A_table
+  !word 10000
+  !word 1000
+  !word 100
+  !word 10
+
+output16
+  !byte 0,0,0,0,0,0
+wip_int
+  !byte 0,0
 
 ; *************************************************************************************
 ; Update screen while paused, or out of time, or at end position
@@ -1474,13 +1588,13 @@ update_map_scroll_position
     sec
     sbc visible_top_left_map_x
     ldx visible_top_left_map_x
-    cmp #9
+    cmp #8  ;how many tiles are visible on the left, going right
     bmi check_for_need_to_scroll_left
     cpx #28
     bpl check_for_need_to_scroll_down
     inx
 check_for_need_to_scroll_left
-    cmp #3
+    cmp #4  ;how many tiles are visible on the left, going left
     bpl check_for_need_to_scroll_down
     cpx #1
     bmi check_for_need_to_scroll_down
@@ -1490,13 +1604,13 @@ check_for_need_to_scroll_down
     lda screen_addr1_high
     sec
     sbc visible_top_left_map_y
-    cmp #9
+    cmp #8  ;how many tiles are visible above, going down
     bmi check_for_need_to_scroll_up
     cpy #10
     bpl check_for_bonus_stages
     iny
 check_for_need_to_scroll_up
-    cmp #3
+    cmp #4  ;how many tiles are visible above, going up
     bpl check_for_bonus_stages
     cpy #1
     bmi check_for_bonus_stages
@@ -1632,7 +1746,7 @@ extract_lower_nybble
 
 ; ****************************************************************************************************
 ; Load cave data
-; Using the cave number, copy the cave data already loaded from CAVES.TAP file into the 
+; Using the cave number, copy the cave data already loaded from CAVES.PRG file into the 
 ; cave_parameter_data location used in the program
 load_cave_data
 
@@ -1969,6 +2083,11 @@ result_high
 ; Update the gameplay map with action handlers for each of the game actors
 ; Includes logic for falling rocks, diamonds, bombs
 update_map
+
+    ;TODO: make this a user selectable option
+    ; slow it down a bit
+    ldx #$f0
+    jsr delay_a_bit
 
     lda #20  ; twenty rows
     sta map_rows
@@ -2963,6 +3082,9 @@ delay2
 ; Let the user select which version of Boulder Dash to play and load the caves file for it
 select_caves_for_version
 
+    lda #$7f
+    sta datadir_b
+
     lda version_selected
 version_display
     jsr show_version_text
@@ -2976,6 +3098,14 @@ version_loop
     lda joystick_addr  ;Read joystick address
     and #$20  ;Fire button
     beq end_version_selection
+
+    lda kb_rows  ;Read keyboard address (weird, used for joystick as well!)
+    and #$80  ;Right direction
+    beq version_up
+
+    lda joystick_addr  ;Read joystick address
+    and #$10  ;Left direction
+    beq version_down
 
     lda joystick_addr  ;Read joystick address
     and #$04  ;Up direction
@@ -3067,7 +3197,7 @@ load_caves_for_version
 ; *************************************************************************************
 ; Cave parameters and map for one cave
 ; IMPORTANT: Below is needed to point to the correct memory location for loading caves
-* = $3600
+* = $3700
 !source "cavedata.asm"
 
 ; *************************************************************************************
@@ -3077,11 +3207,11 @@ cave_load_address
 cave_addr_low
 	!byte $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00
 cave_addr_high
-	!byte $38, $39, $3b, $3d, $3f, $40, $42, $44, $46, $47, $49, $4b, $4d, $4e, $50, $52, $54, $55, $57, $59, $5b
+	!byte $39, $3a, $3c, $3e, $40, $41, $43, $45, $47, $48, $4a, $4c, $4e, $4f, $51, $53, $55, $56, $58, $5a, $5c
 
 ; *************************************************************************************
 ; All caves A to T with the Z intro cave on the end are loaded into memory from this point onwards
 ; each cave is 448 bytes (48 parameters, 400 map) x 21 caves = 9408 bytes
 ; IMPORTANT: Address needs to be first cave_load_address (high-low)
-* = $3800
+* = $3900
 all_caves_load_area
