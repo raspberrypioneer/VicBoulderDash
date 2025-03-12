@@ -1,17 +1,17 @@
 :: Boulder Dash - perform a full build of program
 @echo off
 
-:: Control creation of cave file taps (set to Y or N) and set cave load address
-:: .e.g. when all_caves_load_area start address is $3700, set CAVE_LOW=00, CAVE_HIGH=37
+:: Control creation of cave file PRGs (set to Y or N) and set cave load address
+:: .e.g. when all_caves_load_area start address is $3900, set CAVE_LOW=00, CAVE_HIGH=39
 set MAKECAVES=N
 set CAVE_LOW=00
-set CAVE_HIGH=38
+set CAVE_HIGH=39
 
 :: Build main program
 echo Created game engine
 .\bin\acme.exe -l .\build\symbols -o .\prg\a.prg .\main.asm
 
-:: Create tap file containing the caves of each version
+:: Create PRG file containing the caves of each version
 if "%MAKECAVES%"=="Y" (
 
 :: Create a binary fine containing the 2 load adddress bytes for the cave prg files

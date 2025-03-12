@@ -1,14 +1,12 @@
 TODO:
-add intro screens
-add colour selection or set via cave parameters
-change cave D in +1 to VIC20 not ORIC or ACORN
-fix bonus cave scrolling
-slow it down
+create intro Z caves
+make speed selectable
 add sounds
 add instructions
 add proper loader (loads in one step)
 create as D64 file
 add full readme
+full test, including real vic20
 
 Notes:
 5 rem test keyboard
