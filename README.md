@@ -1,12 +1,11 @@
 TODO:
-create intro Z caves
-make speed selectable
-add sounds
 add instructions
+add sounds
 add proper loader (loads in one step)
 create as D64 file
 add full readme
 full test, including real vic20
+consider make speed selectable (after testing on real vic20)
 
 Notes:
 5 rem test keyboard

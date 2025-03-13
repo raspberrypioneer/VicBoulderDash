@@ -21,7 +21,7 @@ Name=Cave A. Intro
 DiamondValue=10 15
 DiamondsRequired=80 80 80 80 80
 CaveTime=150 110 110 110 110
-Colors=Gray1 Gray2 White
+Colors=Yellow Blue Red
 ;RandSeed=10 187 12 173 14 - Before fix by LogicDeLuxe below
 RandSeed=10 187 12 173 62
 RandomFill=DIRT 254 SPACE 64 BOULDER 64 DIAMOND 37
@@ -46,7 +46,7 @@ Name=Cave B. Ford Knoxs
 DiamondValue=15 20
 DiamondsRequired=50 50 50 50 50
 CaveTime=150 110 110 110 110
-Colors=Red LightRed White
+Colors=Cyan Purple Pink
 RandSeed=7 128 144 160 176
 RandomFill=DIRT 16 SPACE 32 BOULDER 32
 
@@ -72,7 +72,7 @@ Name=Cave C. Transform
 DiamondValue=10 15
 DiamondsRequired=40 40 40 40 40
 CaveTime=201 150 150 110 110
-Colors=Brown Orange Yellow
+Colors=White Red Lt.Blue
 RandSeed=1 34 3 4 5
 RandomFill=SPACE 48 MAGICWALL 112 BOULDER 64 DIAMOND 16
 MagicWallTime=64
@@ -89,7 +89,7 @@ Name=Cave D. Reunion
 DiamondValue=15 20
 DiamondsRequired=75 75 75 75 75
 CaveTime=201 201 150 150 110
-Colors=Red Purple White
+Colors=Purple Green Lt.Yellow
 RandSeed=160 176 192 208 224
 RandomFill=SPACE 32 BOULDER 48
 AmoebaTime=75
@@ -116,7 +116,7 @@ Intermission=true
 DiamondValue=15 25
 DiamondsRequired=30 30 30 30 30
 CaveTime=30 30 30 30 30
-Colors=LightBlue Cyan White
+Colors=Cyan Blue Pink
 MagicWallTime=16
 AmoebaTime=16
 InitialFill=SPACE
@@ -142,7 +142,7 @@ Name=Cave E. Maze 1
 DiamondValue=20 25
 DiamondsRequired=20 20 20 20 20
 CaveTime=150 110 110 110 110
-Colors=Green LightGreen White
+Colors=Purple Red Yellow
 RandSeed=17 34 51 68 85
 RandomFill=SPACE 32 BOULDER 48 FIREFLYl 16 DIAMOND 10
 
@@ -158,7 +158,7 @@ Name=Cave F. Maze 2
 DiamondValue=10 25
 DiamondsRequired=50 50 50 50 50
 CaveTime=150 100 100 75 75
-Colors=Gray2 Gray3 White
+Colors=Yellow Blue Orange
 RandSeed=18 52 86 120 154
 RandomFill=SPACE 80 BOULDER 64 FIREFLYl 56 DIAMOND 37
 
@@ -174,7 +174,7 @@ Name=Cave G. Obstacle
 DiamondValue=10 15
 DiamondsRequired=25 25 25 25 25
 CaveTime=150 150 150 150 150
-Colors=Blue LightBlue White
+Colors=Red Green Lt.Yellow
 RandSeed=10 11 12 13 14
 RandomFill=BOULDER 32 FIREFLYl 2
 AmoebaTime=67
@@ -199,7 +199,7 @@ Name=Cave H. Eazy
 DiamondValue=10 15
 DiamondsRequired=15 15 15 15 15
 CaveTime=150 150 110 110 86
-Colors=Orange Yellow White
+Colors=Yellow Blue Pink
 RandSeed=170 187 204 13 238
 RandomFill=BOULDER 48
 MagicWallTime=32
@@ -220,7 +220,7 @@ Intermission=true
 DiamondValue=10 20
 DiamondsRequired=99 99 99 99 99
 CaveTime=30 30 30 30 30
-Colors=LightBlue Cyan White
+Colors=Yellow Cyan Red
 InitialFill=SPACE
 
 [objects]
@@ -250,7 +250,7 @@ Name=Cave I. Cave-in
 DiamondValue=10 15
 DiamondsRequired=90 90 90 90 90
 CaveTime=150 150 110 110 110
-Colors=Gray1 Gray2 White
+Colors=Red Blue Lt.Orange
 ;RandSeed=49 37 45 52 86 - Before fix by LogicDeLuxe below
 RandSeed=49 37 45 61 60
 RandomFill=BOULDER 80 DIAMOND 53
@@ -278,7 +278,7 @@ Name=Cave J. The guards
 DiamondValue=25
 DiamondsRequired=10 10 10 10 10
 CaveTime=150 150 110 110 110
-Colors=Red LightRed White
+Colors=Yellow Green Red
 
 [objects]
 Line=11 4 11 15 SPACE
@@ -312,7 +312,7 @@ Name=Cave K. Good luck
 DiamondValue=10 15
 DiamondsRequired=25 25 25 25 25
 CaveTime=150 150 110 110 110
-Colors=Brown Orange Yellow
+Colors=Purple Blue Lt.Yellow
 RandSeed=152 135 136 101 84
 RandomFill=BOULDER 48 FIREFLYl 5
 AmoebaTime=48
@@ -331,7 +331,7 @@ Name=Cave L. The trap
 DiamondValue=10 15
 DiamondsRequired=25 25 25 25 25
 CaveTime=150 150 150 110 110
-Colors=Red Purple White
+Colors=Purple Red White
 RandSeed=86 120 108 152 171
 RandomFill=BOULDER 69
 AmoebaTime=48
@@ -352,7 +352,7 @@ Intermission=true
 DiamondValue=15
 DiamondsRequired=9 9 9 9 9
 CaveTime=20 20 20 20 20
-Colors=LightBlue Cyan White
+Colors=Red Green Lt.Orange
 InitialFill=SPACE
 
 [objects]
@@ -372,7 +372,7 @@ Name=Cave M. Reunion 2
 DiamondValue=10 15
 DiamondsRequired=95 95 95 95 95
 CaveTime=150 150 110 110 110
-Colors=Green LightGreen White
+Colors=Purple Blue Yellow
 RandSeed=86 136 144 18 171
 RandomFill=BOULDER 32
 AmoebaTime=138
@@ -397,7 +397,7 @@ Name=Cave N. Liberator
 DiamondValue=10 15
 DiamondsRequired=85 85 85 85 85
 CaveTime=150 150 110 110 110
-Colors=Gray2 Gray3 White
+Colors=Yellow Purple Red
 RandSeed=170 102 87 198 86
 RandomFill=BOULDER 21
 AmoebaTime=94
@@ -425,7 +425,7 @@ Name=Cave O. Perfect
 DiamondValue=5 10
 DiamondsRequired=95 95 95 95 95
 CaveTime=150 150 110 110 110
-Colors=Blue LightBlue White
+Colors=Yellow Blue Lt.Purple
 RandSeed=170 187 204 221 238
 RandomFill=BOULDER 37
 MagicWallTime=58
@@ -445,7 +445,7 @@ Name=Cave P. The frontier
 DiamondValue=10 15
 DiamondsRequired=95 95 95 95 95
 CaveTime=150 150 110 110 110
-Colors=Orange Yellow White
+Colors=Blue Red Lt.Yellow
 RandSeed=68 85 102 119 136
 RandomFill=BOULDER 80 DIAMOND 48
 MagicWallTime=32
@@ -466,7 +466,7 @@ Intermission=true
 DiamondValue=14 20
 DiamondsRequired=7 7 7 7 7
 CaveTime=10 10 10 10 10
-Colors=LightBlue Cyan White
+Colors=Green Blue White
 MagicWallTime=37
 InitialFill=SPACE
 
@@ -480,6 +480,41 @@ Line=2 1 7 6 BOULDER
 Point=18 10 OUTBOX
 [/objects]
 
+[/cave]
+
+[cave]
+Name=Cave 21
+DiamondValue=1
+DiamondExtraValue=1
+DiamondsRequired=1 1 1 1 1
+CaveTime=10 10 10 10 10
+BorderTile=HEXPANDINGWALL
+Colors=Cyan Blue Pink
+
+[map]
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+x    x x   x                           x
+x  x x x x x                           x
+x  x     x x                           x
+x    xx    x                           x
+x   xPXx   x                           x
+x  xxxxxx  x                           x
+x          x                           x
+xwww www www                           x
+x w   w   w                            x
+x w   w   w                            x
+xwww www www                           x
+x cWcWcWcW x                           x
+x          x                           x
+xqWqWqWqW Wx                           x
+xxxxxxxxxxxx                           x
+x                                      x
+x                                      x
+x                                      x
+x                                      x
+x                                      X
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+[/map]
 [/cave]
 
 [/game]

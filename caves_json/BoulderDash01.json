@@ -322,8 +322,8 @@
         "Map": [
             "WWWWWWWWWWWWWWWWWWWW",
             "W                  W",
-            "W         r        W",
-            "W  P      .        W",
+            "W    r             W",
+            "W  P .             W",
             "W                  W",
             "W                  W",
             "W                  W",
@@ -1314,6 +1314,64 @@
         "RockfordStart": [
             1,
             3
+        ]
+    },
+    {
+        "BorderTile": "HEXPANDINGWALL",
+        "CaveLetter": "Z",
+        "CaveNumber": 21,
+        "CaveTime": [
+            10,
+            10,
+            10,
+            10,
+            10
+        ],
+        "Colors": [
+            "yellow",
+            "purple",
+            "red"
+        ],
+        "DiamondExtraValue": 1,
+        "DiamondValue": 1,
+        "DiamondsRequired": [
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        "Map": [
+            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "x     x     wqw w                      x",
+            "x    x x    w w w                      x",
+            "x   x   x   wqw w                      x",
+            "x  x     x  w w w                      x",
+            "x x       x wqw w                      x",
+            "x sxxxxxxas X w w                      x",
+            "x x   P   x wqw w                      x",
+            "x  x     x  w w w                      x",
+            "x   x   x   w w w                      x",
+            "x    x x    w w w                      x",
+            "x     x     w w w                      x",
+            "x www   www w w w                      x",
+            "x wwwwwwwww w w wwwwwwwwwwwwwwwwwwwwwwwx",
+            "x         w   w w                      x",
+            "xwwwwwwww wwwwwcw                      x",
+            "xwwwwwwww c c c w                      x",
+            "xwwwwwwwwwwwwwwww                      x",
+            "x                                      x",
+            "x                                      x",
+            "x                                      x",
+            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        ],
+        "RockfordExit": [
+            6,
+            12
+        ],
+        "RockfordStart": [
+            7,
+            6
         ]
     }
 ]

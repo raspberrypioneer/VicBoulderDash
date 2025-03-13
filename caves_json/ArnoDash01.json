@@ -1109,5 +1109,63 @@
             10,
             18
         ]
+    },
+    {
+        "BorderTile": "SLIME",
+        "CaveLetter": "Z",
+        "CaveNumber": 21,
+        "CaveTime": [
+            10,
+            10,
+            10,
+            10,
+            10
+        ],
+        "Colors": [
+            "red",
+            "green",
+            "lt.orange"
+        ],
+        "DiamondExtraValue": 1,
+        "DiamondValue": 1,
+        "DiamondsRequired": [
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        "Map": [
+            "ssssssssssssssssssssssssssssssssssssssss",
+            "sP  xssx     xX                        s",
+            "s   xxxx     x                         s",
+            "s  xqxxqx    x                         s",
+            "s  xqxxqx    x                         s",
+            "s   xxxx     x                         s",
+            "s  xxxxxx    x                         s",
+            "s  x xx x    x                         s",
+            "s    xx      x                         s",
+            "s   xxxx     x                         s",
+            "s   x  x     x                         s",
+            "s  xx  xx    x                         s",
+            "s           ax                         s",
+            "sxxxxxxxxxxxxx                         s",
+            "s                                      s",
+            "s                                      s",
+            "s                                      s",
+            "s                                      s",
+            "s                                      s",
+            "s                                      s",
+            "s                                      s",
+            "ssssssssssssssssssssssssssssssssssssssss"
+        ],
+        "RockfordExit": [
+            1,
+            14
+        ],
+        "RockfordStart": [
+            1,
+            1
+        ]
     }
 ]

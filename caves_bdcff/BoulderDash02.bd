@@ -23,7 +23,7 @@ Name=Cave A
 DiamondValue=15
 DiamondsRequired=10 10 10 20 20
 CaveTime=240 160 120 100 100
-Colors=Orange Gray1 White
+Colors=Yellow Blue Red
 RandSeed=11 12 13 14 15
 RandomFill=BOULDER 50 DIAMOND 5
 MagicWallTime=25
@@ -63,7 +63,7 @@ Name=Cave B
 DiamondValue=3 10
 DiamondsRequired=75 80 85 90 95
 CaveTime=200 190 180 170 160
-Colors=Green Purple White
+Colors=Cyan Purple Pink
 RandSeed=100 137 140 251 51
 RandomFill=BOULDER 254 AMOEBA 127
 AmoebaTime=10
@@ -93,7 +93,7 @@ Name=Cave C
 DiamondValue=25 50
 DiamondsRequired=16 12 18 15 15
 CaveTime=150 150 150 150 200
-Colors=Purple Orange White
+Colors=White Red Lt.Blue
 RandSeed=24 45 52 30 40
 RandomFill=SPACE 120 BOULDER 50 FIREFLYl 15 DIAMOND 9
 
@@ -116,7 +116,7 @@ Name=Cave D
 DiamondValue=5 8
 DiamondsRequired=50 52 54 56 58
 CaveTime=80 70 60 50 40
-Colors=Green Orange White
+Colors=Purple Green Lt.Yellow
 AmoebaTime=140
 
 [objects]
@@ -142,7 +142,7 @@ Intermission=true
 DiamondValue=30
 DiamondsRequired=1 1 1 1 1
 CaveTime=20 20 20 20 20
-Colors=LightBlue Red White
+Colors=Cyan Blue Pink
 
 [objects]
 FillRect=5 2 11 8 BOULDER FIREFLYl
@@ -158,7 +158,7 @@ Name=Cave E
 DiamondValue=20 40
 DiamondsRequired=5 8 10 10 10
 CaveTime=30 30 30 30 30
-Colors=Blue Gray2 White
+Colors=Purple Red Yellow
 RandSeed=30 31 32 33 34
 RandomFill=BOULDER 255 DIAMOND 127
 MagicWallTime=2
@@ -181,7 +181,7 @@ Name=Cave F
 DiamondValue=5 80
 DiamondsRequired=30 40 32 32 42
 CaveTime=200 200 200 200 200
-Colors=Brown LightRed White
+Colors=Yellow Blue Orange
 RandSeed=10 11 12 13 14
 RandomFill=BOULDER 220 DIAMOND 80
 
@@ -213,7 +213,7 @@ Name=Cave G
 DiamondValue=20 50
 DiamondsRequired=8 14 15 15 12
 CaveTime=200 180 180 150 150
-Colors=LightRed Purple White
+Colors=Red Green Lt.Yellow
 RandSeed=10 11 15 13 14
 RandomFill=SPACE 120 BOULDER 50 FIREFLYl 15 DIAMOND 9
 
@@ -237,7 +237,7 @@ Name=Cave H
 DiamondValue=5 10
 DiamondsRequired=30 40 50 60 70
 CaveTime=200 160 120 100 80
-Colors=Green Brown White
+Colors=Yellow Blue Pink
 AmoebaTime=120
 
 [objects]
@@ -259,7 +259,7 @@ Intermission=true
 DiamondValue=10
 DiamondsRequired=6 6 6 6 6
 CaveTime=30 25 20 20 20
-Colors=Blue Gray3 White
+Colors=Yellow Cyan Red
 
 [objects]
 FillRect=3 3 5 5 SPACE
@@ -282,7 +282,7 @@ Name=Cave I
 DiamondValue=5 50
 DiamondsRequired=75 75 75 75 75
 CaveTime=160 140 120 100 80
-Colors=Gray1 Orange White
+Colors=Red Blue Lt.Orange
 
 [objects]
 FillRect=1 1 38 20 SPACE
@@ -310,7 +310,7 @@ Name=Cave J
 DiamondValue=5 10
 DiamondsRequired=18 27 36 45 54
 CaveTime=200 180 160 140 120
-Colors=Blue Orange White
+Colors=Yellow Green Red
 RandSeed=1 2 3 4 5
 RandomFill=BOULDER 1
 
@@ -330,7 +330,7 @@ Name=Cave K
 DiamondValue=15 30
 DiamondsRequired=21 24 19 23 27
 CaveTime=60 60 60 60 60
-Colors=Orange LightBlue White
+Colors=Purple Blue Lt.Yellow
 RandSeed=10 11 12 13 15
 RandomFill=DIAMOND 15
 MagicWallTime=2
@@ -354,7 +354,7 @@ Name=Cave L
 DiamondValue=15
 DiamondsRequired=35 36 33 37 34
 CaveTime=240 220 200 170 150
-Colors=Brown LightRed White
+Colors=Purple Red White
 RandSeed=12 8 7 9 11
 RandomFill=BOULDER 90 DIAMOND 20
 
@@ -377,7 +377,7 @@ Intermission=true
 DiamondValue=25 60
 DiamondsRequired=2 2 2 2 2
 CaveTime=30 25 20 20 20
-Colors=Blue Orange White
+Colors=Red Green Lt.Orange
 InitialFill=SPACE
 
 [objects]
@@ -397,7 +397,7 @@ Name=Cave M
 DiamondValue=2 10
 DiamondsRequired=1 20 20 40 50
 CaveTime=200 200 200 200 180
-Colors=Blue LightRed White
+Colors=Purple Blue Yellow
 RandSeed=137 140 100 251 51
 RandomFill=BOULDER 255 DIAMOND 127
 SlimePermeability=0
@@ -420,7 +420,7 @@ Name=Cave N
 DiamondValue=20 1
 DiamondsRequired=21 21 21 21 21
 CaveTime=200 180 160 140 120
-Colors=Brown Orange White
+Colors=Yellow Purple Red
 RandSeed=15 16 17 18 19
 RandomFill=BOULDER 60
 
@@ -443,7 +443,7 @@ Name=Cave O
 DiamondValue=10
 DiamondsRequired=36 36 36 36 36
 CaveTime=200 150 133 125 120
-Colors=LightBlue LightRed White
+Colors=Yellow Blue Lt.Purple
 MagicWallTime=10
 
 [objects]
@@ -480,7 +480,7 @@ Name=Cave P
 DiamondValue=10 40
 DiamondsRequired=20 15 17 15 20
 CaveTime=200 200 200 200 200
-Colors=Brown LightRed White
+Colors=Blue Red Lt.Yellow
 RandSeed=10 11 12 13 14
 RandomFill=SPACE 189 BOULDER 179 DIAMOND 19
 
@@ -498,7 +498,7 @@ Intermission=true
 DiamondValue=10 20
 DiamondsRequired=1 1 1 1 1
 CaveTime=20 20 20 20 20
-Colors=Blue Orange White
+Colors=Green Blue White
 
 [objects]
 FillRect=6 5 8 7 SPACE BOULDER
@@ -509,6 +509,41 @@ FillRect=10 8 12 10 FIREFLYl OUTBOX
 Line=12 8 12 10 STEELWALL
 [/objects]
 
+[/cave]
+
+[cave]
+Name=Cave 21
+DiamondValue=1
+DiamondExtraValue=1
+DiamondsRequired=1 1 1 1 1
+CaveTime=10 10 10 10 10
+BorderTile=HEXPANDINGWALL
+Colors=Purple Blue Lt.Yellow
+
+[map]
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+r      r      x                        s
+x   d xxxxr   x                        s
+x  rxx    xdx x                        s
+x xxx r d  x  x                        s
+d    xxxxx xx x                        s
+x  xxxxxx     x                        s
+x wwwXPwww rx x                        s
+r  w xx w xx  x                        s
+x  w    w     x                        s
+x www  www xxxx                        s
+r  x    x  dx                          s
+x cWcWcWc xx                           s
+x          x                           s
+xqWqWqWqW Wx                           s
+xxxxxxxxxxxx                           s
+s                                      s
+s                                      s
+s                                      s
+s                                      s
+s                                      s
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+[/map]
 [/cave]
 
 [/game]

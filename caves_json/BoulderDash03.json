@@ -1353,5 +1353,63 @@
             2,
             1
         ]
+    },
+    {
+        "BorderTile": "HEXPANDINGWALL",
+        "CaveLetter": "Z",
+        "CaveNumber": 21,
+        "CaveTime": [
+            10,
+            10,
+            10,
+            10,
+            10
+        ],
+        "Colors": [
+            "cyan",
+            "blue",
+            "pink"
+        ],
+        "DiamondExtraValue": 1,
+        "DiamondValue": 1,
+        "DiamondsRequired": [
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        "Map": [
+            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "x    x x   x                           x",
+            "x  x x x x x                           x",
+            "x  x     x x                           x",
+            "x    xx    x                           x",
+            "x   xPXx   x                           x",
+            "x  xxxxxx  x                           x",
+            "x          x                           x",
+            "xwww www www                           x",
+            "x w   w   w                            x",
+            "x w   w   w                            x",
+            "xwww www www                           x",
+            "x cWcWcWcW x                           x",
+            "x          x                           x",
+            "xqWqWqWqW Wx                           x",
+            "xxxxxxxxxxxx                           x",
+            "x                                      x",
+            "x                                      x",
+            "x                                      x",
+            "x                                      x",
+            "x                                      X",
+            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        ],
+        "RockfordExit": [
+            20,
+            39
+        ],
+        "RockfordStart": [
+            5,
+            5
+        ]
     }
 ]

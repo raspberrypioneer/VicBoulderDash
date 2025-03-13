@@ -19,8 +19,7 @@ Name=Cave 1
 DiamondValue=15 20
 DiamondsRequired=18 18 18 18 18
 CaveTime=120 120 120 120 120
-
-Colors=Black Purple Red White
+Colors=Yellow Blue Red
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -54,7 +53,7 @@ DiamondValue=35 40
 DiamondsRequired=8 8 8 8 8
 CaveTime=100 100 100 100 100
 MagicWallTime=16
-Colors=Black Cyan Green White
+Colors=Cyan Purple Pink
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -87,9 +86,7 @@ Name=Cave 3
 DiamondValue=20 20
 DiamondsRequired=12 16 24 28 32
 CaveTime=180 180 180 180 180
-
-
-Colors=Black Blue Purple White
+Colors=White Red Lt.Blue
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -123,7 +120,7 @@ DiamondValue=10 12
 DiamondsRequired=16 18 20 22 25
 CaveTime=180 180 180 180 180
 AmoebaTime=130
-Colors=Black Cyan Blue White
+Colors=Purple Green Lt.Yellow
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -158,7 +155,7 @@ DiamondValue=35 45
 DiamondsRequired=11 12 13 14 15
 CaveTime=30 30 30 30 30
 AmoebaTime=255
-Colors=Black Cyan Red White
+Colors=Cyan Blue Pink
 
 [map]
 WWWWWWWWWWWWWWWWWWWW
@@ -181,7 +178,7 @@ Name=Cave 6
 DiamondValue=26 26
 DiamondsRequired=9 10 11 12 13
 CaveTime=200 200 200 200 200
-Colors=Black Red Green White
+Colors=Purple Red Yellow
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -214,8 +211,7 @@ Name=Cave 7
 DiamondValue=5 6
 DiamondsRequired=54 61 68 77 90
 CaveTime=130 130 130 130 130
-
-Colors=Black Blue Green White
+Colors=Yellow Blue Orange
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -248,7 +244,7 @@ Name=Cave 8
 DiamondValue=4 5
 DiamondsRequired=80 80 80 80 80
 CaveTime=200 200 200 200 200
-Colors=Black Cyan Purple White
+Colors=Red Green Lt.Yellow
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -282,7 +278,7 @@ DiamondValue=4 5
 DiamondsRequired=59 69 79 89 99
 CaveTime=200 200 200 200 200
 AmoebaTime=80
-Colors=Black Green Red White
+Colors=Yellow Blue Pink
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -316,7 +312,7 @@ Intermission=true
 DiamondValue=35 35
 DiamondsRequired=14 14 14 14 14
 CaveTime=20 20 20 20 20
-Colors=Black Blue Green Yellow
+Colors=Yellow Cyan Red
 
 [map]
 WWWWWWWWWWWWWWWWWWWW
@@ -340,7 +336,7 @@ DiamondValue=22 25
 DiamondsRequired=10 12 14 16 18
 CaveTime=180 180 180 180 180
 MagicWallTime=10
-Colors=Black Red Blue Yellow
+Colors=Red Blue Lt.Orange
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -373,7 +369,7 @@ Name=Cave 12
 DiamondValue=30 30
 DiamondsRequired=9 10 11 12 13
 CaveTime=160 160 160 160 160
-Colors=Black Green Purple Cyan
+Colors=Yellow Green Red
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -406,7 +402,7 @@ Name=Cave 13
 DiamondValue=21 21
 DiamondsRequired=15 16 17 18 19
 CaveTime=180 175 170 165 160
-Colors=Black Purple Red Cyan
+Colors=Purple Blue Lt.Yellow
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -439,7 +435,7 @@ Name=Cave 14
 DiamondValue=10 10
 DiamondsRequired=22 28 34 38 42
 CaveTime=150 150 150 150 150
-Colors=Black Cyan Green Yellow
+Colors=Purple Red White
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -473,7 +469,7 @@ Intermission=true
 DiamondValue=20 30
 DiamondsRequired=20 21 22 23 24
 CaveTime=40 40 40 40 40
-Colors=Black Red Blue White
+Colors=Red Green Lt.Orange
 
 [map]
 WWWWWWWWWWWWWWWWWWWW
@@ -496,7 +492,7 @@ Name=Cave 16
 DiamondValue=15 20
 DiamondsRequired=22 24 26 28 30
 CaveTime=170 165 160 155 150
-Colors=Black Green Purple White
+Colors=Purple Blue Yellow
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -529,7 +525,7 @@ Name=Cave 17
 DiamondValue=9 9
 DiamondsRequired=34 37 40 43 46
 CaveTime=160 160 160 160 160
-Colors=Black Purple Red Yellow
+Colors=Yellow Purple Red
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -563,7 +559,7 @@ DiamondValue=18 90
 DiamondsRequired=20 22 24 26 28
 CaveTime=200 200 200 200 200
 MagicWallTime=160
-Colors=Black Red Green Yellow
+Colors=Yellow Blue Lt.Purple
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -597,7 +593,7 @@ DiamondValue=10 15
 DiamondsRequired=30 35 40 45 50
 CaveTime=180 180 180 180 180
 MagicWallTime=60
-Colors=Black Purple Blue White
+Colors=Blue Red Lt.Yellow
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -631,7 +627,7 @@ Intermission=true
 DiamondValue=14 14
 DiamondsRequired=36 36 36 36 36
 CaveTime=44 42 40 38 36
-Colors=Black Red Purple White
+Colors=Green Blue White
 
 [map]
 WWWWWWWWWWWWWWWWWWWW
@@ -646,6 +642,41 @@ W..................W
 W..................W
 W.................PW
 WWWWWWWWWWWWWWWWWWWW
+[/map]
+[/cave]
+
+[cave]
+Name=Cave 21
+DiamondValue=1
+DiamondExtraValue=1
+DiamondsRequired=1 1 1 1 1
+CaveTime=10 10 10 10 10
+BorderTile=SLIME
+Colors=Red Green Lt.Orange
+
+[map]
+ssssssssssssssssssssssssssssssssssssssss
+sP  xssx     xX                        s
+s   xxxx     x                         s
+s  xqxxqx    x                         s
+s  xqxxqx    x                         s
+s   xxxx     x                         s
+s  xxxxxx    x                         s
+s  x xx x    x                         s
+s    xx      x                         s
+s   xxxx     x                         s
+s   x  x     x                         s
+s  xx  xx    x                         s
+s           ax                         s
+sxxxxxxxxxxxxx                         s
+s                                      s
+s                                      s
+s                                      s
+s                                      s
+s                                      s
+s                                      s
+s                                      s
+ssssssssssssssssssssssssssssssssssssssss
 [/map]
 [/cave]
 

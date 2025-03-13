@@ -33,7 +33,7 @@ import numpy as np
 from distutils.dir_util import copy_tree
 import shutil
 
-ATTEMPT_BD_COLOUR_MAP = False  #Attempt to map the colours in the BDCFF or use the config file scheme per cave
+ATTEMPT_BD_COLOUR_MAP = True  #Attempt to map the colours in the BDCFF or use the config file scheme per cave
 
 ################################################################################
 #region Helper functions
@@ -141,7 +141,7 @@ def add_cave_map_row(cave_count, cave_line_count, line, output_cave_json, output
 def generate_caves(all_input_lines, output_subfolder):
 
     #Every fifth cave has to be an intermission / bonus cave, with cave letters Q, R, S, T
-    cave_letters = ['A','B','C','D','Q','E','F','G','H','R','I','J','K','L','S','M','N','O','P','T']
+    cave_letters = ['A','B','C','D','Q','E','F','G','H','R','I','J','K','L','S','M','N','O','P','T','Z']
     output_all_caves_json = []
     output_cave_map_bytes = []
 

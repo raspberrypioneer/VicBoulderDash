@@ -39,6 +39,30 @@ set BDVER=ArnoDash01
 set BDPRG=A1CAVES
 call :create_prg_file_for_version
 
+
+:: Copy and rename bonus caves from versions above into a bonus cave collection
+copy /b .\caves_bin\BoulderDash01\Q .\caves_bin\BoulderBonus\A >nul
+copy /b .\caves_bin\BoulderDash01\R .\caves_bin\BoulderBonus\B >nul
+copy /b .\caves_bin\BoulderDash01\S .\caves_bin\BoulderBonus\C >nul
+copy /b .\caves_bin\BoulderDash01\T .\caves_bin\BoulderBonus\D >nul
+copy /b .\caves_bin\BoulderDash02\Q .\caves_bin\BoulderBonus\E >nul
+copy /b .\caves_bin\BoulderDash02\R .\caves_bin\BoulderBonus\F >nul
+copy /b .\caves_bin\BoulderDash02\S .\caves_bin\BoulderBonus\G >nul
+copy /b .\caves_bin\BoulderDash02\T .\caves_bin\BoulderBonus\H >nul
+copy /b .\caves_bin\BoulderDash03\Q .\caves_bin\BoulderBonus\I >nul
+copy /b .\caves_bin\BoulderDash03\R .\caves_bin\BoulderBonus\J >nul
+copy /b .\caves_bin\BoulderDash03\S .\caves_bin\BoulderBonus\K >nul
+copy /b .\caves_bin\BoulderDash03\T .\caves_bin\BoulderBonus\L >nul
+copy /b .\caves_bin\BoulderDashP1\Q .\caves_bin\BoulderBonus\M >nul
+copy /b .\caves_bin\BoulderDashP1\R .\caves_bin\BoulderBonus\N >nul
+copy /b .\caves_bin\BoulderDashP1\S .\caves_bin\BoulderBonus\O >nul
+copy /b .\caves_bin\BoulderDashP1\T .\caves_bin\BoulderBonus\P >nul
+copy /b .\caves_bin\ArnoDash01\Q .\caves_bin\BoulderBonus\Q >nul
+copy /b .\caves_bin\ArnoDash01\R .\caves_bin\BoulderBonus\R >nul
+copy /b .\caves_bin\ArnoDash01\S .\caves_bin\BoulderBonus\S >nul
+copy /b .\caves_bin\ArnoDash01\T .\caves_bin\BoulderBonus\T >nul
+copy /b .\caves_bin\BonusIntro\A .\caves_bin\BoulderBonus\Z >nul
+
 set BDVER=BoulderBonus
 set BDPRG=BBCAVES
 call :create_prg_file_for_version

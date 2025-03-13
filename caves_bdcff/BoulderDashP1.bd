@@ -13,7 +13,7 @@ DiamondValue=2
 AmoebaTime=90
 SlimePermeability=60
 Bombs=6
-Colors=Black Purple Red White
+Colors=Yellow Blue Red
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -49,7 +49,7 @@ DiamondValue=2
 AmoebaTime=80
 Bombs=28
 ZeroGravityTime=255
-Colors=Black Cyan Green White
+Colors=Cyan Purple Pink
 RandSeed=10 13 16 19 22
 RandomFill=SPACE 60 BOULDER 50
 
@@ -87,7 +87,7 @@ DiamondValue=1
 AmoebaTime=80
 SlimePermeability=80
 Bombs=16
-Colors=Black Blue Purple White
+Colors=White Red Lt.Blue
 RandSeed=10 11 12 13 14
 RandomFill=SPACE 60 BOULDER 50
 
@@ -125,7 +125,7 @@ DiamondValue=15
 MagicWallTime=150
 SlimePermeability=10
 Bombs=2
-Colors=Black Cyan Blue White
+Colors=Purple Green Lt.Yellow
 InitialFill=SPACE
 RandSeed=0 4 102 151 100
 RandomFill=BOULDER 100 DIAMOND 80
@@ -163,7 +163,7 @@ CaveTime=45
 DiamondsRequired=35
 DiamondValue=1
 Bombs=2
-Colors=Black Cyan Red White
+Colors=Cyan Blue Pink
 
 [map]
 WWWWWWWWWWWWWWWWWWWW
@@ -189,7 +189,7 @@ DiamondValue=10
 InitialFill=DIRT
 RandSeed=0 4 102 151 100
 RandomFill=SPACE 100 BOULDER 80
-Colors=Black Red Green White
+Colors=Purple Red Yellow
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -227,7 +227,7 @@ BorderTile=SLIME
 InitialFill=DIRT
 RandSeed=0 4 102 151 100
 RandomFill=WALL 90 BOULDER 70 DIAMOND 2
-Colors=Black Blue Green White
+Colors=Yellow Blue Orange
 
 [map]
 ----------------------------------------
@@ -265,7 +265,7 @@ ZeroGravityTime=80
 InitialFill=DIRT
 RandSeed=0 4 102 151 100
 RandomFill=SPACE 100 BOULDER 80
-Colors=Black Cyan Purple White
+Colors=Red Green Lt.Yellow
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -301,7 +301,7 @@ DiamondValue=10
 InitialFill=DIRT
 RandSeed=0 4 102 151 100
 RandomFill=SPACE 100 BOULDER 80
-Colors=Black Green Red White
+Colors=Yellow Blue Pink
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -337,7 +337,7 @@ DiamondsRequired=15
 DiamondValue=15
 SlimePermeability=0
 Bombs=12
-Colors=Black Blue Green Yellow
+Colors=Yellow Cyan Red
 
 [map]
 WWWWWWWWWWWWWWWWWWWW
@@ -365,7 +365,7 @@ Bombs=24
 InitialFill=DIRT
 RandSeed=0 4 102 151 100
 RandomFill=BOULDER 100 WALL 80
-Colors=Black Red Blue Yellow
+Colors=Red Blue Lt.Orange
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -404,7 +404,7 @@ Bombs=24
 InitialFill=DIRT
 RandSeed=10 12 14 16 18
 RandomFill=HEXPANDINGWALL 100 BOULDER 80
-Colors=Black Green Purple Cyan
+Colors=Yellow Green Red
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -439,7 +439,7 @@ DiamondsRequired=35 38 45 48 51
 DiamondValue=3
 AmoebaTime=120
 Bombs=15
-Colors=Black Purple Red Cyan
+Colors=Purple Blue Lt.Yellow
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -477,7 +477,7 @@ BorderTile=SPACE
 InitialFill=DIRT
 RandSeed=0 4 102 151 100
 RandomFill=WALL 90 BOULDER 70 DIAMOND 2
-Colors=Black Cyan Green Yellow
+Colors=Purple Red White
 
 [map]
 ----------------------------------------
@@ -512,7 +512,7 @@ CaveTime=60
 DiamondsRequired=50
 DiamondValue=20
 Bombs=3
-Colors=Black Red Blue White
+Colors=Red Green Lt.Orange
 
 [map]
 WWWWWWWWWWWWWWWWWWWW
@@ -541,7 +541,7 @@ Bombs=30
 InitialFill=DIRT
 RandSeed=10 12 14 16 18
 RandomFill=WALL 90 BOULDER 70 FIREFLYl 2
-Colors=Black Green Purple White
+Colors=Purple Blue Yellow
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -578,7 +578,7 @@ Bombs=20
 InitialFill=DIRT
 RandSeed=0 4 102 151 100
 RandomFill=SLIME 90 BOULDER 70 FIREFLYl 2
-Colors=Black Purple Red Yellow
+Colors=Yellow Purple Red
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -615,7 +615,7 @@ AmoebaTime=60
 InitialFill=DIRT
 RandSeed=10 12 14 16 18
 RandomFill=WALL 90 BOULDER 70 FIREFLYl 2
-Colors=Black Red Green Yellow
+Colors=Yellow Blue Lt.Purple
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -654,7 +654,7 @@ Bombs=20
 InitialFill=DIRT
 RandSeed=0 4 102 151 100
 RandomFill=SPACE 100 BOULDER 80
-Colors=Black Purple Blue White
+Colors=Blue Red Lt.Yellow
 
 [map]
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -689,7 +689,7 @@ CaveTime=30
 DiamondsRequired=1
 DiamondValue=14
 BorderTile=SPACE
-Colors=Black Red Purple White
+Colors=Green Blue White
 
 [map]
                     
@@ -704,6 +704,41 @@ wqw..wwwwwwww..w..w
    w............w   
     wwwwwwwwwwww    
                     
+[/map]
+[/cave]
+
+[cave]
+Name=Cave 21
+DiamondValue=1
+DiamondExtraValue=1
+DiamondsRequired=1 1 1 1 1
+CaveTime=10 10 10 10 10
+BorderTile=HEXPANDINGWALL
+Colors=Yellow Blue Pink
+
+[map]
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+x                  w                   w
+w w w w w w wwwwwwww                   w
+wwwwwwwwwww  c q c w                   w
+wWwWwWwWwWw wwwwwwww                   w
+wwwwwwwwwww  q c q w                   w
+wwPxxxxxxww wwwwwwww                   w
+w x    s  w  c q c w                   w
+w  s  ss  w wwwwwwww                   w
+w sss  s  w  q c q w                   w
+w  s   s  w wwwwwwww                   w
+w xXx sss w        w                   w
+w            w w w w                   w
+wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+w                                      w
+w                                      w
+w                                      w
+w                                      w
+w                                      w
+w                                      w
+w                                      w
+wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 [/map]
 [/cave]
 

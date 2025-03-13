@@ -324,6 +324,7 @@ intro_and_cave_select
   lda #>tile_map_row_1
   sta map_address_high
   jsr draw_borders
+  jsr set_cave_colours
 
   ;set the tile check logic in draw grid (self-mod code)
   ldx #0
@@ -565,9 +566,9 @@ set_title_text
 game_title_loop
   dey
   lda game_title,y
-  sta _SCREEN_ADDR+393,y
-  lda #4  ;purple
-  sta _COLOUR_SCREEN_ADDR+393,y
+  sta _SCREEN_ADDR+390,y
+  lda param_colours+1
+  sta _COLOUR_SCREEN_ADDR+390,y
   cpy #0
   bne game_title_loop
   rts
