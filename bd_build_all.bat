@@ -9,7 +9,7 @@ set CAVE_HIGH=39
 
 :: Build main program
 echo Created game engine
-.\bin\acme.exe -l .\build\symbols -o .\prg\a.prg .\main.asm
+.\bin\acme.exe -l .\build\symbols -o .\prg\bd .\main.asm
 
 :: Create PRG file containing the caves of each version
 if "%MAKECAVES%"=="Y" (
@@ -68,7 +68,7 @@ set BDPRG=BBCAVES
 call :create_prg_file_for_version
 )
 
-goto :build_completed
+goto :build_d64
 
 :: Subroutine to create one large cave file containing all caves A to T with the Z intro cave on the end for a given version
 :create_prg_file_for_version
@@ -76,9 +76,10 @@ cd .\caves_bin\%BDVER%
 copy /b A+B+C+D+E+F+G+H+I+J+K+L+M+N+O+P+Q+R+S+T+Z ..\..\build\caves.bin >nul
 cd ..\..
 copy /b .\build\prgheader.bin+.\build\caves.bin .\build\caves_prg.bin >nul
-move /y .\build\caves_prg.bin .\prg\%BDPRG%.prg >nul
+move /y .\build\caves_prg.bin .\prg\%BDPRG% >nul
 echo Created cave file from %BDVER% called %BDPRG%
 exit /B
 
-:build_completed
+:build_d64
+%PYPATH%\python create_d64.py
 echo Done!

@@ -3171,8 +3171,7 @@ end_version_selection
 load_caves_for_version
 
   ;Get the start of the cave file name to load
-  lda version_selected  ;multiply by 16 (4 x asl)
-  asl
+  lda version_selected  ;multiply by 8 (3 x asl)
   asl
   asl
   asl
@@ -3180,7 +3179,7 @@ load_caves_for_version
   adc #<cave_file_names  ;Load X and Y with address of filename
   tax
   ldy #>cave_file_names  ;Load X and Y with address of filename
-  lda #$0b  ;number of characters in filename (e.g. B1CAVES.PRG)
+  lda #7  ;number of characters in filename (e.g. B1CAVES)
   jsr $ffbd  ;Kernal: SETNAM, set filename
   lda #$00  ;0 is device number
   ldx #$08  ;8 is logical file number

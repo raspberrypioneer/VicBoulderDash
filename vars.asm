@@ -825,13 +825,13 @@ status_message_game_over
 
 ; IMPORTANT: this table must not go-over a page boundary
 cave_file_names
-    !fill 16,0
-    !scr "B1CAVES.PRG     "
-    !scr "B2CAVES.PRG     "
-    !scr "B3CAVES.PRG     "
-    !scr "P1CAVES.PRG     "
-    !scr "A1CAVES.PRG     "
-    !scr "BBCAVES.PRG     "
+    !fill 8,0
+    !scr "B1CAVES "
+    !scr "B2CAVES "
+    !scr "B3CAVES "
+    !scr "P1CAVES "
+    !scr "A1CAVES "
+    !scr "BBCAVES "
 
 version_option_text
     !scr "select version  "

@@ -1,7 +1,4 @@
 TODO:
-rename engine to BD, caves without PRG. Use python and D64 library to create D64, see d64 created manually
-note, in VIC needed to check "Load to Basic start" in settings > machine > autostart settings
-
 add instructions into game
 add sounds
 
@@ -27,3 +24,5 @@ Notes:
 
 Font used: Demo Maker G
 https://home-2002.code-cop.org/c64/font_05.html
+
+Note: In VICE needed to check "Load to Basic start" in settings > machine > autostart settings for load"*",8 instead of 8,1
