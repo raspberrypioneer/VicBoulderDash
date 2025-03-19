@@ -2,10 +2,10 @@
 @echo off
 
 :: Control creation of cave file PRGs (set to Y or N) and set cave load address
-:: .e.g. when all_caves_load_area start address is $3900, set CAVE_LOW=00, CAVE_HIGH=39
+:: .e.g. when all_caves_load_area start address is $4000, set CAVE_LOW=00, CAVE_HIGH=40
 set MAKECAVES=N
 set CAVE_LOW=00
-set CAVE_HIGH=39
+set CAVE_HIGH=40
 
 :: Build main program
 echo Created game engine

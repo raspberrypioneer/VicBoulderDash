@@ -1,5 +1,4 @@
 TODO:
-add instructions into game
 add sounds
 
 add full readme

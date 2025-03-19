@@ -254,7 +254,7 @@ play_ambient_sound = $71
   ;poke36878,(peek(36878)and15or32
   lda _AUXILIARY_COLOUR
   and #15
-  ora #32  ;red
+  ora #240  ;lt.yellow
   sta _AUXILIARY_COLOUR
 
   ;poke36869,peek(36869)and240or15
@@ -266,10 +266,10 @@ play_ambient_sound = $71
 ; *************************************************************************************
 ; Select version to play
 
-  jsr clear_screen
-  lda #15  ;yellow
-  sta _BACKGROUND_BORDER_COLOUR
+  lda #$7f
+  sta datadir_b
 
+  jsr display_instructions
   jsr select_caves_for_version  ;Let the user select the game version to play
   jsr load_caves_for_version  ;Load all caves into memory
 
@@ -384,7 +384,7 @@ show_options_loop
   sta _COLOUR_SCREEN_ADDR+24
   sta _COLOUR_SCREEN_ADDR+25
 
-  ;draw map, waiting for keyboard input
+  ;draw map, waiting for user input
 wait_for_keypress
   jsr update_map
   jsr draw_grid_of_sprites
@@ -3083,8 +3083,9 @@ delay2
 ; Let the user select which version of Boulder Dash to play and load the caves file for it
 select_caves_for_version
 
-    lda #$7f
-    sta datadir_b
+    jsr clear_screen
+    lda #15  ;yellow
+    sta _BACKGROUND_BORDER_COLOUR
 
     lda version_selected
 version_display
@@ -3189,6 +3190,87 @@ load_caves_for_version
   jsr $ffd5  ;Kernal: LOAD, load into memory from device
   rts
 
+; *************************************************************************************
+; Display instruction screens for the game
+display_instructions
+
+  jsr clear_screen
+  lda #12  ;purple
+  sta _BACKGROUND_BORDER_COLOUR
+
+  ldy #0
+  sty current_instruction_page
+  jsr display_page_of_instructions
+
+instructions_loop
+
+  lda joystick_addr  ;Read joystick address
+  and #$20  ;Fire button
+  beq end_instructions
+
+  lda joystick_addr  ;Read joystick address
+  and #$08  ;Down direction
+  beq next_instruction_page
+
+  jmp instructions_loop
+
+end_instructions
+  jsr clear_screen
+  rts
+
+next_instruction_page
+  ldy current_instruction_page
+  iny
+  cpy #6  ;6 pages of instructions
+  bne show_instruction_page
+  ldy #0
+show_instruction_page
+  sty current_instruction_page
+  jsr display_page_of_instructions
+
+  lda #5
+  sta temp1
+  ldx #$ff
+  jsr delay_a_bit_longer
+  jmp instructions_loop
+
+display_page_of_instructions
+  lda instruction_page_low,y
+  sta screen_addr1_low  ;source low
+  lda instruction_page_high,y
+  sta screen_addr1_high  ;source high
+
+  lda #<_SCREEN_ADDR
+  sta screen_addr2_low  ;target low
+  lda #>_SCREEN_ADDR
+  sta screen_addr2_high  ;target high
+
+  ;size is 672 bytes for display (28 lines of 24 columns)
+  lda #$a0
+  sta copy_size  
+  lda #$02
+  sta copy_size+1
+
+  jsr copy_memory
+
+  ;add colour band for sprites used
+  lda #14  ;blue
+  ldy #24
+colour_band_loop
+  dey
+  sta _COLOUR_SCREEN_ADDR+(24*23),y
+  sta _COLOUR_SCREEN_ADDR+(24*24),y
+  cpy #0
+  bne colour_band_loop
+  rts
+
+current_instruction_page
+  !byte 0
+
+instruction_page_low
+  !byte <instructions_1, <instructions_2, <instructions_3, <instructions_4, <instructions_5, <instructions_6
+instruction_page_high
+  !byte >instructions_1, >instructions_2, >instructions_3, >instructions_4, >instructions_5, >instructions_6
 
 ; *************************************************************************************
 !source "vars.asm"
@@ -3197,7 +3279,7 @@ load_caves_for_version
 ; *************************************************************************************
 ; Cave parameters and map for one cave
 ; IMPORTANT: Below is needed to point to the correct memory location for loading caves
-* = $3700
+* = $3800
 !source "cavedata.asm"
 
 ; *************************************************************************************
@@ -3207,11 +3289,243 @@ cave_load_address
 cave_addr_low
 	!byte $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00
 cave_addr_high
-	!byte $39, $3a, $3c, $3e, $40, $41, $43, $45, $47, $48, $4a, $4c, $4e, $4f, $51, $53, $55, $56, $58, $5a, $5c
+	!byte $40, $41, $43, $45, $47, $48, $4a, $4c, $4e, $4f, $51, $53, $55, $56, $58, $5a, $5c, $5d, $5f, $61, $63
 
 ; *************************************************************************************
 ; All caves A to T with the Z intro cave on the end are loaded into memory from this point onwards
 ; each cave is 448 bytes (48 parameters, 400 map) x 21 caves = 9408 bytes
 ; IMPORTANT: Address needs to be first cave_load_address (high-low)
-* = $3900
+* = $4000
 all_caves_load_area
+
+; Instructions are held in the cave load area but overwitten after use when version caves are loaded
+instructions_1
+    !scr "      boulder dash      "
+    !scr "      instructions      "
+    !fill 24," "
+    !scr "  rockford must gather  "
+    !scr " all diamonds needed to "
+    !scr " complete each cave and "
+    !scr " reach the exit before  "
+    !scr "     time runs out      "
+    !fill 24," "
+    !scr "  use joystick to move  "
+    !fill 24," "
+    !scr "   'fire' + direction   "
+    !scr " clears a space, pushes "
+    !scr "a rock, grabs a diamond "
+    !scr "    or plants a bomb    "
+    !scr "without rockford moving "
+    !fill 24," "
+    !scr "'q' kills rockford when "
+    !scr " trapped or when a cave "
+    !scr "    cannot be solved    "
+    !fill 24," "
+    !scr "'space' pauses the game "
+    !fill 24," "
+
+    !fill 8," "
+    !byte 164,165  ;rockford
+    !fill 4," "
+    !byte 80,81  ;diamond
+    !fill 8," "
+    !fill 8," "
+    !byte 166,167  ;rockford
+    !fill 4," "
+    !byte 82,83  ;diamond
+    !fill 8," "
+
+    !fill 24," "
+    !scr "   'down' to continue   "
+    !scr "    'fire' to start     "
+
+instructions_2
+    !scr "  on the menu screens   "
+    !scr " use joystick to change "
+    !scr " boulder dash version,  "
+    !scr "    the cave to play    "
+    !scr "  and difficulty level  "
+    !fill 24," "
+    !scr "'fire' to select choice "
+    !fill 48," "
+    !scr "    score points by     "
+    !scr "   gathering diamonds   "
+    !fill 24," "
+    !scr "   diamonds are more    "
+    !scr "  valuable when fewer   "
+    !scr "   are available and    "
+    !scr "  when rockford's exit  "
+    !scr "   is open and there    "
+    !scr "  are still some left   "
+    !fill 24," "
+    !scr "   every 500 points,    "
+    !scr "  rockford is awarded   "
+    !scr "     a bonus life!      "
+
+    !fill 24," "
+    !fill 8," "
+    !byte 84,85  ;diamond
+    !fill 4," "
+    !byte 96,97  ;rock
+    !fill 8," "
+    !fill 8," "
+    !byte 86,87  ;diamond
+    !fill 4," "
+    !byte 98,99  ;rock
+    !fill 8," "
+    !fill 24," "
+
+    !scr "   'down' to continue   "
+    !scr "    'fire' to start     "
+
+instructions_3
+    !scr "    each cave has a     "
+    !scr "  different puzzle for  "
+    !scr "  rockford to overcome  "
+    !fill 72," "
+    !scr " watch out for falling  "
+    !scr "   rocks and diamonds   "
+    !scr "  which kill rockford!  "
+    !fill 48," "
+    !scr "    butterflies and     "
+    !scr "   fireflies are also   "
+    !scr "        lethal!         "
+    !fill 24," "
+    !scr "rockford can push rocks "
+    !scr "into spaces to get past "
+    !scr "  obstacles, drop them  "
+    !scr " onto fireflies to kill "
+    !scr "them, or drop them onto "
+    !scr " butterflies to change  "
+    !scr "   them into diamonds   "
+
+    !fill 24," "
+    !fill 8," "
+    !byte 104,105  ;firefly
+    !fill 4," "
+    !byte 148,149  ;butterfly
+    !fill 8," "
+    !fill 8," "
+    !byte 106,107  ;firefly
+    !fill 4," "
+    !byte 150,151  ;butterfly
+    !fill 8," "
+    !fill 24," "
+
+    !scr "   'down' to continue   "
+    !scr "    'fire' to start     "
+
+instructions_4
+    !scr "  walls restrict where  "
+    !scr "    rockford can go     " 
+    !fill 24," "
+    !scr "   explosions from a    "
+    !scr " firefly, butterfly or  "
+    !scr "  bomb destroys brick   "
+    !scr " but not titanium walls "
+    !fill 24," "
+    !scr "  drop rocks onto the   "
+    !scr "  magic wall to change  "
+    !scr "  them into diamonds    "
+    !fill 24," "
+    !scr " empty space must exist "
+    !scr "   below the wall for   "
+    !scr "   diamonds to land     "
+    !fill 24," "
+    !scr "  beware it also turns  "
+    !scr "  diamonds into rocks!  "
+    !fill 24," "
+    !scr "   watch out for the    "
+    !scr "growing wall which grows"
+    !scr "  into empty space!     "
+
+    !fill 24," "
+    !fill 8," "
+    !byte 69,70  ;brick wall
+    !fill 4," "
+    !byte 79,79  ;titanium wall
+    !fill 8," "
+    !fill 8," "
+    !byte 69,70  ;brick wall
+    !fill 4," "
+    !byte 79,79  ;titanium wall
+    !fill 8," "
+    !fill 24," "
+
+    !scr "   'down' to continue   "
+    !scr "    'fire' to start     "
+
+instructions_5
+    !scr "trap the growing amoeba "
+    !scr " using rocks to turn it "
+    !scr "     into diamonds      "
+    !fill 24," "
+    !scr " beware it will turn to "
+    !scr "  rock if it grows too  "
+    !scr "         large!         "
+    !fill 24," "
+    !scr "    the amoeba kills    "
+    !scr "     fireflies and      "
+    !scr " turns butterflies into "
+    !scr "        diamonds        "
+    !fill 72," "
+    !scr "  slime looks like the  "
+    !scr "amoeba but does not grow"
+    !fill 24," "
+    !scr "it slows down rocks and "
+    !scr " diamonds from dropping "
+    !scr " into empty space below "
+    !fill 24," "
+
+    !fill 24," "
+    !fill 8," "
+    !byte 120,121  ;amoeba
+    !fill 4," "
+    !byte 124,125  ;amoeba
+    !fill 8," "
+    !fill 8," "
+    !byte 122,123  ;amoeba
+    !fill 4," "
+    !byte 126,127  ;amoeba
+    !fill 8," "
+    !fill 24," "
+
+    !scr "   'down' to continue   "
+    !scr "    'fire' to start     "
+
+instructions_6
+    !scr " rockford can use bombs "
+    !scr "     in some caves      "
+    !fill 24," "
+    !scr "  they explode after a  "
+    !scr "short delay and destroy "
+    !scr "    almost anything!    "
+    !fill 96," "
+    !scr "  some caves have zero  "
+    !scr "  gravity where rocks,  "
+    !scr "   diamonds and bombs   "
+    !scr "      do not fall       "
+    !fill 24," "
+    !scr "rocks looks like bubbles"
+    !scr "  and can be pushed in  "
+    !scr "     all directions     "
+    !fill 24," "
+    !scr "  beware zero gravity   "
+    !scr "      can run out!      "
+    !fill 24," "
+
+    !fill 24," "
+    !fill 8," "
+    !byte 193,194  ;bomb
+    !fill 4," "
+    !byte 160,161  ;bubble
+    !fill 8," "
+    !fill 8," "
+    !byte 195,196  ;bomb
+    !fill 4," "
+    !byte 162,163  ;bubble
+    !fill 8," "
+    !fill 24," "
+
+    !scr "   'down' to continue   "
+    !scr "    'fire' to start     "
