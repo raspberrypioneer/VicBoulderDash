@@ -269,6 +269,10 @@ play_ambient_sound = $71
   lda #$7f
   sta datadir_b
 
+  jsr clear_screen
+  lda #12  ;purple
+  sta _BACKGROUND_BORDER_COLOUR
+
   jsr display_instructions
   jsr select_caves_for_version  ;Let the user select the game version to play
   jsr load_caves_for_version  ;Load all caves into memory
@@ -3083,10 +3087,40 @@ delay2
 ; Let the user select which version of Boulder Dash to play and load the caves file for it
 select_caves_for_version
 
-    jsr clear_screen
-    lda #15  ;yellow
-    sta _BACKGROUND_BORDER_COLOUR
+    ;draw rockford with diamond
+    ldy #0
+big_rockford_draw
+    lda big_rockford,y
+    sta _SCREEN_ADDR+176,y
+    lda big_rockford+8,y
+    sta _SCREEN_ADDR+24+176,y
+    lda big_rockford+16,y
+    sta _SCREEN_ADDR+48+176,y
+    lda big_rockford+24,y
+    sta _SCREEN_ADDR+72+176,y
+    lda big_rockford+32,y
+    sta _SCREEN_ADDR+96+176,y
+    lda big_rockford+40,y
+    sta _SCREEN_ADDR+120+176,y
+    lda big_rockford+48,y
+    sta _SCREEN_ADDR+144+176,y
+    lda big_rockford+56,y
+    sta _SCREEN_ADDR+168+176,y
 
+    lda #14  ;blue
+    sta _COLOUR_SCREEN_ADDR+176,y
+    sta _COLOUR_SCREEN_ADDR+24+176,y
+    sta _COLOUR_SCREEN_ADDR+48+176,y
+    sta _COLOUR_SCREEN_ADDR+72+176,y
+    sta _COLOUR_SCREEN_ADDR+96+176,y
+    sta _COLOUR_SCREEN_ADDR+120+176,y
+    sta _COLOUR_SCREEN_ADDR+144+176,y
+    sta _COLOUR_SCREEN_ADDR+168+176,y
+    iny
+    cpy #8
+    bne big_rockford_draw
+
+    ;version selection
     lda version_selected
 version_display
     jsr show_version_text
@@ -3133,12 +3167,12 @@ show_version_text
     ldx #0
 version_text_loop
     lda version_option_text,x
-    sta _SCREEN_ADDR+312+4,x
+    sta _SCREEN_ADDR+312+4+120,x
     lda version_option_text+1,y
-    sta _SCREEN_ADDR+336+4,x
+    sta _SCREEN_ADDR+336+4+120,x
 version_text_colour
     lda #1
-    sta _COLOUR_SCREEN_ADDR+336+4,x
+    sta _COLOUR_SCREEN_ADDR+336+4+120,x
     iny
     inx
     cpx #15
@@ -3193,10 +3227,6 @@ load_caves_for_version
 ; *************************************************************************************
 ; Display instruction screens for the game
 display_instructions
-
-  jsr clear_screen
-  lda #12  ;purple
-  sta _BACKGROUND_BORDER_COLOUR
 
   ldy #0
   sty current_instruction_page

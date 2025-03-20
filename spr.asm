@@ -227,3 +227,40 @@ redefined_characters
 
 ;Anti-space
 !byte $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff  ;repeated for all 4 characters
+
+;Big Rockford with diamond
+!byte $00, $00, $03, $03, $03, $03, $03, $03
+!byte $00, $00, $f0, $f0, $f0, $ff, $ff, $ff
+!byte $00, $00, $00, $00, $00, $ff, $ff, $ff
+!byte $00, $00, $fc, $fc, $fc, $fc, $fc, $fc
+!byte $fc, $fc, $fc, $fc, $fc, $fc, $03, $03
+!byte $0f, $0f, $0f, $0f, $0f, $0f, $ff, $ff
+!byte $03, $03, $03, $03, $03, $03, $fc, $fc
+!byte $f0, $f0, $f0, $f0, $f0, $f0, $00, $00
+!byte $03, $00, $00, $00, $01, $01, $01, $54
+!byte $ff, $0f, $0f, $0f, $5a, $5a, $5a, $05
+!byte $ff, $ff, $ff, $ff, $aa, $aa, $aa, $55
+!byte $fc, $00, $00, $00, $54, $54, $54, $01
+!byte $00, $00, $00, $00, $00, $00, $00, $50
+!byte $00, $00, $00, $00, $f0, $f0, $f0, $f0
+!byte $54, $54, $54, $54, $54, $00, $00, $00
+!byte $05, $05, $0a, $0a, $0a, $05, $05, $05
+!byte $55, $55, $aa, $aa, $aa, $55, $55, $55
+!byte $01, $01, $01, $01, $01, $00, $00, $00
+!byte $50, $50, $50, $50, $50, $00, $00, $00
+!byte $0f, $0f, $0f, $0f, $af, $af, $fa, $fa
+!byte $af, $af, $fa, $fa, $ff, $ff, $ff, $ff
+!byte $00, $00, $00, $00, $a0, $a0, $f0, $f0
+!byte $00, $00, $00, $02, $02, $02, $03, $03
+!byte $0a, $0a, $0a, $a5, $a5, $a5, $f0, $f0
+!byte $aa, $aa, $aa, $55, $55, $55, $00, $00
+!byte $00, $00, $00, $a8, $a8, $a8, $fc, $fc
+!byte $0f, $0f, $0a, $0a, $0f, $0f, $0f, $0f
+!byte $ff, $ff, $ff, $ff, $af, $af, $fa, $fa
+!byte $03, $03, $03, $03, $55, $55, $55, $00
+!byte $f0, $f0, $f0, $f0, $50, $50, $50, $00
+!byte $fc, $fc, $fc, $fc, $55, $55, $55, $00
+!byte $00, $00, $00, $00, $50, $50, $50, $00
+!byte $ff, $ff, $ff, $ff, $0f, $0f, $0a, $0a
+!byte $f0, $f0, $f0, $f0, $00, $00, $00, $00
+!byte $a0, $a0, $f0, $f0, $00, $00, $00, $00
