@@ -7,6 +7,11 @@ _SCREEN_ADDR = $1000  ;4096
 _COLOUR_SCREEN_ADDR = $9400  ;37888
 _AUXILIARY_COLOUR = $900e  ;36878
 _BACKGROUND_BORDER_COLOUR = $900f  ;36879
+_SOUND1 = $900a  ;36874
+_SOUND2 = $900b  ;36875
+_SOUND3 = $900c  ;36876
+_NOISE = $900d  ;36877
+_VOLUME = $900e  ;36878
 
 ;map elements defines
 map_space=0
@@ -125,19 +130,20 @@ message_game_over=108
 ;sounds
 no_sound=0
 rockford_move_sound=1
-got_earth_sound=2
-got_diamond_sound=3
-got_all_diamonds_sound=4
-bonus_life_sound=4  ;same as got_all_diamonds_sound
-enter_cave_sound=5
-exit_cave_sound=6
-rock_move_sound=7
-diamond_move_sound=8
-hurry_sound=8  ;same as diamond_move_sound
-explosion_sound=9
-magic_wall_sound=10
-growing_wall_sound=10  ;same as magic_wall_sound
-amoeba_sound=11
+got_earth_sound=7
+rock_move_sound=13
+enter_cave_sound=29
+explosion_sound=45
+got_diamond_sound=61
+diamond_move_sound=77
+hurry_sound=77;  ;same as diamond_move_sound
+got_all_diamonds_sound=93
+bonus_life_sound=93  ;same as got_all_diamonds_sound
+exit_cave_sound=114
+magic_wall_sound=130
+growing_wall_sound=130  ;same as magic_wall_sound
+amoeba_sound=146
+random_sound=172
 
 ; *************************************************************************************
 zero_page_start
@@ -160,6 +166,9 @@ key_press = $0a
 sprite_address_low = $23
 sprite_address_high = $24
 
+sound_address_low = $25
+sound_address_high = $26
+
 screen_addr1_low = $40
 screen_addr1_high = $41
 screen_addr2_low = $42
@@ -173,8 +182,8 @@ colour_addr2_high = $47
 map_address_low = $21
 map_address_high = $22
 
-map_rows = $0b
-map_cols = $0c
+map_cols = $0b
+map_rows = $0c
 
 map_rockford_current_position_addr_low = $48
 map_rockford_current_position_addr_high = $49
@@ -219,7 +228,7 @@ tick_counter = $6d
 sub_second_ticks = $6e
 ticks_since_last_direction_key_pressed = $6f
 play_sound_fx = $70
-play_ambient_sound = $71
+play_ambient_sound_fx = $71
 
 ; *************************************************************************************
 * = $12a0  ;for PRG load start
@@ -267,7 +276,7 @@ play_ambient_sound = $71
 ; Select version to play
 
   lda #$7f
-  sta datadir_b
+  sta _DATADIR_B
 
   jsr clear_screen
   lda #12  ;purple
@@ -332,6 +341,7 @@ intro_and_cave_select
 
   ;set the tile check logic in draw grid (self-mod code)
   ldx #0
+  stx set_amoeba_sound+1  ;also turn off amoeba sound if used in intro
   jsr self_mod_code
   lda #skip_null_tile-(skip_tile_check+4)  ;branch forward to skip_null_tile (+4 bytes for cmp,#,beq,#)
   sta skip_tile_check+3
@@ -417,6 +427,9 @@ exit_intro_keypress
   ;nop out the tile check logic in draw grid (self-mod code)
   ldx #12
   jsr self_mod_code
+
+  ldx #amoeba_sound
+  stx set_amoeba_sound+1  ;reassign amoeba sound
 
   ;add back Rockford and growing wall handlers
   lda #<handler_rockford
@@ -558,7 +571,7 @@ initialise_variables
   sta bonus_timer
   sta cell_type_to_sprite  ;ensure space is the first sprite in table
   sta play_sound_fx
-  sta play_ambient_sound
+  sta play_ambient_sound_fx
   sta random_seed
   rts
 
@@ -656,19 +669,14 @@ skip_reveal_or_hide
     dex
     bne reveal_rows_loop
 
-;TODO: Add sounds
     ; create some 'random' audio pitches to play while revealing/hiding the map
-;    jsr get_next_random_byte
-;    ora cave_number
-;    sta sound_random_base  ;set the pitch on the A channel (first byte)
-;    ldx #<sound_random_base
-;    ldy #>sound_random_base
-;    jsr _PLAY_SOUND_FX
-
+    jsr get_next_random_byte
+    ora #192
+    eor cave_number
+    sta sound_random+4
+    lda #random_sound
+    sta play_sound_fx
     rts
-
-;sound_random_base
-;    !byte 7,0,0,0,0,0,0,$7e,16,0,0,0,7,9
 
 ; *************************************************************************************
 ; A small 'pseudo-random' number routine. Generates a sequence of 256 numbers.
@@ -739,9 +747,9 @@ dont_allow_rock_push_up
 
   ; put the end tile on the map
   lda param_rockford_end
-  sta screen_addr1_high
+  sta map_rows
   lda param_rockford_end+1
-  sta screen_addr1_low
+  sta map_cols
   jsr map_xy_position_to_map_address
   ldy #0
   lda #map_titanium_wall
@@ -779,42 +787,6 @@ dont_allow_rock_push_up
   jsr update_player_lives
 
   rts
-
-; *************************************************************************************
-; Set Rockford start position (row/column) on map
-set_rockford_start
-
-  lda param_rockford_start
-  sta screen_addr1_high
-  lda param_rockford_start+1
-  sta screen_addr1_low
-  jsr map_xy_position_to_map_address
-  ldy #0
-  lda #map_rockford_appearing_or_end_position
-  sta (map_address_low),y
-  lda map_address_low
-  sta map_rockford_current_position_addr_low
-  lda map_address_high
-  sta map_rockford_current_position_addr_high
-  rts
-
-; *************************************************************************************
-; Determine next cave to play, which depends on cave sequence, bonus caves and difficulty level
-calculate_next_cave_number_and_level
-
-    ldx cave_number
-    ldy difficulty_level
-    lda cave_play_order,x
-    sta cave_number
-    bne store_cave_number_and_difficulty_level
-    iny
-    cpy #6
-    bne store_cave_number_and_difficulty_level
-    ldy #1
-store_cave_number_and_difficulty_level
-    sty difficulty_level
-    sta cave_number
-    rts
 
 ; *************************************************************************************
 ; Set the status bar display with values applied during the games (cave time, diamonds required, etc)
@@ -1089,8 +1061,6 @@ skip_earth
   jsr update_player_score
 
 skip_got_diamond
-;TODO: Add sounds
-;  jsr update_sounds
   ; update game tick
   dec tick_counter
   lda tick_counter
@@ -1188,6 +1158,27 @@ tile_below_store_row  ;special row for pseudo-random generated caves with extra-
   !fill 64
 
 ; *************************************************************************************
+; screen addresses
+;
+char_screen_high
+  !byte $10, $10, $10, $10, $11, $11, $11, $11, $11, $12, $12, $12
+char_screen_low
+  !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
+char_screen_below_high
+  !byte $10, $10, $10, $11, $11, $11, $11, $11, $11, $12, $12, $12
+char_screen_below_low
+  !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
+
+colour_screen_high
+  !byte $94, $94, $94, $94, $95, $95, $95, $95, $95, $96, $96, $96
+colour_screen_low
+  !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
+colour_screen_below_high
+  !byte $94, $94, $94, $95, $95, $95, $95, $95, $95, $96, $96, $96
+colour_screen_below_low
+  !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
+
+; *************************************************************************************
 ; Draw a full grid of sprites, updating the current map position first
 ; IMPORTANT: this table must not go-over a page boundary
 !align 255, 0
@@ -1198,7 +1189,7 @@ draw_grid_of_sprites
   jsr update_grid_animations
 
   lda #0  ;skip status bar
-  sta temp1  ;grid row counter
+  sta map_rows  ;grid row counter
 loop_plot_row
   tay
 
@@ -1223,7 +1214,7 @@ loop_plot_row
   sta colour_addr2_high
 
   lda #0
-  sta temp2  ;grid column counter
+  sta map_cols  ;grid column counter
 loop_plot_column
 
   ;Get sprite number from map
@@ -1263,7 +1254,7 @@ not_titanium
   sta bottom_right_char+1
 
   ;Plot the top 2 and bottom 2 characters for the tile
-  lda temp2  ;grid column counter
+  lda map_cols  ;grid column counter
   asl  ;Double the counter number to get the screen offset position
   tay
 top_left_char
@@ -1293,8 +1284,8 @@ foreground_colourB
   sta (colour_addr2_low),y
 
 skip_null_tile
-  inc temp2  ;grid column counter
-  lda temp2  ;grid column counter
+  inc map_cols  ;grid column counter
+  lda map_cols  ;grid column counter
   cmp #12  ;12 columns
   bcc loop_plot_column
 
@@ -1306,8 +1297,8 @@ skip_null_tile
   bcc skip_high
   inc map_address_high
 skip_high
-  inc temp1  ;grid row counter
-  lda temp1  ;grid row counter
+  inc map_rows  ;grid row counter
+  lda map_rows  ;grid row counter
   cmp #12  ;12 rows (skip status bar in rows 0, 1)
   ;bcc loop_plot_row
   bcs end_draw
@@ -1317,25 +1308,40 @@ end_draw
   rts
 
 ; *************************************************************************************
-; screen addresses
-;
-char_screen_high
-  !byte $10, $10, $10, $10, $11, $11, $11, $11, $11, $12, $12, $12
-char_screen_low
-  !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
-char_screen_below_high
-  !byte $10, $10, $10, $11, $11, $11, $11, $11, $11, $12, $12, $12
-char_screen_below_low
-  !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
+; Set Rockford start position (row/column) on map
+set_rockford_start
 
-colour_screen_high
-  !byte $94, $94, $94, $94, $95, $95, $95, $95, $95, $96, $96, $96
-colour_screen_low
-  !byte $60, $90, $c0, $f0, $20, $50, $80, $b0, $e0, $10, $40, $70
-colour_screen_below_high
-  !byte $94, $94, $94, $95, $95, $95, $95, $95, $95, $96, $96, $96
-colour_screen_below_low
-  !byte $78, $a8, $d8, $08, $38, $68, $98, $c8, $f8, $28, $58, $88
+  lda param_rockford_start
+  sta map_rows
+  lda param_rockford_start+1
+  sta map_cols
+  jsr map_xy_position_to_map_address
+  ldy #0
+  lda #map_rockford_appearing_or_end_position
+  sta (map_address_low),y
+  lda map_address_low
+  sta map_rockford_current_position_addr_low
+  lda map_address_high
+  sta map_rockford_current_position_addr_high
+  rts
+
+; *************************************************************************************
+; Determine next cave to play, which depends on cave sequence, bonus caves and difficulty level
+calculate_next_cave_number_and_level
+
+    ldx cave_number
+    ldy difficulty_level
+    lda cave_play_order,x
+    sta cave_number
+    bne store_cave_number_and_difficulty_level
+    iny
+    cpy #6
+    bne store_cave_number_and_difficulty_level
+    ldy #1
+store_cave_number_and_difficulty_level
+    sty difficulty_level
+    sta cave_number
+    rts
 
 ; *************************************************************************************
 update_player_score
@@ -1493,8 +1499,6 @@ not_a_bonus_end
 count_up_bonus_at_end_of_stage_loop
   lda #exit_cave_sound
   sta play_sound_fx
-;TODO: Add sounds
-;  jsr update_sounds
 
   ;countdown the remaining time and add to score
   dec time_remaining
@@ -1580,7 +1584,7 @@ got_diamond_return
     rts
 
 ; *************************************************************************************
-; Scrolls the map by setting the tile_map_ptr and visible_top_left_map_x and y
+; Scrolls the map by setting the map_address_high/low and visible_top_left_map_x and y
 ; Note: each time Rockford moves and pushes the boundaries, visible_top_left_map_x and y are incremented / decremented
 ;       this means the visible position is not set based on Rockford's absolute position at the start
 update_map_scroll_position
@@ -1589,66 +1593,65 @@ update_map_scroll_position
     sta map_address_low
     lda map_rockford_current_position_addr_high
     sta map_address_high
-    jsr map_address_to_map_xy_position
+    jsr map_address_to_map_xy_position  ;determine Rockford's row and column position on map, returned in map_rows/cols
     sec
-    sbc visible_top_left_map_x
+    sbc visible_top_left_map_x  ;subtract visible top left x from calculated column position, result in A
     ldx visible_top_left_map_x
     cmp #8  ;how many tiles are visible on the left, going right
     bmi check_for_need_to_scroll_left
-    cpx #28
+    cpx #28  ;how many tiles are visible on the left, going right to stop going right
     bpl check_for_need_to_scroll_down
     inx
 check_for_need_to_scroll_left
     cmp #4  ;how many tiles are visible on the left, going left
     bpl check_for_need_to_scroll_down
-    cpx #1
+    cpx #1  ;how many tiles are visible on the left, going left to stop going left
     bmi check_for_need_to_scroll_down
     dex
 check_for_need_to_scroll_down
     ldy visible_top_left_map_y
-    lda screen_addr1_high
+    lda map_rows
     sec
     sbc visible_top_left_map_y
     cmp #8  ;how many tiles are visible above, going down
     bmi check_for_need_to_scroll_up
-    cpy #10
+    cpy #10  ;how many tiles are visible above, going down to stop going down
     bpl check_for_bonus_stages
     iny
 check_for_need_to_scroll_up
     cmp #4  ;how many tiles are visible above, going up
     bpl check_for_bonus_stages
-    cpy #1
+    cpy #1  ;how many tiles are visible above, going up to stop going up
     bmi check_for_bonus_stages
     dey
 check_for_bonus_stages
     lda param_intermission
     beq skip_bonus_stage
-    lda #0  ; bonus stage y position is fixed (cannot scroll down, only left-right)
-    tay
+    ldy #0  ; bonus stage y position is fixed (cannot scroll down, only left-right)
 skip_bonus_stage
     stx visible_top_left_map_x
-    stx screen_addr1_low
+    stx map_cols
     sty visible_top_left_map_y
-    sty screen_addr1_high
+    sty map_rows
     jsr map_xy_position_to_map_address
     rts
 
 ; *************************************************************************************
-; Map address (which starts at $2000) becomes row/column in screen_addr1_high and low
-; e.g. $2000 is 0,0   $2098 is 2,18   $2140 is 5,0   $210f is 5,15
+; Map address (which starts at $2000) becomes row/column in map_rows/cols
+; e.g. $2000 is 0,0   $2098 is 2,24   $2140 is 5,0   $210f is 5,15
 map_address_to_map_xy_position
 
     lda map_address_high
     and #7
-    sta screen_addr1_high
+    sta map_rows
     lda map_address_low
     asl
-    rol screen_addr1_high
+    rol map_rows
     asl
-    rol screen_addr1_high
+    rol map_rows
     lda map_address_low
     and #$3f
-    sta screen_addr1_low
+    sta map_cols
     rts
 
 ; *************************************************************************************
@@ -1657,14 +1660,14 @@ map_xy_position_to_map_address
 
     lda #0
     sta map_address_low
-    lda screen_addr1_high
+    lda map_rows
     lsr
     ror map_address_low
     lsr
     ror map_address_low
     ora #>tile_map_row_0
     sta map_address_high
-    lda screen_addr1_low
+    lda map_cols
     ora map_address_low
     sta map_address_low
     rts
@@ -2089,9 +2092,8 @@ result_high
 ; Includes logic for falling rocks, diamonds, bombs
 update_map
 
-    ;TODO: make this a user selectable option
-    ; slow it down a bit
-    ldx #$f0
+    ; Slow it down a bit
+    ldx #$ff
     jsr delay_a_bit
 
     lda #20  ; twenty rows
@@ -2707,13 +2709,14 @@ skip_storing_space_above
     sta cell_below
 magic_wall_is_active
     lda #magic_wall_sound
-    sta play_ambient_sound
+    sta play_ambient_sound_fx
     ldx #$1d
     ldy magic_wall_timer
     bne store_magic_wall_state
     ; magic wall becomes inactive once the timer has run out
     lda #no_sound
-    sta play_ambient_sound
+    sta play_ambient_sound_fx
+    jsr note_clear
     ldx #$2d
 store_magic_wall_state
     stx magic_wall_state
@@ -2730,7 +2733,6 @@ handler_amoeba
 
     lda amoeba_replacement
     beq update_amoeba
-    ; play amoeba sound
     tax
     rts
 
@@ -2748,8 +2750,9 @@ update_amoeba
     bne amoeba_return
 amoeba_can_grow
     stx current_amoeba_cell_type
+set_amoeba_sound
     lda #amoeba_sound
-    sta play_ambient_sound
+    sta play_ambient_sound_fx
     inc amoeba_counter
     lda amoeba_counter
     cmp amoeba_growth_interval
@@ -2805,16 +2808,17 @@ update_amoeba_timing
     ldy current_amoeba_cell_type
     bne found_amoeba
     ldx #map_unprocessed | 18  ;via handler_basics and explosion_replacements table converts to diamond
-    bne amoeba_replacement_found
+    bne amoeba_replacement_found  ;always branch
 found_amoeba
     adc #$38
     bcc check_for_amoeba_timeout
     ; towards the end of the level time the amoeba turns into rock
-    lda #no_sound
-    sta play_ambient_sound
     ldx #map_unprocessed | map_rock
 amoeba_replacement_found
     stx amoeba_replacement
+    lda #no_sound
+    sta play_ambient_sound_fx
+    jsr note_clear
 check_for_amoeba_timeout
     lda time_remaining
     cmp #50
@@ -3062,7 +3066,6 @@ clear_screen
 
     rts
 
-
 ; ****************************************************************************************************
 delay_a_bit_longer
 
@@ -3131,23 +3134,23 @@ version_display
     jsr delay_a_bit_longer
 
 version_loop
-    lda joystick_addr  ;Read joystick address
+    lda _JOYSTICK  ;Read joystick address
     and #$20  ;Fire button
     beq end_version_selection
 
-    lda kb_rows  ;Read keyboard address (weird, used for joystick as well!)
+    lda _KEYB_ROWS  ;Read keyboard address (weird, used for joystick as well!)
     and #$80  ;Right direction
     beq version_up
 
-    lda joystick_addr  ;Read joystick address
+    lda _JOYSTICK  ;Read joystick address
     and #$10  ;Left direction
     beq version_down
 
-    lda joystick_addr  ;Read joystick address
+    lda _JOYSTICK  ;Read joystick address
     and #$04  ;Up direction
     beq version_up
 
-    lda joystick_addr  ;Read joystick address
+    lda _JOYSTICK  ;Read joystick address
     and #$08  ;Down direction
     beq version_down
 
@@ -3234,11 +3237,11 @@ display_instructions
 
 instructions_loop
 
-  lda joystick_addr  ;Read joystick address
+  lda _JOYSTICK  ;Read joystick address
   and #$20  ;Fire button
   beq end_instructions
 
-  lda joystick_addr  ;Read joystick address
+  lda _JOYSTICK  ;Read joystick address
   and #$08  ;Down direction
   beq next_instruction_page
 
@@ -3303,13 +3306,13 @@ instruction_page_high
   !byte >instructions_1, >instructions_2, >instructions_3, >instructions_4, >instructions_5, >instructions_6
 
 ; *************************************************************************************
-!source "vars.asm"
-!source "keyboard.asm"
+!source "vars.asm"  ;tables of data
+!source "interrupt.asm"  ;interrupt routines for joystick, keyboard input and sounds
 
 ; *************************************************************************************
 ; Cave parameters and map for one cave
 ; IMPORTANT: Below is needed to point to the correct memory location for loading caves
-* = $3800
+* = $3b00
 !source "cavedata.asm"
 
 ; *************************************************************************************
@@ -3319,13 +3322,13 @@ cave_load_address
 cave_addr_low
 	!byte $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00
 cave_addr_high
-	!byte $40, $41, $43, $45, $47, $48, $4a, $4c, $4e, $4f, $51, $53, $55, $56, $58, $5a, $5c, $5d, $5f, $61, $63
+  !byte $3d, $3e, $40, $42, $44, $45, $47, $49, $4b, $4c, $4e, $50, $52, $53, $55, $57, $59, $5a, $5c, $5e, $60
 
 ; *************************************************************************************
 ; All caves A to T with the Z intro cave on the end are loaded into memory from this point onwards
 ; each cave is 448 bytes (48 parameters, 400 map) x 21 caves = 9408 bytes
 ; IMPORTANT: Address needs to be first cave_load_address (high-low)
-* = $4000
+* = $3d00
 all_caves_load_area
 
 ; Instructions are held in the cave load area but overwitten after use when version caves are loaded
