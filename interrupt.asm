@@ -51,6 +51,14 @@ check_ambient_fx
   ldy active_sound_offset    ;is the sound effect in progress?
   bne continue_the_sound     ;if so, continue it
   ldy play_ambient_sound_fx  ;otherwise, play new sound effet
+
+  ; create some 'random' audio pitches for amoeba, magic wall ambient sound fx
+  jsr get_next_random_byte
+  ora #192
+  eor cave_number
+  sta sound_magic_wall+3
+  sta sound_amoeba+3
+
 continue_the_sound
   jmp play_note_fx
 end_ambient_sound_fx
@@ -102,15 +110,13 @@ sound_fx_exit_cave
   !byte 6,0,0,246,246
   !byte 3,0,0,243,243,0  ;sound with terminator 0
 sound_magic_wall
-  !byte 5,0,0,190,200
-  !byte 6,0,0,230,240
-  !byte 3,0,0,210,220,0  ;sound with terminator 0
+  !byte 2,0,0,0,0
+  !byte 1,0,230,0,0
+  !byte 1,0,235,0,0,0  ;sound with terminator 0
 sound_amoeba
-  !byte 1,234,0,0,0
-  !byte 1,235,0,0,0
-  !byte 1,236,0,0,0
-  !byte 1,237,0,0,0
-  !byte 2,238,0,0,0,0  ;sound with terminator 0
+  !byte 2,0,0,0,0
+  !byte 1,250,0,0,0
+  !byte 1,251,0,0,0,0  ;sound with terminator 0
 sound_random
   !byte 6,0,0,0,250,0  ;sound with terminator 0
 
