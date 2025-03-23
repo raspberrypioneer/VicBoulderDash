@@ -56,6 +56,7 @@ check_ambient_fx
   jsr get_next_random_byte
   ora #192
   eor cave_number
+  and #248
   sta sound_magic_wall+3
   sta sound_amoeba+3
 
@@ -106,17 +107,17 @@ sound_fx_got_all_diamonds
   !byte 9,0,0,241,236
   !byte 6,0,0,244,239,0  ;sound with terminator 0
 sound_fx_exit_cave
-  !byte 9,0,0,249,249
-  !byte 6,0,0,246,246
-  !byte 3,0,0,243,243,0  ;sound with terminator 0
+  !byte 3,0,0,249,249
+  !byte 2,0,0,246,246
+  !byte 1,0,0,243,243,0  ;sound with terminator 0
 sound_magic_wall
   !byte 2,0,0,0,0
   !byte 1,0,230,0,0
   !byte 1,0,235,0,0,0  ;sound with terminator 0
 sound_amoeba
   !byte 2,0,0,0,0
-  !byte 1,250,0,0,0
-  !byte 1,251,0,0,0,0  ;sound with terminator 0
+  !byte 1,0,170,0,0
+  !byte 1,0,180,0,0,0  ;sound with terminator 0
 sound_random
   !byte 6,0,0,0,250,0  ;sound with terminator 0
 

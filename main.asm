@@ -669,6 +669,7 @@ skip_reveal_or_hide
   jsr get_next_random_byte
   ora #192
   eor cave_number
+  and #248
   sta sound_random+4
   lda #random_sound
   sta play_sound_fx
@@ -1117,6 +1118,7 @@ gameplay_loop_local
   jmp gameplay_loop
 
 lose_a_life
+  jsr note_clear
   lda cave_number
   cmp #16  ;don't lose a life on a bonus cave, just move to next cave instead
   bcs unsuccessful_bonus_cave
