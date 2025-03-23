@@ -4,8 +4,6 @@ I recently ported the BBC/Acorn Electron version of Boulder Dash to the Oric so 
 
 This repo really contains 5 different versions of the game. They all run with the same 'game engine' but have different caves. Use the joystick to select the version from the first menu screen, then press fire to confirm.
 
-![Version selection screen](./docs/BDver.png)
-
 - Boulder Dash, Boulder Dash 2 and Boulder Dash 3, are similar to the original games released for other platforms in the 1980's.
 
 ![Boulder Dash](./docs/BD1.png)
