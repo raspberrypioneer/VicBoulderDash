@@ -7,6 +7,11 @@ _SCREEN_ADDR = $1000  ;4096
 _COLOUR_SCREEN_ADDR = $9400  ;37888
 _AUXILIARY_COLOUR = $900e  ;36878
 _BACKGROUND_BORDER_COLOUR = $900f  ;36879
+_HORIZONTAL_ALIGNMENT = $9000  ;36864 bits 0-6 horizontal centering, bit 7 sets interlace scan
+_VERTICAL_ALIGNMENT = $9001  ;36865 vertical centering
+_VICINIT1 = $ede4  ;Initial values for VIC chip registers
+_VICINIT2 = $ede5  ;Initial values for VIC chip registers
+
 _SOUND1 = $900a  ;36874
 _SOUND2 = $900b  ;36875
 _SOUND3 = $900c  ;36876
@@ -254,11 +259,26 @@ play_ambient_sound_fx = $71
   ora #(28*2)  ;28 rows
   sta 36867
 
-  ;poke 36864,12:poke 36865,38
-  lda #10
-  sta 36864  ;horizontal alignment
-  lda #29
-  sta 36865  ;vertical alignment
+  ;Set screen position for PAL / NTSC
+  lda _VICINIT1
+  cmp #12  ;if PAL
+  beq set_screen_position
+  ;set speed adjustment for NTSC as PAL is 10% faster
+  lda #$e8
+  sta slow_down_setting+1
+  ;set NTSC horizontal position
+  lda #3
+  sta pal_ntsc_horizontal_position+1
+  lda _VICINIT1
+set_screen_position
+  sec
+pal_ntsc_horizontal_position
+  sbc #2  ;PAL for NTSC will sbc #3
+  sta _HORIZONTAL_ALIGNMENT
+  lda _VICINIT2
+  sec
+  sbc #8  ;PAL and NTSC
+  sta _VERTICAL_ALIGNMENT
 
   ;poke36878,(peek(36878)and15or32
   lda _AUXILIARY_COLOUR
@@ -2091,7 +2111,8 @@ result_high
 update_map
 
   ; Slow it down a bit
-  ldx #$ff
+slow_down_setting
+  ldx #$ff  ;for PAL, is changed for NTSC
   jsr delay_a_bit
 
   lda #20  ; twenty rows

@@ -25,11 +25,10 @@ This repo really contains 5 different versions of the game. They all run with th
 ## Emulation
 [Vic Boulder Dash](./d64/Vic20%20Boulder%20Dash.d64) is available in the d64 folder.
 
-It has been tested using the VICE emulator and on a real Vic20 (PAL version) with a 32K RAM expansion and joystick attached.
+It has been tested using the VICE emulator (PAL and NTSC) and on a real Vic20 (PAL) with a 32K RAM expansion and joystick attached.
 
 > VICE xvic.exe v3.3 settings
 ```
-machine > model settings > VIC model > PAL
 machine > model settings > RAM blocks > all ticked for max RAM
 settings > machine > autostart settings > tick "Load to Basic start" for load"*",8 instead of 8,1
 ```
@@ -82,6 +81,6 @@ The following sources have all helped to make this development possible and is g
 - The [Demo Maker G font](https://home-2002.code-cop.org/c64/font_05.html) was used for letters, numbers and symbols.
 - The COMPUTE! Mapping the VIC book by Russ Davies is a great reference for understanding all those Vic20 memory locations.
 - The Commodore Vic20 Programmer's reference guide helps with understanding how things are done on the Vic.
-- The [Vic20 Denial / Sleeping Elephant website](https://sleepingelephant.com/) includes a number of helpful titbits and commentary.
+- The [Vic20 Denial / Sleeping Elephant website](https://sleepingelephant.com/) includes a number of helpful titbits and commentary, including contributions from the [forum for this game](https://sleepingelephant.com/ipw-web/bulletin/bb/viewtopic.php?t=11254).
 - The [disassembly of the original BBC/Acorn Electron game](https://github.com/TobyLobster/Boulderdash) by TobyLobster was where this all started.
 - [Arno's Boulder Dash fansite](https://www.boulder-dash.nl/) provided was the source of the BDCFF files used to create the caves. The Arno version 1 caves feature in this game, although there are many others available!
