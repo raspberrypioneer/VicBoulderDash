@@ -14,7 +14,7 @@ echo Created game engine
 :: Create PRG file containing the caves of each version
 if "%MAKECAVES%"=="Y" (
 
-:: Create a binary fine containing the 2 load adddress bytes for the cave prg files
+:: Create a binary file containing the 2 load adddress bytes for the cave prg files
 >.\build\temp.txt echo(%CAVE_LOW% %CAVE_HIGH%
 certutil -f -v -decodehex .\build\temp.txt .\build\prgheader.bin 4 >nul
 del .\build\temp.txt

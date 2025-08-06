@@ -54,10 +54,20 @@ The main program is `main.asm`. It includes other programs such as `spr.asm`, `v
 Used as the basis for autoloading the main program using the keyboard buffer. Also see the basic loader `bdload.bas`.
 > basic
 ```
-5 rem loader pokes LO"BD",8{CR} into keyboard buffer
-10 poke631,76:poke632,111:poke633,34:poke634,66:poke635,66
-20 poke636,34:poke637,44:poke638,56:poke639,13:poke198,9
-30 poke783,0:poke781,161:poke782,18:sys65436:sys58232
+1 PRINT"LOAD"CHR$(34)"BD"CHR$(34)","MID$(STR$(PEEK(186)),2)
+
+#print <CLEAR SCREEN>LOAD"BD",<current device to load from, usually 8>
+
+2 POKE631,19:POKE632,131:POKE198,2:POKE43,162:POKE44,18:POKE4769,0:NEW
+
+#POKE631,19  #put HOME key into keyboard buffer (locations 631-640)
+#POKE632,131  #put LOAD/RUN key into keyboard buffer (locations 631-640)
+#POKE198,2  #simulate typing the 2 characters above in the keyboard buffer
+
+#POKE43,162  #start of basic, low byte
+#POKE44,18  #start of basic, high byte, so basic (18*256)+162 = 4770
+#POKE4769,0  #need to precede address above (4770-1) with zero 
+#NEW  #puts 2 bytes of zero at the address above, no more basic lines will follow
 ```
 
 Used to understand how to test for specific keys in a keyboard scan.
