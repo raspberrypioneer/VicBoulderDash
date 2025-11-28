@@ -825,12 +825,12 @@ status_message_game_over
 
 ; IMPORTANT: this table must not go-over a page boundary
 cave_file_names
-  !fill 8,0
   !scr "B1CAVES "
   !scr "B2CAVES "
   !scr "B3CAVES "
   !scr "P1CAVES "
   !scr "A1CAVES "
+  !scr "A2CAVES "
   !scr "BBCAVES "
 
 big_rockford
@@ -841,25 +841,28 @@ big_rockford
   !byte 236,237,238,239,240,241,234,241
   !byte 242,243,32,244,245,246,234,247
   !byte 32,32,32,32,32,32,248,32
-  !byte 32,32,32,32,32,32,32,32
 
 loading_text
-  !scr " loading..."
+  !scr "loading...     "
+  !byte 0
 
-version_option_text
-  !scr "select version  "
-  !byte 2  ;red
+version_option_text  ;text with end of line indicator (0)
+  !scr "select version "
+  !byte 0
   !scr "boulder dash 1 "
-  !byte 3  ;cyan
+  !byte 0
   !scr "boulder dash 2 "
-  !byte 4  ;purple
+  !byte 0
   !scr "boulder dash 3 "
-  !byte 5  ;green
+  !byte 0
   !scr "boulder dash +1"
-  !byte 7  ;yellow
+  !byte 0
   !scr "arno dash 1    "
-  !byte 6  ;blue
+  !byte 0
+  !scr "arno dash 2    "
+  !byte 0
   !scr "bonus caves    "
+  !byte 0
 
 game_title
   !scr "boulder dash"

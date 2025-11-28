@@ -528,6 +528,7 @@ play_one_life
   jsr set_cave_colours
   jsr update_cave_time
   jsr setup_status_bar
+  jsr update_player_score
   ldy #message_clear
   jsr update_status_message
 
@@ -3107,35 +3108,35 @@ delay2
 ; Let the user select which version of Boulder Dash to play and load the caves file for it
 select_caves_for_version
 
+br_start_pos = (4 * 24) + 8  ;big rockford position: 2 lines x 24 columns + centre
+op_start_pos = (13 * 24) + 4  ;versions start position: 10 lines x 24 columns + centre
+
   ;draw rockford with diamond
   ldy #0
 big_rockford_draw
   lda big_rockford,y
-  sta _SCREEN_ADDR+176,y
+  sta _SCREEN_ADDR+br_start_pos,y
   lda big_rockford+8,y
-  sta _SCREEN_ADDR+24+176,y
+  sta _SCREEN_ADDR+24+br_start_pos,y
   lda big_rockford+16,y
-  sta _SCREEN_ADDR+48+176,y
+  sta _SCREEN_ADDR+48+br_start_pos,y
   lda big_rockford+24,y
-  sta _SCREEN_ADDR+72+176,y
+  sta _SCREEN_ADDR+72+br_start_pos,y
   lda big_rockford+32,y
-  sta _SCREEN_ADDR+96+176,y
+  sta _SCREEN_ADDR+96+br_start_pos,y
   lda big_rockford+40,y
-  sta _SCREEN_ADDR+120+176,y
+  sta _SCREEN_ADDR+120+br_start_pos,y
   lda big_rockford+48,y
-  sta _SCREEN_ADDR+144+176,y
-  lda big_rockford+56,y
-  sta _SCREEN_ADDR+168+176,y
+  sta _SCREEN_ADDR+144+br_start_pos,y
 
   lda #14  ;blue
-  sta _COLOUR_SCREEN_ADDR+176,y
-  sta _COLOUR_SCREEN_ADDR+24+176,y
-  sta _COLOUR_SCREEN_ADDR+48+176,y
-  sta _COLOUR_SCREEN_ADDR+72+176,y
-  sta _COLOUR_SCREEN_ADDR+96+176,y
-  sta _COLOUR_SCREEN_ADDR+120+176,y
-  sta _COLOUR_SCREEN_ADDR+144+176,y
-  sta _COLOUR_SCREEN_ADDR+168+176,y
+  sta _COLOUR_SCREEN_ADDR+br_start_pos,y
+  sta _COLOUR_SCREEN_ADDR+24+br_start_pos,y
+  sta _COLOUR_SCREEN_ADDR+48+br_start_pos,y
+  sta _COLOUR_SCREEN_ADDR+72+br_start_pos,y
+  sta _COLOUR_SCREEN_ADDR+96+br_start_pos,y
+  sta _COLOUR_SCREEN_ADDR+120+br_start_pos,y
+  sta _COLOUR_SCREEN_ADDR+144+br_start_pos,y
   iny
   cpy #8
   bne big_rockford_draw
@@ -3145,23 +3146,22 @@ big_rockford_draw
 version_display
   jsr show_version_text
 
-  lda #5
+version_selection_delay
+  lda #50
   sta temp1
   ldx #$ff
   jsr delay_a_bit_longer
+  lda #5
+  sta version_selection_delay+1
 
 version_loop
-  lda _JOYSTICK  ;Read joystick address
-  and #$20  ;Fire button
-  beq end_version_selection
-
   lda _KEYB_ROWS  ;Read keyboard address (weird, used for joystick as well!)
   and #$80  ;Right direction
-  beq version_up
+  beq version_down
 
   lda _JOYSTICK  ;Read joystick address
   and #$10  ;Left direction
-  beq version_down
+  beq version_up
 
   lda _JOYSTICK  ;Read joystick address
   and #$04  ;Up direction
@@ -3171,32 +3171,55 @@ version_loop
   and #$08  ;Down direction
   beq version_down
 
+  lda _JOYSTICK  ;Read joystick address
+  and #$20  ;Fire button
+  beq end_version_selection
+
   jmp version_loop
 
 show_version_text
-  lda version_selected  ;multiply by 16 (4 x asl)
-  asl
-  asl
-  asl
-  asl
-  tay  ;version text table location in Y
+  ldx #0  ;data position counter
+  ldy #0  ;screen position counter
 
-  lda version_option_text,y  ;set text colour (self-mod)
-  sta version_text_colour+1
-  ;set version text (all lines are the same length)
-  ldx #0
-version_text_loop
+  lda #2  ;red
+  sta set_version_line_colour+1  ;self-mod
+  jsr draw_version_char_line  ;heading line
+
+  ldy #48  ;screen position counter (heading line plus skip line)
+  lda #0  ;versions line counter
+  sta temp1
+version_lines_loop
+  lda #1  ;white
+  sta set_version_line_colour+1  ;self-mod
+  lda temp1
+  cmp version_selected
+  bne draw_version_line
+  lda #3  ;cyan
+  sta set_version_line_colour+1  ;self-mod
+draw_version_line
+  jsr draw_version_char_line  ;version line
+  inc temp1
+  lda temp1
+  cmp #7
+  bne version_lines_loop
+  rts
+
+draw_version_char_line
   lda version_option_text,x
-  sta _SCREEN_ADDR+312+4+120,x
-  lda version_option_text+1,y
-  sta _SCREEN_ADDR+336+4+120,x
-version_text_colour
-  lda #1
-  sta _COLOUR_SCREEN_ADDR+336+4+120,x
-  iny
+  beq end_version_char_line
+  sta _SCREEN_ADDR+op_start_pos,y
+set_version_line_colour
+  lda #2  ;red is heading colour initially, changed later for lines
+  sta _COLOUR_SCREEN_ADDR+op_start_pos,y
   inx
-  cpx #15
-  bne version_text_loop
+  iny
+  bne draw_version_char_line
+end_version_char_line
+  inx  ;count past the end of line character
+  tya
+  clc
+  adc #9  ;Add 9 to screen position for each line (doesn't exceed 255)
+  tay
   rts
 
 version_down
@@ -3212,23 +3235,23 @@ version_up
   jmp version_display
 
 version_selected
-  !byte 1
+  !byte 0
 
 version_selection_cycle_up
-  !byte 0,2,3,4,5,6,1
+  !byte 6,0,1,2,3,4,5
 version_selection_cycle_down
-  !byte 0,6,1,2,3,4,5
+  !byte 1,2,3,4,5,6,0
 
 end_version_selection
 
-  ldx #10
+  ldy #0
 loading_message
-  lda #1  ;white
-  sta _COLOUR_SCREEN_ADDR+507,x
-  lda loading_text,x    
-  sta _SCREEN_ADDR+507,x
-  dex
+  lda loading_text,y
+  beq end_loading_message
+  sta _SCREEN_ADDR+op_start_pos,y
+  iny
   bne loading_message
+end_loading_message
   rts
 
 ; *************************************************************************************
