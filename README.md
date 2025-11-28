@@ -2,7 +2,7 @@
 This is a fan-developed version of Boulder Dash for the Commodore Vic20 with a 32K RAM expansion.
 I recently ported the BBC/Acorn Electron version of Boulder Dash to the Oric so thought I'd try doing the same with the Vic20, my first computer.
 
-This repo really contains 5 different versions of the game. They all run with the same 'game engine' but have different caves. Use the joystick to select the version from the first menu screen, then press fire to confirm.
+This repo really contains 6 different versions of the game. They all run with the same 'game engine' but have different caves. Use the joystick to select the version from the first menu screen, then press fire to confirm.
 
 ![Version selection screen](./docs/BDVer.png)
 
@@ -18,9 +18,11 @@ This repo really contains 5 different versions of the game. They all run with th
 
 ![Boulder Dash +1](./docs/BDP1.png)
 
-- Arno Dash 1 is one example of the many fan-developed caves found on [Arno's Boulder Dash fansite](https://www.boulder-dash.nl/). Boulder Dash format files (BDCFF) are used to create new caves which run with the game-engine.
+- The Arno Dash games are some examples of the many fan-developed caves found on [Arno's Boulder Dash fansite](https://www.boulder-dash.nl/). Boulder Dash format files (BDCFF) are used to create new caves which run with the game-engine. They have been adapted slightly for the Vic20.
 
-![Arno Dash](./docs/AD1.png)
+![Arno Dash 1](./docs/AD1.png)
+
+![Arno Dash 2](./docs/AD2.png)
 
 ## Emulation
 [Vic Boulder Dash](./d64/Vic20%20Boulder%20Dash.d64) is available in the d64 folder.
