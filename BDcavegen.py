@@ -33,7 +33,7 @@ import numpy as np
 from distutils.dir_util import copy_tree
 import shutil
 
-ATTEMPT_BD_COLOUR_MAP = True  #Attempt to map the colours in the BDCFF or use the config file scheme per cave
+ATTEMPT_BD_COLOUR_MAP = False  #Attempt to map the colours in the BDCFF or use the config file scheme per cave
 
 ################################################################################
 #region Helper functions

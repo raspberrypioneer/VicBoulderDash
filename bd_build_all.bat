@@ -39,6 +39,9 @@ set BDVER=ArnoDash01
 set BDPRG=A1CAVES
 call :create_prg_file_for_version
 
+set BDVER=ArnoDash02
+set BDPRG=A2CAVES
+call :create_prg_file_for_version
 
 :: Copy and rename bonus caves from versions above into a bonus cave collection
 copy /b .\caves_bin\BoulderDash01\Q .\caves_bin\BoulderBonus\A >nul

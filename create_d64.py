@@ -8,7 +8,7 @@ from pathlib import Path
 
 base_path = path.dirname(path.abspath(__file__))
 d64_file_path = path.join(base_path,"d64","Vic20 Boulder Dash.d64")
-prg_list = ["BDLOAD","BD","B1CAVES","B2CAVES","B3CAVES","P1CAVES","A1CAVES","BBCAVES"]
+prg_list = ["BDLOAD","BD","B1CAVES","B2CAVES","B3CAVES","P1CAVES","A1CAVES","A2CAVES","BBCAVES"]
 
 disk_label = b"VIC BOULDER DASH"
 disk_id = b"00"
