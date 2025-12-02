@@ -5,7 +5,7 @@
 :: .e.g. when all_caves_load_area start address is $3d00, set CAVE_LOW=00, CAVE_HIGH=3d
 set MAKECAVES=N
 set CAVE_LOW=00
-set CAVE_HIGH=3d
+set CAVE_HIGH=3e
 
 :: Build main program
 echo Created game engine

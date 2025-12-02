@@ -22,7 +22,7 @@ setup_IRQ
 
 ; *************************************************************************************
 interrupt_actions
-  jsr update_sounds
+  jsr update_sounds  ;self-mod into play_theme_tune or update_sounds
   jsr read_user_input
   jmp $eabf  ;hardware interrupt vector
 
@@ -231,3 +231,37 @@ check_pause
 read_input_end
   sty key_press
   rts
+
+; *************************************************************************************
+; Play title screen theme tune
+play_theme_tune
+
+  lda theme_note_duration
+  beq play_theme_note  ;duration of last note complete, start a new one
+  cmp #1
+  bne end_play_theme_note
+  lda #0  ;clear sound between notes
+  sta _SOUND2
+  sta _SOUND3
+end_play_theme_note
+  dec theme_note_duration
+  rts
+
+play_theme_note
+  ldy active_sound_offset
+  lda theme_voice_1,y  ;get the note given in position y
+  bne skip_theme_restart
+  ldy #0  ;reset note position y when tune ends (voice 1 note is zero)
+  lda theme_voice_1,y
+skip_theme_restart
+  sta _SOUND2  ;play tune voice 1
+  lda theme_voice_2,y  ;use the same note position y for voice 2
+  sta _SOUND3  ;play tune voice 2
+  iny  ;next note and save it
+  sty active_sound_offset
+  lda #10  ;reset the duration
+  sta theme_note_duration
+  rts
+
+theme_note_duration
+  !byte 0
