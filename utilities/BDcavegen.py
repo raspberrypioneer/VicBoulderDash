@@ -436,6 +436,7 @@ if __name__ == '__main__':
 
     ### Config and file paths
     base_path = path.dirname(path.abspath(__file__))
+    base_path = path.join(base_path, "..")
     config_file = open(path.join(base_path, "config", "config.json"))
     config_settings = json.load(config_file)
     element_map = config_settings["element_map"]

@@ -75,7 +75,7 @@ goto :build_d64
 
 :: Subroutine to create one large cave file containing all caves A to T with the Z intro cave on the end for a given version
 :create_prg_file_for_version
-cd .\caves_bin\%BDVER%
+cd .\caves_bin\%BDVER%_Vic20
 copy /b A+B+C+D+E+F+G+H+I+J+K+L+M+N+O+P+Q+R+S+T+Z ..\..\build\caves.bin >nul
 cd ..\..
 copy /b .\build\prgheader.bin+.\build\caves.bin .\build\caves_prg.bin >nul
@@ -84,5 +84,5 @@ echo Created cave file from %BDVER% called %BDPRG%
 exit /B
 
 :build_d64
-%PYPATH%\python create_d64.py
+%PYPATH%\python .\utilities\create_d64.py
 echo Done!

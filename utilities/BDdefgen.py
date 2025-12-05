@@ -6,7 +6,7 @@ import os
 from os import path
 import json
 
-CAVE_FILE_FOLDER = "BoulderDash01"  #Specify folder in output to reverse engineer and create BD definition file
+CAVE_FILE_FOLDER = "ArnoDash01"  #Specify folder in output to reverse engineer and create BD definition file
 UNUSED_PARAMS_FROM_POS = 43
 
 ################################################################################
@@ -15,6 +15,10 @@ def generate_BD_for_cave(cave_number, cave_bytes):
     border_tile = 3
     #print(f"[cave]\nName=Cave {cave_number}", end="")
     output_file.write(f"[cave]\nName=Cave {cave_number}")
+            
+    rockford_positions = []
+    next_is_rockford_pos = False
+    tiles_drawn = 0
 
     for i, byte in enumerate(cave_bytes):
         if i < 48:
@@ -24,11 +28,20 @@ def generate_BD_for_cave(cave_number, cave_bytes):
                 if param_address != "#use_previous_address#":
                     #print(f"\n{param_address}={byte}", end="")
                     output_file.write(f"\n{param_address}={byte}")
+
+                    #special cases
+                    if param_address in ["RockfordStart","RockfordExit"]:
+                        rockford_positions.append(byte)
+                        next_is_rockford_pos = True
                 else:
                     #print(f" {byte}", end="")
                     output_file.write(f" {byte}")
                     if param_address == "BorderTile":
                         border_tile = byte
+                    if next_is_rockford_pos:
+                        rockford_positions.append(byte)
+                        next_is_rockford_pos = False
+
         else:
             #Reverse engineer map tiles
             if (i == 48):
@@ -37,12 +50,29 @@ def generate_BD_for_cave(cave_number, cave_bytes):
                 output_file.write("\n\n[map]\n")
                 output_file.write(element_list[border_tile]*40)
 
+                rockford_start = ((rockford_positions[0]-1) * 40) + (rockford_positions[1]+1)
+                rockford_exit = ((rockford_positions[2]-1) * 40) + (rockford_positions[3]+1)
+
             if (i-48) % 20 == 0:
                 #print()
                 output_file.write("\n")
             high, low = byte >> 4, byte & 0x0F
             #print(f"{element_list[high]}{element_list[low]}", end="")
-            output_file.write(f"{element_list[high]}{element_list[low]}")
+            first_tile = element_list[high]
+            second_tile = element_list[low]
+
+            #special case for rockford start and exit
+            if rockford_start == tiles_drawn + 1:
+                first_tile = "P"
+            elif rockford_exit == tiles_drawn + 1:
+                first_tile = "X"
+            elif rockford_start == tiles_drawn + 2:
+                second_tile = "P"
+            elif rockford_exit == tiles_drawn + 2:
+                second_tile = "X"
+
+            output_file.write(f"{first_tile}{second_tile}")
+            tiles_drawn += 2
 
     #print()
     #print(element_list[border_tile]*40, end="")
@@ -76,17 +106,18 @@ if __name__ == '__main__':
 
     ### Config and file paths
     base_path = path.dirname(path.abspath(__file__))
-    config_file = open(path.join(base_path, "config/config.json"))
+    base_path = path.join(base_path, "..")
+    config_file = open(path.join(base_path, "config", "config.json"))
     config_settings = json.load(config_file)
     element_map = config_settings["element_map"]
     element_list = list(element_map.keys())
     parameter_list = config_settings["parameters"]
 
-    cave_letters = ['A','B','C','D','Q','E','F','G','H','R','I','J','K','L','S','M','N','O','P','T','Z']
-    BD_caves_folder = path.join(base_path, "caves_bin", CAVE_FILE_FOLDER)
+    cave_letters = ['A','B','C','D','Q','E','F','G','H','R','I','J','K','L','S','M','N','O','P','T']
+    BD_caves_folder = path.join(base_path, "build", CAVE_FILE_FOLDER)
 
     #Open bd file to write to
-    output_file_name = path.join(BD_caves_folder, BD_caves_folder + ".bd")
+    output_file_name = path.join(BD_caves_folder, CAVE_FILE_FOLDER + ".bd")
     output_file = open(output_file_name, "w")
 
     ### Process each cave file (e.g. A, B, C) in the folder
@@ -100,7 +131,7 @@ if __name__ == '__main__':
             input_cave_file.close()
 
             #Use the BD file contents to generate caves
-            print(f"Generating definition file from cave in {CAVE_FILE_FOLDER}: {cavefile}")
+            print(f"Generating definition file from cave in {CAVE_FILE_FOLDER}: {cavefile} to {output_file_name}")
             generate_BD_for_cave(n, cave_bytes)
             n += 1
 
