@@ -50,8 +50,22 @@ check_ambient_fx
   beq end_ambient_sound_fx   ;if not, end
   ldy active_sound_offset    ;is the sound effect in progress?
   bne continue_the_sound     ;if so, continue it
-  ldy play_ambient_sound_fx  ;otherwise, play new sound effet
+  ldy play_ambient_sound_fx  ;otherwise, play new sound effect
 
+  cpy #random_sound
+  bne amoeba_magic_wall_sound
+
+  ; create some 'random' audio pitches to play while revealing/hiding the map
+  lda get_next_random_byte+1  ;don't use the get_next_random_byte routine which affects the reveal/hide effect
+  ora #192
+  eor cave_number
+  and #248
+  sta sound_random+4
+  lda #random_sound
+  sta play_sound_fx
+  jmp continue_the_sound
+
+amoeba_magic_wall_sound
   ; create some 'random' audio pitches for amoeba, magic wall ambient sound fx
   jsr get_next_random_byte
   ora #192
@@ -67,10 +81,10 @@ end_ambient_sound_fx
 
 ; *************************************************************************************
 ;sound_fx_example
-;  duration,volume,noise,sound1,sound2,sound3
-;  duration,volume,noise,sound1,sound2,sound3
-;  duration,volume,noise,sound1,sound2,sound3
-;  if duration is zero, deactivate sound fx
+;  volume,noise,sound1,sound2,sound3
+;  volume,noise,sound1,sound2,sound3
+;  volume,noise,sound1,sound2,sound3
+;  if volume is zero, deactivate sound fx
 ;
 !align 255, 0
 list_of_sounds
@@ -152,9 +166,15 @@ note_volume
   sty active_sound_offset
   rts
 
+ambient_note_end
+  lda #no_sound
+  sta play_ambient_sound_fx
+  jmp note_clear
+
 note_end
   lda #0
   sta play_sound_fx
+  sta compare_sound_fx+1
 note_clear
   sta _NOISE
   sta _SOUND1

@@ -517,16 +517,6 @@ level_display
   sta _SCREEN_ADDR+34
   jmp wait_for_keypress
 
-cave_selection_cycle_up
-  !byte 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0
-cave_selection_cycle_down
-  !byte 15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14
-
-level_selection_cycle_up
-  !byte 0,2,3,4,5,1
-level_selection_cycle_down
-  !byte 0,5,1,2,3,4
-
 handler_null
   rts
 
@@ -595,7 +585,7 @@ initialise_variables
   sta sub_second_ticks
   lda #4
   sta delay_trying_to_push_rock
-  lda #$0d
+  lda #map_magic_wall
   sta magic_wall_state
   sta amoeba_growth_interval
   lda #message_clear
@@ -612,7 +602,6 @@ initialise_variables
   sta cell_type_to_sprite  ;ensure space is the first sprite in table
   sta play_sound_fx
   sta play_ambient_sound_fx
-  sta random_seed
   rts
 
 ; *************************************************************************************
@@ -660,6 +649,11 @@ prepare_reveal_hide_code
 ; Performed in a loop using the game tick counter
 screen_dissolve_effect
   sta dissolve_to_solid_flag
+
+; use 'random' audio pitches to play while revealing/hiding the map
+  lda #random_sound
+  sta play_ambient_sound_fx
+
   lda #$21
   sta tick_counter
 screen_dissolve_loop
@@ -667,25 +661,29 @@ screen_dissolve_loop
   jsr draw_grid_of_sprites
   dec tick_counter
   bpl screen_dissolve_loop
+
+  jsr ambient_note_end
   rts
 
 dissolve_to_solid_flag
-  !byte 0
-random_seed
   !byte 0
 
 ; *************************************************************************************
 ; Apply the tile show/hide routine for each game play tick
 reveal_or_hide_more_cells
-  ldy #<tile_map_row_1
+  ldy #<tile_map_row_0
   sty map_address_low
-  lda #>tile_map_row_1
+  lda #>tile_map_row_0
   sta map_address_high
 
-  ldx #21
-reveal_rows_loop
-  ldy #38
-reveal_cells_loop
+  ldx #22
+loop_over_rows
+  lda map_address_low
+  ; rows are stored in the first 40 bytes of every 64 bytes, so skip if we have
+  ; exceeded the right range
+  and #63
+  cmp #40
+  bpl skip_to_next_row
   ; progress a counter in a non-obvious pattern
   jsr get_next_random_byte
   ; if it's early in the process (tick counter is low), then branch more often so we
@@ -694,7 +692,7 @@ reveal_cells_loop
   lsr
   lsr
   cmp tick_counter
-  bcc skip_reveal_or_hide
+  bne skip_reveal_or_hide
   lda (map_address_low),y
   ; clear the top bit to reveal the cell...
   and #$7f
@@ -702,34 +700,32 @@ reveal_cells_loop
   ora dissolve_to_solid_flag
   sta (map_address_low),y
 skip_reveal_or_hide
-  dey
-  bne reveal_cells_loop
-  lda #$40
+  inc map_address_low
+  bne skip_increment
+  inc map_address_high
+skip_increment
+  clc
+  bcc loop_over_rows
+  ; move forward to next row. Each row is stored at 64 byte intervals. We have moved
+  ; on 40 so far so add the remainder to get to the next row
+skip_to_next_row
+  lda #64-40
   jsr add_a_to_ptr
   dex
-  bne reveal_rows_loop
-
-  ; create some 'random' audio pitches to play while revealing/hiding the map
-  jsr get_next_random_byte
-  ora #192
-  eor cave_number
-  and #248
-  sta sound_random+4
-  lda #random_sound
-  sta play_sound_fx
+  bne loop_over_rows
   rts
 
 ; *************************************************************************************
 ; A small 'pseudo-random' number routine. Generates a sequence of 256 numbers.
 get_next_random_byte
-  lda random_seed
+  lda #0
   asl
   asl
   asl
   asl
   sec
-  adc random_seed
-  sta random_seed
+  adc get_next_random_byte+1
+  sta get_next_random_byte+1
   rts
 
 ; *************************************************************************************
@@ -810,8 +806,27 @@ dont_allow_rock_push_up
   sta diamonds_required
   lda param_cave_time,x
   sta time_remaining
+
+  ;show or hide the bombs character depending on use in the cave
   lda param_bombs
   sta bomb_counter
+  beq clear_bomb_on_status_bar
+  lda #193
+  sta status_bar_line1+4
+  lda #194
+  sta status_bar_line1+5
+  lda #195
+  sta status_bar_line2+4
+  lda #196
+  sta status_bar_line2+5
+  jmp update_status_bar_from_params
+clear_bomb_on_status_bar
+  lda #32
+  sta status_bar_line1+4
+  sta status_bar_line1+5
+  sta status_bar_line2+4
+  sta status_bar_line2+5
+update_status_bar_from_params
 
   ;cave letter and difficulty level on status bar
   ldy cave_number
@@ -888,6 +903,9 @@ update_diamonds_required
 
 ; *************************************************************************************
 update_bombs_available
+
+  lda param_bombs
+  beq cave_has_no_bombs
   jsr clear_output8
   lda bomb_counter
   jsr single_byte_to_ASCII
@@ -898,6 +916,7 @@ update_bombs_available
   sta status_bar_line3+5
   lda output8+2
   sta status_bar_line3+6
+cave_has_no_bombs
   rts
 
 ; *************************************************************************************
@@ -1062,7 +1081,7 @@ end_update_bomb_delay
 end_update_gravity_timer
   ; update magic wall timer
   lda magic_wall_state
-  cmp #$1d
+  cmp #map_magic_wall | map_anim_state1  ;active
   bne update_death_explosion
   dec magic_wall_timer
 update_death_explosion
@@ -1540,9 +1559,10 @@ not_a_bonus_end
   jsr draw_grid_of_sprites
   lda time_remaining
   beq skip_bonus
-count_up_bonus_at_end_of_stage_loop
+
   lda #exit_cave_sound
-  sta play_sound_fx
+  sta play_ambient_sound_fx
+count_up_bonus_at_end_of_stage_loop
 
   ;countdown the remaining time and add to score
   dec time_remaining
@@ -1559,6 +1579,7 @@ count_up_bonus_at_end_of_stage_loop
   lda time_remaining
   bne count_up_bonus_at_end_of_stage_loop
 skip_bonus
+  jsr ambient_note_end
 
   ;Determine next cave and level to play
   jsr calculate_next_cave_number_and_level
@@ -2744,30 +2765,29 @@ handler_magic_wall
   ldy #map_unprocessed | map_space
   sty cell_above
 skip_storing_space_above
-  cpx #$2d
+  cpx #map_magic_wall | map_anim_state2  ;inactive
   beq store_magic_wall_state
   ; if the cell below isn't empty, then don't store the item below
   ldy cell_below
   bne magic_wall_is_active
   ; store the item that has fallen through the wall below
+  ora #map_anim_state4  ; mark the rock / diamond / bomb as fallen
   sta cell_below
 magic_wall_is_active
   lda #magic_wall_sound
   sta play_ambient_sound_fx
-  ldx #$1d
+  ldx #map_magic_wall | map_anim_state1  ;active
   ldy magic_wall_timer
   bne store_magic_wall_state
   ; magic wall becomes inactive once the timer has run out
-  lda #no_sound
-  sta play_ambient_sound_fx
-  jsr note_clear
-  ldx #$2d
+  jsr ambient_note_end
+  ldx #map_magic_wall | map_anim_state2  ;inactive
 store_magic_wall_state
   stx magic_wall_state
   rts
 
 check_if_magic_wall_is_active
-  cpx #$1d
+  cpx #map_magic_wall | map_anim_state1  ;active
   beq magic_wall_is_active
   rts
 
@@ -2859,9 +2879,7 @@ found_amoeba
   ldx #map_unprocessed | map_rock
 amoeba_replacement_found
   stx amoeba_replacement
-  lda #no_sound
-  sta play_ambient_sound_fx
-  jsr note_clear
+  jsr ambient_note_end
 check_for_amoeba_timeout
   lda time_remaining
   cmp #50
@@ -2908,6 +2926,7 @@ slime_pass_through
   lda #map_unprocessed | map_space   ; something will fall into the wall, clear the cell above
   sta cell_above
   lda item_allowed
+  ora #map_anim_state4               ; mark the rock / diamond / bomb as fallen
   sta cell_below                     ; store the item that has fallen through the wall below
 slime_return
   rts
