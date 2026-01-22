@@ -311,6 +311,7 @@ slime_animated_sprite0
   !byte sprite_amoeba1                                                                ; cell type $09 = map_slime
   !byte $4c                                                                           ; cell type $0A = map_explosion
   !byte sprite_bomb1                                                                  ; cell type $0B = map_bomb
+growing_wall_sprite
   !byte sprite_wall1                                                                  ; cell type $0C = map_growing_wall
   !byte sprite_wall2                                                                  ; cell type $0D = map_magic_wall
   !byte sprite_butterfly1                                                             ; cell type $0E = map_butterfly
@@ -787,8 +788,6 @@ firefly_and_butterfly_next_direction_table  ;next direction to consider (butterf
 ; self-mod code table
 ;
 self_mod_code_table
-  ;used to check growing wall tile: cmp #map_growing_wall, beq skip_null_tile, nop; nop 
-  !byte $c9, map_growing_wall, $f0, 0, $ea, $ea
   ;used to reveal-hide_tiles: cmp #map_unprocessed, bcc not_titanium, lda #map_titanium_wall
   !byte $c9, map_unprocessed, $90, 0, $a9, map_titanium_wall
   ;used to nop out the above
@@ -832,47 +831,6 @@ status_message_bonus_life
 status_message_game_over
   !byte 2  ;red
   !scr "    game over    "
-
-; IMPORTANT: this table must not go-over a page boundary
-cave_file_names
-  !scr "B1CAVES "
-  !scr "B2CAVES "
-  !scr "B3CAVES "
-  !scr "P1CAVES "
-  !scr "A1CAVES "
-  !scr "A2CAVES "
-  !scr "BBCAVES "
-
-big_rockford
-  !byte 209,210,211,212,32,32,32,32
-  !byte 213,214,79,215,216,32,32,32
-  !byte 217,218,219,220,221,32,222,32
-  !byte 223,224,225,226,227,228,229,230
-  !byte 231,232,233,234,235,236,229,236
-  !byte 237,238,32,239,240,241,229,242
-  !byte 32,32,32,32,32,32,243,32
-
-loading_text
-  !scr "loading...     "
-  !byte 0
-
-version_option_text  ;text with end of line indicator (0)
-  !scr "select version "
-  !byte 0
-  !scr "boulder dash 1 "
-  !byte 0
-  !scr "boulder dash 2 "
-  !byte 0
-  !scr "boulder dash 3 "
-  !byte 0
-  !scr "boulder dash +1"
-  !byte 0
-  !scr "arno dash 1    "
-  !byte 0
-  !scr "arno dash 2    "
-  !byte 0
-  !scr "bonus caves    "
-  !byte 0
 
 game_title
   !scr "boulder dash"
