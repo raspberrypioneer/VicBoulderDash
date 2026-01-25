@@ -24,14 +24,14 @@ instructions_1
   !fill 24," "
 
   !fill 8," "
-  !byte 164,165  ;rockford
+  !byte 180,182  ;rockford
   !fill 4," "
-  !byte 80,81  ;diamond
+  !byte 96,98  ;diamond
   !fill 8," "
   !fill 8," "
-  !byte 166,167  ;rockford
+  !byte 181,183  ;rockford
   !fill 4," "
-  !byte 82,83  ;diamond
+  !byte 97,99  ;diamond
   !fill 8," "
 
   !fill 24," "
@@ -63,14 +63,14 @@ instructions_2
 
   !fill 24," "
   !fill 8," "
-  !byte 84,85  ;diamond
+  !byte 96,98  ;diamond
   !fill 4," "
-  !byte 96,97  ;rock
+  !byte 74,76  ;rock
   !fill 8," "
   !fill 8," "
-  !byte 86,87  ;diamond
+  !byte 97,99  ;diamond
   !fill 4," "
-  !byte 98,99  ;rock
+  !byte 75,77  ;rock
   !fill 8," "
   !fill 24," "
 
@@ -100,14 +100,14 @@ instructions_3
 
   !fill 24," "
   !fill 8," "
-  !byte 104,105  ;firefly
+  !byte 124,126  ;firefly
   !fill 4," "
-  !byte 148,149  ;butterfly
+  !byte 112,114  ;butterfly
   !fill 8," "
   !fill 8," "
-  !byte 106,107  ;firefly
+  !byte 125,127  ;firefly
   !fill 4," "
-  !byte 150,151  ;butterfly
+  !byte 113,115  ;butterfly
   !fill 8," "
   !fill 24," "
 
@@ -140,14 +140,14 @@ instructions_4
 
   !fill 24," "
   !fill 8," "
-  !byte 69,70  ;brick wall
+  !byte 86,86  ;brick wall
   !fill 4," "
-  !byte 79,79  ;titanium wall
+  !byte 87,87  ;titanium wall
   !fill 8," "
   !fill 8," "
-  !byte 69,70  ;brick wall
+  !byte 86,86  ;brick wall
   !fill 4," "
-  !byte 79,79  ;titanium wall
+  !byte 87,87  ;titanium wall
   !fill 8," "
   !fill 24," "
 
@@ -178,14 +178,14 @@ instructions_5
 
   !fill 24," "
   !fill 8," "
-  !byte 120,121  ;amoeba
+  !byte 140,142  ;amoeba
   !fill 4," "
-  !byte 124,125  ;amoeba
+  !byte 144,146  ;amoeba
   !fill 8," "
   !fill 8," "
-  !byte 122,123  ;amoeba
+  !byte 141,143  ;amoeba
   !fill 4," "
-  !byte 126,127  ;amoeba
+  !byte 145,147  ;amoeba
   !fill 8," "
   !fill 24," "
 
@@ -215,14 +215,14 @@ instructions_6
 
   !fill 24," "
   !fill 8," "
-  !byte 193,194  ;bomb
+  !byte 148,150  ;bomb
   !fill 4," "
-  !byte 160,161  ;bubble
+  !byte 82,84  ;bubble
   !fill 8," "
   !fill 8," "
-  !byte 195,196  ;bomb
+  !byte 149,151  ;bomb
   !fill 4," "
-  !byte 162,163  ;bubble
+  !byte 83,85  ;bubble
   !fill 8," "
   !fill 24," "
 

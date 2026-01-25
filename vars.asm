@@ -124,128 +124,136 @@ sprite_addresses_high
 sprite_addr_space
   !byte 32,32,32,32
 
+sprite_addr_anti_space
+  !byte 65,65,65,65
+
+sprite_addr_pathway
+  !byte 66,67,68,69
+
 sprite_addr_earth1
 sprite_addr_earth2
-  !byte 65,66,67,68
+  !byte 70,71,72,73
+
+sprite_addr_boulder1
+  !byte 74,75,76,77
+sprite_addr_boulder2
+  !byte 78,79,80,81
+sprite_addr_bubble
+  !byte 82,83,84,85
 
 sprite_addr_wall1  ;reuse characters
 sprite_addr_wall2
-  !byte 69,69,69,69
-
-sprite_addr_magic_wall1
-  !byte 70,70,70,70
-sprite_addr_magic_wall2
-  !byte 71,71,71,71
-sprite_addr_magic_wall3
-  !byte 72,72,72,72
-sprite_addr_magic_wall4
-  !byte 73,73,73,73
+  !byte 86,86,86,86
 
 sprite_addr_titanium_wall1  ;reuse characters
 sprite_addr_titanium_wall2
-  !byte 74,74,74,74
+  !byte 87,87,87,87
 
-sprite_addr_pathway
-  !byte 75,76,77,78
-
-sprite_addr_anti_space
-  !byte 79,79,79,79
-
-sprite_addr_diamond1
-  !byte 80,81,82,83
-sprite_addr_diamond2
-  !byte 84,85,86,87
-sprite_addr_diamond3
-  !byte 88,89,90,91
-sprite_addr_diamond4
-  !byte 92,93,94,95
-
-sprite_addr_boulder1
-  !byte 96,97,98,99
-sprite_addr_boulder2
-  !byte 100,101,102,103
-
-sprite_addr_firefly1
-  !byte 104,105,106,107
-sprite_addr_firefly2
-  !byte 108,109,110,111
-sprite_addr_firefly3
-  !byte 112,113,114,115
-sprite_addr_firefly4
-  !byte 116,117,118,119
-
-sprite_addr_amoeba1
-  !byte 120,121,122,123
-sprite_addr_amoeba2
-  !byte 124,125,126,127
+sprite_addr_magic_wall1
+  !byte 88,88,88,88
+sprite_addr_magic_wall2
+  !byte 89,89,89,89
+sprite_addr_magic_wall3
+  !byte 90,90,90,90
+sprite_addr_magic_wall4
+  !byte 91,91,91,91
 
 sprite_addr_box
-  !byte 128,129,130,131
+  !byte 92,93,94,95
 
-sprite_addr_explosion1
-  !byte 132,133,134,135
-sprite_addr_explosion2
-  !byte 136,137,138,139
-sprite_addr_explosion3
-  !byte 140,141,142,143
-sprite_addr_explosion4
-  !byte 144,145,146,147
+sprite_addr_diamond1
+  !byte 96,97,98,99
+sprite_addr_diamond2
+  !byte 100,101,102,103
+sprite_addr_diamond3
+  !byte 104,105,106,107
+sprite_addr_diamond4
+  !byte 108,109,110,111
 
 sprite_addr_butterfly1
-  !byte 148,149,150,151
+  !byte 112,113,114,115
 sprite_addr_butterfly2
-  !byte 152,153,154,155
+  !byte 116,117,118,119
 sprite_addr_butterfly3
-  !byte 156,157,158,159
+  !byte 120,121,122,123
 
-sprite_addr_bubble
-  !byte 160,161,162,163
+sprite_addr_firefly1
+  !byte 124,125,126,127
+sprite_addr_firefly2
+  !byte 128,129,130,131
+sprite_addr_firefly3
+  !byte 132,133,134,135
+sprite_addr_firefly4
+  !byte 136,137,138,139
 
-sprite_addr_rockford_blinking1  ;aka 'normal' Rockford
-  !byte 164,165,166,167
-sprite_addr_rockford_blinking2  ;eyes blink
-  !byte 168,169,166,167
-sprite_addr_rockford_blinking3  ;eyes close
-  !byte 170,171,166,167
-sprite_addr_rockford_winking1   ;right eye blink
-  !byte 164,169,166,167
-sprite_addr_rockford_winking2   ;right eye close
-  !byte 164,171,166,167
-sprite_addr_rockford_moving_down1  ;aka wait 1 - fold arms
-  !byte 164,165,172,173
-sprite_addr_rockford_moving_down2  ;aka wait 2 - fold arms, tap foot
-  !byte 164,165,174,173
-sprite_addr_rockford_moving_down3  ;aka wait 3 - eyes blink, fold arms
-  !byte 168,169,172,173
-sprite_addr_rockford_moving_up1  ;aka wait 4 - eyes close, tap foot
-  !byte 170,171,174,173
-sprite_addr_rockford_moving_up2  ;aka wait 5 - eyes close, fold arms
-  !byte 170,171,172,173
-sprite_addr_rockford_moving_left1  ;head left, legs full
-  !byte 175,176,177,178
-sprite_addr_rockford_moving_left2  ;head left, legs part
-  !byte 175,176,179,180
-sprite_addr_rockford_moving_left3  ;head left, legs part-stand
-  !byte 175,176,181,182
-sprite_addr_rockford_moving_left4  ;head left, legs stand
-  !byte 175,176,181,183
-sprite_addr_rockford_moving_right1  ;head right, legs stand
-  !byte 184,185,186,187
-sprite_addr_rockford_moving_right2  ;head right, legs part-stand
-  !byte 184,185,188,187
-sprite_addr_rockford_moving_right3  ;head right, legs part
-  !byte 184,185,189,190
-sprite_addr_rockford_moving_right4  ;head right, legs full
-  !byte 184,185,191,192
+sprite_addr_amoeba1
+  !byte 140,141,142,143
+sprite_addr_amoeba2
+  !byte 144,145,146,147
 
 sprite_addr_bomb
-  !byte 193,194,195,196
+  !byte 148,149,150,151
 sprite_addr_bomb1
-  !byte 197,198,199,200
+  !byte 152,153,154,155
 sprite_addr_bomb2
-  !byte 201,202,203,204
+  !byte 156,157,158,159
 sprite_addr_bomb3
-  !byte 205,206,207,208
+  !byte 160,161,162,163
+
+sprite_addr_explosion1
+  !byte 164,165,166,167
+sprite_addr_explosion2
+  !byte 168,169,170,171
+sprite_addr_explosion3
+  !byte 172,173,174,175
+sprite_addr_explosion4
+  !byte 176,177,178,179
+
+lfc = 180  ;left face
+rfc = 182  ;right face
+lbo = 181  ;left body
+rbo = 183  ;right body
+leb = 184  ;left eye blink
+reb = 185  ;right eye blink
+lec = 186  ;left eye close
+rec = 187  ;right eye close
+
+sprite_addr_rockford_blinking1  ;aka 'normal' Rockford
+  !byte lfc,lbo,rfc,rbo
+sprite_addr_rockford_blinking2  ;eyes blink
+  !byte leb,lbo,reb,rbo
+sprite_addr_rockford_blinking3  ;eyes close
+  !byte lec,lbo,rec,rbo
+sprite_addr_rockford_winking1   ;right eye blink
+  !byte lfc,lbo,reb,rbo
+sprite_addr_rockford_winking2   ;right eye close
+  !byte lfc,lbo,rec,rbo
+sprite_addr_rockford_moving_down1  ;aka wait 1 - fold arms
+  !byte lfc,188,rfc,189
+sprite_addr_rockford_moving_down2  ;aka wait 2 - fold arms, tap foot
+  !byte lfc,190,rfc,189
+sprite_addr_rockford_moving_down3  ;aka wait 3 - eyes blink, fold arms
+  !byte 184,188,reb,189
+sprite_addr_rockford_moving_up1  ;aka wait 4 - eyes close, tap foot
+  !byte lec,190,rec,189
+sprite_addr_rockford_moving_up2  ;aka wait 5 - eyes close, fold arms
+  !byte lec,188,rec,189
+sprite_addr_rockford_moving_left1  ;head left, legs full
+  !byte 191,193,192,194
+sprite_addr_rockford_moving_left2  ;head left, legs part
+  !byte 191,195,192,196
+sprite_addr_rockford_moving_left3  ;head left, legs part-stand
+  !byte 191,197,192,198
+sprite_addr_rockford_moving_left4  ;head left, legs stand
+  !byte 191,197,192,199
+sprite_addr_rockford_moving_right1  ;head right, legs stand
+  !byte 200,202,201,203
+sprite_addr_rockford_moving_right2  ;head right, legs part-stand
+  !byte 200,204,201,203
+sprite_addr_rockford_moving_right3  ;head right, legs part
+  !byte 200,205,201,206
+sprite_addr_rockford_moving_right4  ;head right, legs full
+  !byte 200,207,201,208
 
 ; *************************************************************************************
 ; Sprite handler routine addresses
@@ -797,14 +805,14 @@ self_mod_code_table
 ; status bar and messages
 ;
 status_bar_line1
-  !byte 80,81,32,32,193,194
+  !byte 96,98,32,32,148,150
   !fill 16,32
-  !byte 164,165
+  !byte 180,182
 
 status_bar_line2
-  !byte 82,83,32,32,195,196
+  !byte 97,99,32,32,149,151
   !scr "  time  cave Z9 "
-  !byte 166,167
+  !byte 181,183
 
 status_bar_line3
   !fill 24,32
@@ -837,10 +845,10 @@ game_title
 
 game_options
 options_cave_select
-  !byte 164,165
+  !byte 180,182
   !scr "  cave  a  left right "
 options_level_select
-  !byte 166,167
+  !byte 181,183
   !scr "  level 1  up down    "
 options_start
   !scr "  press fire to start   "

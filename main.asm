@@ -174,10 +174,10 @@ sprite_address_high = $24
 sound_address_low = $25
 sound_address_high = $26
 
-screen_addr1_low = $40
-screen_addr1_high = $41
-screen_addr2_low = $42
-screen_addr2_high = $43
+copy_addr1_low = $40
+copy_addr1_high = $41
+copy_addr2_low = $42
+copy_addr2_high = $43
 
 colour_addr1_low = $44
 colour_addr1_high = $45
@@ -187,8 +187,7 @@ colour_addr2_high = $47
 map_address_low = $21
 map_address_high = $22
 
-cache_temp1 = $27
-cache_temp2 = $28
+cache_counter = $27
 
 map_cols = $0b
 map_rows = $0c
@@ -825,13 +824,13 @@ dont_allow_rock_push_up
   lda param_bombs
   sta bomb_counter
   beq clear_bomb_on_status_bar
-  lda #193
+  lda #148
   sta status_bar_line1+4
-  lda #194
+  lda #150
   sta status_bar_line1+5
-  lda #195
+  lda #149
   sta status_bar_line2+4
-  lda #196
+  lda #151
   sta status_bar_line2+5
   jmp update_status_bar_from_params
 clear_bomb_on_status_bar
@@ -1190,26 +1189,29 @@ draw_grid_of_sprites
 
   lda #0  ;skip status bar
   sta map_rows  ;grid row counter
-  sta cache_temp2
+  sta cache_counter
 loop_plot_row
   tay
 
   lda char_screen_low,y
-  sta screen_addr1_low
+  sta top_left_char_addr+1
+  sta top_right_char_addr+1
   lda char_screen_high,y
-  sta screen_addr1_high
+  sta top_left_char_addr+2
+  sta top_right_char_addr+2
 
   lda char_screen_below_low,y
-  sta screen_addr2_low
+  sta bottom_left_char_addr+1
+  sta bottom_right_char_addr+1
   lda char_screen_below_high,y
-  sta screen_addr2_high
+  sta bottom_left_char_addr+2
+  sta bottom_right_char_addr+2
 
-  lda #0
-  sta map_cols  ;grid column counter
+  ldy #0
 loop_plot_column
+  sty map_cols  ;grid column counter
 
   ;Get sprite number from map
-  tay
   lda (map_address_low),y
 
   ;Next 6 bytes are changed with self-mod code
@@ -1219,21 +1221,14 @@ skip_tile_check
   lda #map_titanium_wall
 not_titanium
 
+  ldx cache_counter
+
   tay
   lda cell_type_to_sprite,y
-
-  ;Check if the sprite on screen (in the cache) is the same one as the map
-  sta sprite_in_cache+1
   tay
-  sty cache_temp1
-  ldy cache_temp2
-  lda screen_cache_map,y
-sprite_in_cache
-  cmp #0
+  cmp screen_cache_map,x
   beq skip_null_tile  ;Sprite is the same, don't need to redraw it
-  lda sprite_in_cache+1
-  sta screen_cache_map,y
-  ldy cache_temp1
+  sta screen_cache_map,x
 
   ;Lookup sprite high/low address in the sprite list table
   lda sprite_addresses_low,y
@@ -1241,44 +1236,35 @@ sprite_in_cache
   lda sprite_addresses_high,y
   sta sprite_address_high
 
-  ;Transfer the 4 bytes which make up the sprite tile to the locations below (self-mod code)
-  ldy #0
-  lda (sprite_address_low),y
-  sta top_left_char+1
-  iny
-  lda (sprite_address_low),y
-  sta top_right_char+1
-  iny
-  lda (sprite_address_low),y
-  sta bottom_left_char+1
-  iny
-  lda (sprite_address_low),y
-  sta bottom_right_char+1
-
   ;Plot the top 2 and bottom 2 characters for the tile
   lda map_cols  ;grid column counter
   asl  ;Double the counter number to get the screen offset position
-  tay
-top_left_char
-  lda #65
-  sta (screen_addr1_low),y
-bottom_left_char
-  lda #67
-  sta (screen_addr2_low),y
-  iny
+  tax
 
-top_right_char
-  lda #66
-  sta (screen_addr1_low),y
-bottom_right_char
-  lda #68
-  sta (screen_addr2_low),y
+  ;Transfer the 4 bytes which make up the sprite tile to the locations below (self-mod code)
+  ldy #0
+  lda (sprite_address_low),y
+top_left_char_addr
+  sta top_left_char_addr,x  ;self-mod, see above
+  iny
+  lda (sprite_address_low),y
+bottom_left_char_addr
+  sta bottom_left_char_addr,x  ;self-mod, see above
+  iny
+  inx
+  lda (sprite_address_low),y
+top_right_char_addr
+  sta top_right_char_addr,x  ;self-mod, see above
+  iny
+  lda (sprite_address_low),y
+bottom_right_char_addr
+  sta bottom_right_char_addr,x  ;self-mod, see above
 
 skip_null_tile
-  inc cache_temp2
-  inc map_cols  ;grid column counter
-  lda map_cols  ;grid column counter
-  cmp #12  ;12 columns
+  inc cache_counter  ;never exceeds 12 row x 12 columns (1 byte)
+  ldy map_cols
+  iny
+  cpy #12  ;12 columns
   bcc loop_plot_column
 
   ; move tile pointer on to next row (64 bytes)
@@ -1822,14 +1808,14 @@ load_cave_number_stored
 
   tay
   lda cave_addr_low,y
-  sta screen_addr1_low  ;source low
+  sta copy_addr1_low  ;source low
   lda cave_addr_high,y
-  sta screen_addr1_high  ;source high
+  sta copy_addr1_high  ;source high
 
   lda #<cave_parameter_data
-  sta screen_addr2_low  ;target low
+  sta copy_addr2_low  ;target low
   lda #>cave_parameter_data
-  sta screen_addr2_high  ;target high
+  sta copy_addr2_high  ;target high
 
   ;size is always 448 bytes per cave
   lda #$c0
@@ -1851,9 +1837,9 @@ set_cave_colours
   sta _BACKGROUND_BORDER_COLOUR
 
   lda #<_COLOUR_SCREEN_ADDR+96
-  sta screen_addr2_low  ;target low
+  sta copy_addr2_low  ;target low
   lda #>_COLOUR_SCREEN_ADDR+96
-  sta screen_addr2_high  ;target high
+  sta copy_addr2_high  ;target high
 
   lda #$40  ;size is 24 lines x 24 characters
   sta clear_size  
@@ -2758,7 +2744,6 @@ skip_storing_space_above
   ldy cell_below
   bne magic_wall_is_active
   ; store the item that has fallen through the wall below
-  ora #map_anim_state4  ; mark the rock / diamond / bomb as fallen
   sta cell_below
 magic_wall_is_active
   lda #magic_wall_sound
@@ -3002,20 +2987,20 @@ copy_memory
   ldx copy_size+1
   beq copy_remaining_bytes
 copy_a_page
-  lda (screen_addr1_low),y
-  sta (screen_addr2_low),y
+  lda (copy_addr1_low),y
+  sta (copy_addr2_low),y
   iny
   bne copy_a_page
-  inc screen_addr1_high
-  inc screen_addr2_high
+  inc copy_addr1_high
+  inc copy_addr2_high
   dex
   bne copy_a_page
 copy_remaining_bytes
   ldx copy_size
   beq copy_return
 copy_a_byte
-  lda (screen_addr1_low),y
-  sta (screen_addr2_low),y
+  lda (copy_addr1_low),y
+  sta (copy_addr2_low),y
   iny
   dex
   bne copy_a_byte
@@ -3037,10 +3022,10 @@ clear_memory
   beq clear_remaining_bytes
 clear_a_page
   lda clear_to_byte+1
-  sta (screen_addr2_low),y
+  sta (copy_addr2_low),y
   iny
   bne clear_a_page
-  inc screen_addr2_high
+  inc copy_addr2_high
   dex
   bne clear_a_page
 clear_remaining_bytes
@@ -3048,7 +3033,7 @@ clear_remaining_bytes
   beq clear_return
 clear_to_byte
   lda #0  ;self-mod, see above
-  sta (screen_addr2_low),y
+  sta (copy_addr2_low),y
   iny
   dex
   bne clear_to_byte
@@ -3065,9 +3050,9 @@ clear_screen
 
   ;set screen memory as target
   lda #<_SCREEN_ADDR
-  sta screen_addr2_low  ;target low
+  sta copy_addr2_low  ;target low
   lda #>_SCREEN_ADDR
-  sta screen_addr2_high  ;target high
+  sta copy_addr2_high  ;target high
 
   ;size is 672 bytes for display (28 lines of 24 columns)
   lda #$a0
@@ -3080,9 +3065,9 @@ clear_screen
 
   ;set colour memory as target
   lda #<_COLOUR_SCREEN_ADDR
-  sta screen_addr2_low  ;target low
+  sta copy_addr2_low  ;target low
   lda #>_COLOUR_SCREEN_ADDR
-  sta screen_addr2_high  ;target high
+  sta copy_addr2_high  ;target high
 
   ;size is 672 bytes for display (28 lines of 24 columns)
   lda #$a0
@@ -3318,14 +3303,14 @@ show_instruction_page
 
 display_page_of_instructions
   lda instruction_page_low,y
-  sta screen_addr1_low  ;source low
+  sta copy_addr1_low  ;source low
   lda instruction_page_high,y
-  sta screen_addr1_high  ;source high
+  sta copy_addr1_high  ;source high
 
   lda #<_SCREEN_ADDR
-  sta screen_addr2_low  ;target low
+  sta copy_addr2_low  ;target low
   lda #>_SCREEN_ADDR
-  sta screen_addr2_high  ;target high
+  sta copy_addr2_high  ;target high
 
   ;size is 672 bytes for display (28 lines of 24 columns)
   lda #$a0
