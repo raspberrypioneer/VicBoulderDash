@@ -1,16 +1,10 @@
 _JOYSTICK = $9111  ;37137
 _KEYB_ROWS = $9120  ;37152
 _KEYB_COLS = $9121  ;37153
-_DATADIR_B = $9122  ;37154
 _DATADIR_A = $9123  ;37155
 
 ; *************************************************************************************
 setup_IRQ
-
-  lda #0
-  sta _DATADIR_B
-  lda #$ff
-  sta _DATADIR_A
 
   sei
   lda #<interrupt_actions
@@ -189,6 +183,9 @@ note_clear
 ; *************************************************************************************
 ;Read user input
 read_user_input
+  lda #$7f
+  sta _DATADIR_A
+
   ldy #0
 check_fire_button
   lda _JOYSTICK  ;Read joystick address
@@ -250,6 +247,9 @@ check_pause
 
 read_input_end
   sty key_press
+
+  lda #$80
+  sta _DATADIR_A
   rts
 
 ; *************************************************************************************

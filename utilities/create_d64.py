@@ -9,7 +9,9 @@ from pathlib import Path
 base_path = path.dirname(path.abspath(__file__))
 base_path = path.join(base_path, "..")
 d64_file_path = path.join(base_path,"d64","Vic20 Boulder Dash.d64")
-prg_list = ["BDLOAD","BD","B1CAVES","B2CAVES","B3CAVES","P1CAVES","A1CAVES","A2CAVES","BBCAVES"]
+prg_list = ["BDLOAD","BD","INS-1","INS-2","INS-3","INS-4","INS-5","INS-6"]
+version_codes = ["BD1","BD2","BD3","BP1","AR1","AR2"]
+cave_letters = ['A','B','C','D','Q','E','F','G','H','R','I','J','K','L','S','M','N','O','P','T','Z']
 
 disk_label = b"VIC BOULDER DASH"
 disk_id = b"00"
@@ -23,4 +25,13 @@ with d64_image as image:
         with open(path.join(base_path,"prg",prg_name), "rb") as file:
             prg_on_d64_image.write(file.read())
         prg_on_d64_image.close
+
+    for version in version_codes:
+        for letter in cave_letters:
+            cave_file = version + "-" + letter
+            prg_on_d64_image = image.path(cave_file.encode()).open(mode="w", ftype="prg")
+            with open(path.join(base_path,"prg",cave_file), "rb") as file:
+                prg_on_d64_image.write(file.read())
+            prg_on_d64_image.close
+
     image.close

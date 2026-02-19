@@ -2,20 +2,18 @@
 ; The cache overwrites version data which is just used once at the start
 screen_cache_map
 
-; IMPORTANT: this table must not go-over a page boundary
-cave_file_names
-  !scr "B1CAVES "
-  !scr "B2CAVES "
-  !scr "B3CAVES "
-  !scr "P1CAVES "
-  !scr "A1CAVES "
-  !scr "A2CAVES "
-  !scr "BBCAVES "
+cave_version_prefix
+  !scr "BD1-"
+  !scr "BD2-"
+  !scr "BD3-"
+  !scr "BP1-"
+  !scr "AR1-"
+  !scr "AR2-"
 
 version_selection_cycle_up
-  !byte 6,0,1,2,3,4,5
+  !byte 5,0,1,2,3,4
 version_selection_cycle_down
-  !byte 1,2,3,4,5,6,0
+  !byte 1,2,3,4,5,0
 
 big_rockford
   !byte 209,210,211,212,32,32,32,32
@@ -44,8 +42,6 @@ version_option_text  ;text with end of line indicator (0)
   !scr "arno dash 1    "
   !byte 0
   !scr "arno dash 2    "
-  !byte 0
-  !scr "bonus caves    "
   !byte 0
 
 end_of_version_data

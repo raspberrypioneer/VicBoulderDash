@@ -1,5 +1,5 @@
 # Boulder Dash for the Commodore Vic20
-This is a fan-developed version of Boulder Dash for the Commodore Vic20 with a 32K RAM expansion.
+This is a fan-developed version of Boulder Dash for the Commodore Vic20 with an 8K RAM expansion.
 I recently ported the BBC/Acorn Electron version of Boulder Dash to the Oric so thought I'd try doing the same with the Vic20, my first computer.
 
 This repo really contains 6 different versions of the game. They all run with the same 'game engine' but have different caves. Use the joystick to select the version from the first menu screen, then press fire to confirm.
@@ -27,7 +27,7 @@ This repo really contains 6 different versions of the game. They all run with th
 ## Emulation
 [Vic Boulder Dash](./d64/Vic20%20Boulder%20Dash.d64) is available in the d64 folder.
 
-It has been tested using the VICE emulator (PAL and NTSC) and on a real Vic20 (PAL) with a 32K RAM expansion and joystick attached.
+It has been tested using the VICE emulator (PAL and NTSC) and on a real Vic20 (PAL) with an 8K RAM expansion and joystick attached.
 
 > VICE xvic.exe v3.3 settings
 ```

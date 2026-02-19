@@ -2,85 +2,69 @@
 @echo off
 
 :: Control creation of cave file PRGs (set to Y or N) and set cave load address
-:: .e.g. when all_caves_load_area start address is $3d00, set CAVE_LOW=00, CAVE_HIGH=3d
+:: .e.g. when all_caves_load_area start address is $3a00, set CAVE_LOW=00, CAVE_HIGH=3a
 set MAKECAVES=N
 set CAVE_LOW=00
-set CAVE_HIGH=3e
+set CAVE_HIGH=3a
+
+:: Build instruction programs
+set MAKEINSTRUCTIONS=N
+if "%MAKEINSTRUCTIONS%"=="Y" (
+.\bin\acme.exe -o .\prg\ins-1 .\instruct1.asm
+.\bin\acme.exe -o .\prg\ins-2 .\instruct2.asm
+.\bin\acme.exe -o .\prg\ins-3 .\instruct3.asm
+.\bin\acme.exe -o .\prg\ins-4 .\instruct4.asm
+.\bin\acme.exe -o .\prg\ins-5 .\instruct5.asm
+.\bin\acme.exe -o .\prg\ins-6 .\instruct6.asm
+echo Created instruction pages
+)
 
 :: Build main program
-echo Created game engine
 .\bin\acme.exe -l .\build\symbols -o .\prg\bd .\main.asm
+echo Created game engine
 
-:: Create PRG file containing the caves of each version
+:: Create PRG files containing the caves of each version
 if "%MAKECAVES%"=="Y" (
 
-:: Create a binary file containing the 2 load adddress bytes for the cave prg files
+:: Create binary file containing the 2 load address bytes
 >.\build\temp.txt echo(%CAVE_LOW% %CAVE_HIGH%
 certutil -f -v -decodehex .\build\temp.txt .\build\prgheader.bin 4 >nul
 del .\build\temp.txt
 
 set BDVER=BoulderDash01
-set BDPRG=B1CAVES
+set BDPRG=BD1
 call :create_prg_file_for_version
 
 set BDVER=BoulderDash02
-set BDPRG=B2CAVES
+set BDPRG=BD2
 call :create_prg_file_for_version
 
 set BDVER=BoulderDash03
-set BDPRG=B3CAVES
+set BDPRG=BD3
 call :create_prg_file_for_version
 
 set BDVER=BoulderDashP1
-set BDPRG=P1CAVES
+set BDPRG=BP1
 call :create_prg_file_for_version
 
 set BDVER=ArnoDash01
-set BDPRG=A1CAVES
+set BDPRG=AR1
 call :create_prg_file_for_version
 
 set BDVER=ArnoDash02
-set BDPRG=A2CAVES
-call :create_prg_file_for_version
-
-:: Copy and rename bonus caves from versions above into a bonus cave collection
-copy /b .\caves_bin\BoulderDash01\Q .\caves_bin\BoulderBonus\A >nul
-copy /b .\caves_bin\BoulderDash01\R .\caves_bin\BoulderBonus\B >nul
-copy /b .\caves_bin\BoulderDash01\S .\caves_bin\BoulderBonus\C >nul
-copy /b .\caves_bin\BoulderDash01\T .\caves_bin\BoulderBonus\D >nul
-copy /b .\caves_bin\BoulderDash02\Q .\caves_bin\BoulderBonus\E >nul
-copy /b .\caves_bin\BoulderDash02\R .\caves_bin\BoulderBonus\F >nul
-copy /b .\caves_bin\BoulderDash02\S .\caves_bin\BoulderBonus\G >nul
-copy /b .\caves_bin\BoulderDash02\T .\caves_bin\BoulderBonus\H >nul
-copy /b .\caves_bin\BoulderDash03\Q .\caves_bin\BoulderBonus\I >nul
-copy /b .\caves_bin\BoulderDash03\R .\caves_bin\BoulderBonus\J >nul
-copy /b .\caves_bin\BoulderDash03\S .\caves_bin\BoulderBonus\K >nul
-copy /b .\caves_bin\BoulderDash03\T .\caves_bin\BoulderBonus\L >nul
-copy /b .\caves_bin\BoulderDashP1\Q .\caves_bin\BoulderBonus\M >nul
-copy /b .\caves_bin\BoulderDashP1\R .\caves_bin\BoulderBonus\N >nul
-copy /b .\caves_bin\BoulderDashP1\S .\caves_bin\BoulderBonus\O >nul
-copy /b .\caves_bin\BoulderDashP1\T .\caves_bin\BoulderBonus\P >nul
-copy /b .\caves_bin\ArnoDash01\Q .\caves_bin\BoulderBonus\Q >nul
-copy /b .\caves_bin\ArnoDash01\R .\caves_bin\BoulderBonus\R >nul
-copy /b .\caves_bin\ArnoDash01\S .\caves_bin\BoulderBonus\S >nul
-copy /b .\caves_bin\ArnoDash01\T .\caves_bin\BoulderBonus\T >nul
-copy /b .\caves_bin\BonusIntro\A .\caves_bin\BoulderBonus\Z >nul
-
-set BDVER=BoulderBonus
-set BDPRG=BBCAVES
+set BDPRG=AR2
 call :create_prg_file_for_version
 )
 
 goto :build_d64
 
-:: Subroutine to create one large cave file containing all caves A to T with the Z intro cave on the end for a given version
+:: Subroutine to prepend each cave with the load address bytes and copy renamed file with the version code into the prg folder
 :create_prg_file_for_version
-cd .\caves_bin\%BDVER%_Vic20
-copy /b A+B+C+D+E+F+G+H+I+J+K+L+M+N+O+P+Q+R+S+T+Z ..\..\build\caves.bin >nul
-cd ..\..
-copy /b .\build\prgheader.bin+.\build\caves.bin .\build\caves_prg.bin >nul
-move /y .\build\caves_prg.bin .\prg\%BDPRG% >nul
-echo Created cave file from %BDVER% called %BDPRG%
+
+for %%f in (.\caves_bin\%BDVER%_Vic20\*) do (
+copy /b .\build\prgheader.bin + %%f .\prg\%BDPRG%-%%~nxf >nul
+)
+echo Created cave files for %BDVER%
 exit /B
 
 :build_d64

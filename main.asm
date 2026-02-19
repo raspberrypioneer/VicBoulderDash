@@ -1,6 +1,6 @@
 ; *************************************************************************************
-; Boulder Dash for the Vic20
-; by raspberrypioneer Feb 2025
+; Boulder Dash for the Vic20 with 8K RAM expansion
+; by raspberrypioneer Feb 2026
 ;
 
 _SCREEN_ADDR = $1000  ;4096
@@ -12,11 +12,17 @@ _VERTICAL_ALIGNMENT = $9001  ;36865 vertical centering
 _VICINIT1 = $ede4  ;Initial values for VIC chip registers
 _VICINIT2 = $ede5  ;Initial values for VIC chip registers
 
+_KERNAL_SETLFS = $ffba  ;Kernal: SETLFS, set logical first and second addresses
+_KERNAL_SETNAM = $ffbd  ;Kernal: SETNAM, set filename
+_KERNAL_LOAD = $ffd5  ;Kernal: LOAD, load into memory from device
+
 _SOUND1 = $900a  ;36874
 _SOUND2 = $900b  ;36875
 _SOUND3 = $900c  ;36876
 _NOISE = $900d  ;36877
 _VOLUME = $900e  ;36878
+
+_DATADIR_B = $9122  ;37154
 
 ;map elements defines
 map_space=0
@@ -297,20 +303,16 @@ pal_ntsc_horizontal_position
 ; *************************************************************************************
 ; Select version to play
 
-  lda #$7f
-  sta _DATADIR_B
-
   jsr clear_screen
   lda #12  ;purple
   sta _BACKGROUND_BORDER_COLOUR
 
+  lda #0
+  sta _DATADIR_B
+  jsr setup_IRQ  ;Setup joystick-keyboard actions interrupt
+
   jsr display_instructions
   jsr select_caves_for_version  ;Let the user select the game version to play
-  jsr load_caves_for_version  ;Load all caves into memory
-
-; *************************************************************************************
-; Setup joystick-keyboard actions interrupt
-  jsr setup_IRQ
 
 ; *************************************************************************************
 ; Menu to start with and return to after a game ends
@@ -338,8 +340,10 @@ play_next_life
 ; Load and display the intro screen, accept the cave, level, keyset from the user and start the game
 intro_and_cave_select
 
-  lda #20  ;Cave Z (intro cave)
+  lda #25  ;Cave Z (intro cave)
   sta cave_number
+
+  ;set-up cave and variables
   jsr prepare_cave
 
   ;knock-out Rockford and growing wall handlers for now
@@ -529,12 +533,12 @@ not_game_over
 ; *************************************************************************************
 prepare_cave
 
-  jsr load_cave_data
+  jsr load_cave_for_version
   jsr initialise_variables
   jsr populate_cave_from_loaded_data
 
   lda cave_number
-  cmp #20  ;Cave Z (intro cave)
+  cmp #25  ;Cave Z (intro cave)
   bne prepare_standard_cave
   ;set visible map and Rockford position for drawing grid
   lda #0
@@ -1791,43 +1795,6 @@ extract_lower_nybble
   inc ticks_since_last_direction_key_pressed
   rts
 
-; ****************************************************************************************************
-; Load cave data
-; Using the cave number, copy the cave data already loaded from CAVES.PRG file into the 
-; cave_parameter_data location used in the program
-load_cave_data
-
-  lda cave_number
-load_cave_number_stored
-  cmp #$ff  ;Check if the cave is already stored, initially cave $ff isn't a valid one, so will always loads cave A
-  beq load_cave_data_return  ;Skip if already loaded
-
-  ;Copy cave from load area into area used in program
-  lda cave_number  ;cave number starts from zero
-  sta load_cave_number_stored+1
-
-  tay
-  lda cave_addr_low,y
-  sta copy_addr1_low  ;source low
-  lda cave_addr_high,y
-  sta copy_addr1_high  ;source high
-
-  lda #<cave_parameter_data
-  sta copy_addr2_low  ;target low
-  lda #>cave_parameter_data
-  sta copy_addr2_high  ;target high
-
-  ;size is always 448 bytes per cave
-  lda #$c0
-  sta copy_size  
-  lda #1
-  sta copy_size+1
-
-  jmp copy_memory  ;copy from source to target for given size
-
-load_cave_data_return
-  rts
-
 ; *************************************************************************************
 ; Apply the cave colours from the parameters, affects border, foreground colour and auxiliary colour
 set_cave_colours
@@ -2980,38 +2947,6 @@ colour_status_bar_loop
   rts
 
 ; *************************************************************************************
-; Copy a number of bytes (in copy size variable) from source to target memory locations
-copy_memory
-
-  ldy #0
-  ldx copy_size+1
-  beq copy_remaining_bytes
-copy_a_page
-  lda (copy_addr1_low),y
-  sta (copy_addr2_low),y
-  iny
-  bne copy_a_page
-  inc copy_addr1_high
-  inc copy_addr2_high
-  dex
-  bne copy_a_page
-copy_remaining_bytes
-  ldx copy_size
-  beq copy_return
-copy_a_byte
-  lda (copy_addr1_low),y
-  sta (copy_addr2_low),y
-  iny
-  dex
-  bne copy_a_byte
-
-copy_return
-  rts
-
-copy_size
-  !byte 0, 0
-
-; *************************************************************************************
 ; Clear a number of bytes in target memory locations, using clear_size and clear_to_byte
 clear_memory
 
@@ -3149,24 +3084,17 @@ version_selection_delay
   sta version_selection_delay+1
 
 version_loop
-  lda _KEYB_ROWS  ;Read keyboard address (weird, used for joystick as well!)
-  and #$80  ;Right direction
+
+  lda key_press
+  cmp #KEY_MASK_RIGHT
   beq version_down
-
-  lda _JOYSTICK  ;Read joystick address
-  and #$10  ;Left direction
+  cmp #KEY_MASK_LEFT
   beq version_up
-
-  lda _JOYSTICK  ;Read joystick address
-  and #$04  ;Up direction
+  cmp #KEY_MASK_UP
   beq version_up
-
-  lda _JOYSTICK  ;Read joystick address
-  and #$08  ;Down direction
+  cmp #KEY_MASK_DOWN
   beq version_down
-
-  lda _JOYSTICK  ;Read joystick address
-  and #$20  ;Fire button
+  cmp #KEY_MASK_FIRE
   beq end_version_selection
 
   jmp version_loop
@@ -3231,6 +3159,19 @@ version_up
 
 end_version_selection
 
+  lda version_selected+1  ;multiply by 4 (2 x asl)
+  asl
+  asl
+  tay
+  ldx #0
+set_cave_name
+  lda cave_version_prefix,y
+  sta name_of_file,x
+  iny
+  inx
+  cpx #4
+  bne set_cave_name
+
   ldy #0
 loading_message
   lda loading_text,y
@@ -3242,26 +3183,43 @@ end_loading_message
   rts
 
 ; *************************************************************************************
-load_caves_for_version
+load_cave_for_version
 
-  ;Get the start of the cave file name to load
-  lda version_selected+1  ;multiply by 8 (3 x asl)
-  asl
-  asl
-  asl
+  ;Set cave letter to load
+  lda cave_number
+load_cave_number_stored
+  cmp #$ff  ;Check if the cave is already stored, initially cave $ff isn't a valid one, so will always loads cave A
+  beq cave_already_loaded  ; Skip if already loaded
   clc
-  adc #<cave_file_names  ;Load X and Y with address of filename
-  tax
-  ldy #>cave_file_names  ;Load X and Y with address of filename
-  lda #7  ;number of characters in filename (e.g. B1CAVES)
-  jsr $ffbd  ;Kernal: SETNAM, set filename
-  lda #$00  ;0 is device number
-  ldx #$08  ;8 is logical file number
-  ldy #$01  ;1 means use secondary address (load into memory location set in PRG first 2 bytes)
-  jsr $ffba  ;Kernal: SETLFS, set logical first and second addresses
-  lda #$00  ;0 set operation to be load (not verify)
-  jmp $ffd5  ;Kernal: LOAD, load into memory from device
+  adc #65
+  sta name_of_file+4
+  jsr load_disk_file
+  lda cave_number
+  sta load_cave_number_stored+1
+cave_already_loaded
+  rts
 
+load_disk_file
+  ;SETLFS
+  lda #$01  ;1 is logical file number
+  ldx #$08  ;8 is device number (disk)
+  ldy #$01  ;1 means use secondary address (load into memory location set in PRG first 2 bytes)
+  jsr _KERNAL_SETLFS  ;Kernal: SETLFS, set logical first and second addresses
+
+  ;SETNAM
+  ldx #<name_of_file
+  ldy #>name_of_file
+  lda #5  ;number of characters in filename (e.g. BD1-A for Boulder Dash version 1, cave A)
+  jsr _KERNAL_SETNAM  ;Kernal: SETNAM, set filename
+
+  ;LOAD
+  lda #$00  ;0 set operation to be load (not verify)
+  jsr _KERNAL_LOAD  ;Kernal: LOAD, load into memory from device
+  rts
+
+;Version prefix populated in version selection
+name_of_file
+  !scr "INS-1"  ;e.g. BD1-A for BD1 cave A, INS-1 for instructions page 1
 ; *************************************************************************************
 ; Display instruction screens for the game
 display_instructions
@@ -3272,12 +3230,11 @@ display_instructions
 
 instructions_loop
 
-  lda _JOYSTICK  ;Read joystick address
-  and #$20  ;Fire button
+  lda key_press
+  cmp #KEY_MASK_FIRE
   beq end_instructions
 
-  lda _JOYSTICK  ;Read joystick address
-  and #$08  ;Down direction
+  cmp #KEY_MASK_DOWN
   beq current_instruction_page
 
   jmp instructions_loop
@@ -3302,23 +3259,11 @@ show_instruction_page
   jmp instructions_loop
 
 display_page_of_instructions
-  lda instruction_page_low,y
-  sta copy_addr1_low  ;source low
-  lda instruction_page_high,y
-  sta copy_addr1_high  ;source high
-
-  lda #<_SCREEN_ADDR
-  sta copy_addr2_low  ;target low
-  lda #>_SCREEN_ADDR
-  sta copy_addr2_high  ;target high
-
-  ;size is 672 bytes for display (28 lines of 24 columns)
-  lda #$a0
-  sta copy_size  
-  lda #$02
-  sta copy_size+1
-
-  jsr copy_memory
+  lda current_instruction_page+1
+  clc
+  adc #49
+  sta name_of_file+4
+  jsr load_disk_file  ;load file direct to screen address
 
   ;add colour band for sprites used
   lda #14  ;blue
@@ -3331,38 +3276,17 @@ colour_band_loop
   bne colour_band_loop
   rts
 
-instruction_page_low
-  !byte <instructions_1, <instructions_2, <instructions_3, <instructions_4, <instructions_5, <instructions_6
-instruction_page_high
-  !byte >instructions_1, >instructions_2, >instructions_3, >instructions_4, >instructions_5, >instructions_6
-
 ; *************************************************************************************
 !source "vars.asm"  ;tables of data
 !source "interrupt.asm"  ;interrupt routines for joystick, keyboard input and sounds
-!source "vervars.asm"  ;tables of data used for version selection overwitten by cache
 
 ; *************************************************************************************
 ; Cave parameters and map for one cave
 ; IMPORTANT: Below is needed to point to the correct memory location for loading caves
-* = $3c00
+* = $3a00
 !source "cavedata.asm"
 
 ; *************************************************************************************
-; Cave starting addresses
-; each cave is 448 bytes, each high-low combination is 448 bytes apart
-cave_load_address
-cave_addr_low
-  !byte $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00, $c0, $80, $40, $00
-cave_addr_high
-  !byte $3e, $3f, $41, $43, $45, $46, $48, $4a, $4c, $4d, $4f, $51, $53, $54, $56, $58, $5a, $5b, $5d, $5f, $61
+!source "vervars.asm"  ;tables of data used for version selection overwitten by cache
 
-; *************************************************************************************
-; All caves A to T with the Z intro cave on the end are loaded into memory from this point onwards
-; each cave is 448 bytes (48 parameters, 400 map) x 21 caves = 9408 bytes
-; IMPORTANT: Address needs to be first cave_load_address (high-low), see above
-; The build script needs to be updated if the caves load area address is changed
-* = $3e00
-all_caves_load_area
-
-; Instructions are held in the cave load area but overwitten after use when version caves are loaded
-!source "instructions.asm"
+end_of_game
