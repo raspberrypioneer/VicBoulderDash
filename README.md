@@ -25,14 +25,12 @@ This repo really contains 6 different versions of the game. They all run with th
 ![Arno Dash 2](./docs/AD2.png)
 
 ## Emulation
-[Vic Boulder Dash](./d64/Vic20%20Boulder%20Dash.d64) is available in the d64 folder.
+[Vic20 Boulder Dash](./d64/Vic20%20Boulder%20Dash.d64) is available in the d64 folder.
 
-It has been tested using the VICE emulator (PAL and NTSC) and on a real Vic20 (PAL) with an 8K RAM expansion and joystick attached.
+It has been tested using the VICE emulator (PAL and NTSC with 8K RAM - see below) and on a real Vic20 (PAL) with an 8K RAM expansion and joystick attached.
 
-> VICE xvic.exe v3.3 settings
 ```
-machine > model settings > RAM blocks > all ticked for max RAM
-settings > machine > autostart settings > tick "Load to Basic start" for load"*",8 instead of 8,1
+machine > model settings > RAM blocks > tick Block 1 (8K at $2000-$3FFF)
 ```
 Set joystick mappings if required. Also see `bd_run.bat`.
 
@@ -84,7 +82,7 @@ Used to understand how to test for specific keys in a keyboard scan.
 ```
 
 ## Caves
-- All 20 caves are available in memory (16 standard and 4 bonus caves). They each have the same size, 48 bytes used for parameters, 400 bytes for the map. Each tile in the map is a nibble (each byte represents two tiles). When a particular cave is about to be played, it is loaded into a section of memory labelled `cave_parameter_data`. See `cavedata.asm` for more details about the parameters available. 
+- All 20 caves are available (16 standard and 4 bonus caves), each one loaded when needed. They each have the same size, 48 bytes used for parameters, 400 bytes for the map. Each tile in the map is a nibble (each byte represents two tiles). When a particular cave is about to be played, it is loaded into a section of memory labelled `cave_parameter_data`. See `cavedata.asm` for more details about the parameters available. 
 - New cave files can be converted from BDCFF files found on [Arno's Boulder Dash fansite](https://www.boulder-dash.nl/) using a conversion utility `BDCavegen.py`.
 
 ## Acknowledgements
