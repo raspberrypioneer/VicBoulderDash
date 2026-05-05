@@ -3076,7 +3076,7 @@ version_display
   jsr show_version_text
 
 version_selection_delay
-  lda #50
+  lda #20
   sta temp1
   ldx #$ff
   jsr delay_a_bit_longer
@@ -3123,7 +3123,7 @@ draw_version_line
   jsr draw_version_char_line  ;version line
   inc temp1
   lda temp1
-  cmp #7
+  cmp #6
   bne version_lines_loop
   rts
 

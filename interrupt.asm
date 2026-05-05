@@ -183,6 +183,10 @@ note_clear
 ; *************************************************************************************
 ;Read user input
 read_user_input
+
+  ldx #3
+  jsr delay_a_bit
+
   lda #$7f
   sta _DATADIR_A
 
