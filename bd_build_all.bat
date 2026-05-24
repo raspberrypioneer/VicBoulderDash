@@ -3,13 +3,19 @@
 
 :: Control creation of cave file PRGs (set to Y or N) and set cave load address
 :: .e.g. when all_caves_load_area start address is $3a00, set CAVE_LOW=00, CAVE_HIGH=3a
-set MAKECAVES=N
+set MAKE_CAVES=N
 set CAVE_LOW=00
 set CAVE_HIGH=3a
 
+:: Tokenise basic loader program
+set TOKENISE_LOADER=N
+if "%TOKENISE_LOADER%"=="Y" (
+.\bin\c64list.exe bdload.bas -ovr -prg:.\prg\bdload.
+)
+
 :: Build instruction programs
-set MAKEINSTRUCTIONS=N
-if "%MAKEINSTRUCTIONS%"=="Y" (
+set MAKE_INSTRUCTIONS=N
+if "%MAKE_INSTRUCTIONS%"=="Y" (
 .\bin\acme.exe -o .\prg\ins-1 .\instruct1.asm
 .\bin\acme.exe -o .\prg\ins-2 .\instruct2.asm
 .\bin\acme.exe -o .\prg\ins-3 .\instruct3.asm
@@ -24,7 +30,7 @@ echo Created instruction pages
 echo Created game engine
 
 :: Create PRG files containing the caves of each version
-if "%MAKECAVES%"=="Y" (
+if "%MAKE_CAVES%"=="Y" (
 
 :: Create binary file containing the 2 load address bytes
 >.\build\temp.txt echo(%CAVE_LOW% %CAVE_HIGH%
