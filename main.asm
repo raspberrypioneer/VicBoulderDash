@@ -245,7 +245,7 @@ play_ambient_sound_fx = $71
 
 ; *************************************************************************************
 ; Program starts here due to the larger screen of 24 columns x 28 rows (also see below)
-;   672 ($280) bytes are needed, added to the screen start address $1000, gives $12a0
+;   672 ($2a0) bytes are needed, added to the screen start address $1000, gives $12a0
 * = $12a0  ;for PRG load start
   !byte $a2,$12
 
